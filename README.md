@@ -15,7 +15,7 @@
 [![Privacy](https://img.shields.io/badge/privacy-100%25%20local%20%7C%20air--gap%20ready-6366f1?style=flat-square)](docs/privacy.md)
 [![License](https://img.shields.io/badge/license-source--available%20%7C%20PolyForm%20Noncommercial-eab308?style=flat-square)](LICENSE)
 
-[A Cognitive Symbiont](#a-local-cognitive-symbiont) · [Architecture](#anatomy-of-the-organism) · [Requirements & Hardware](#release-status-hardware-and-system-requirements) · [Quickstart](#quickstart) · [Cartridge Library](https://huggingface.co/gavriel-tech/neuromorph-nano-cartridges) · [The Interface](#the-local-interface) · [Roadmap](#frontier-roadmap--open-collaboration) · [Privacy & Air-Gap](#privacy-air-gap-and-user-control) · [License](#license-and-copyright)
+[A Cognitive Symbiont](#a-local-cognitive-symbiont) · [Architecture](#anatomy-of-the-organism) · [Modular Cartridges & Continual Learning](#modular-parameter-cartridges--preventing-catastrophic-forgetting) · [Parameter Mapping & Editing](#precision-parameter-mapping-surgery--live-editing) · [Features](#complete-feature-set) · [Requirements](#release-status-hardware-and-system-requirements) · [Quickstart](#quickstart) · [Cartridge Library](https://huggingface.co/gavriel-tech/neuromorph-nano-cartridges) · [The Interface](#the-local-interface) · [Privacy & Air-Gap](#privacy-air-gap-and-user-control) · [License](#license-and-copyright)
 
 </div>
 
@@ -64,6 +64,87 @@ Instead of loading one slow giant model for every operation, Neuromorph Nano run
 | **Idle Writer & World Model** | Uses quiet moments to write `L1 Piece -> L2 File -> L3 Module -> L4 System` notes (L4 is the project outline) | Yields to every interactive query (`< 300 ms` ceiling) |
 | **Memory & Muscle Memory** | Stores verified per-repo episodes, tiered memory (`core / active / archive`), and compressed behavioural reflexes | Behaviour only, never copied code; every learned cartridge, unit or filter can be plugged in, unplugged or removed |
 | **Local Interface** | 11 pages at `http://127.0.0.1:4870/`: live activity, topology, anatomy, MicroModels, cartridges, parameter maps, memory, learning, storage, audit and settings | No telemetry, no outside requests of its own, and one-switch Air-Gap Mode |
+
+---
+
+## Modular Parameter Cartridges & Preventing Catastrophic Forgetting
+
+Traditional continuous learning fine-tunes one monolithic weight file in place: teaching a model a new codebase, task, or preference overwrites the parameters that carried earlier skills (**catastrophic forgetting**).
+
+**Neuromorph Nano uses a modular weight-separation and cartridge-stacking architecture developed at Gavriel Technologies.** A MicroModel's fixed neural assembly (attention, feed-forward, norm, and readout structure) is cleanly separated from its weights and specializations. Instead of mutating one giant checkpoint, weights and learned parameters are stored as **modular, hash-verified cartridges** that stream in a deterministic authority stack on top of a frozen base cartridge:
+
+```text
+  Fixed MicroModel Assembly (Reader / Writer / Embedder / Reranker)
+    |
+    +-- 1. Base Cartridge             [tensors]   Frozen foundation cut & restored for the role's jobs
+    +-- 2. Hardware Settings          [settings]  Per-GPU precision, batching, and residency budgets
+    +-- 3. Adapters & Project Lenses  [low-rank]  Unmerged y += scale * up(down(x)) per repository
+    +-- 4. Job Filters & Compensation [affine]    f64-folded y = x * gain + bias at named sockets
+    +-- 5. Learned Units              [units]     Compartmentalized continual learning (nano / shared / project)
+    +-- 6. Preference Cartridges      [prefs]     Always plugged last: user rules, wants, and style
+```
+
+![Modular Cartridge Rack: four MicroModel decks with seated base cartridges and stacked job filters, project lenses, and adapters](docs/images/17-cartridge-rack.png)
+
+*The 4-deck Cartridge Rack: each MicroModel's base cartridge seats in its base slot with modular job filters, project lenses, and adapters stacked unmerged on top, plus whole-engine hardware cartridges below.*
+
+### How Cartridge Stacking Prevents Catastrophic Forgetting
+
+- **Base parameters stay frozen during continual learning:** Base cartridge creation is strictly operational and surgical, never mutated by daily learning. All continual learning lives outside base cartridges in isolated **project adapters/lenses**, **learned units**, **job filters**, and six versioned continual records (`clc-knowledge`, `clc-procedural`, `clc-behavioral`, `clc-retrieval`, `clc-interaction`, `clc-evaluation`).
+- **Unmerged streaming in stacks:** Stacked affine job filters (`nmengn-sockets/1`) at the same socket are folded on the fly in float64 into a single pass, and low-rank adapters apply unmerged after linear nodes. Swapping a job filter or stack takes effect at the next call with **no restart**; unplugging any cartridge or switching off a project compartment returns **bit-for-bit identical base outputs**.
+- **Strict compartment isolation:** Learned units and project lenses belong to their own compartment (`nano`, `shared`, or a specific repository). Learning patterns in Repo A never leaks into or degrades Repo B.
+- **Evidence-gated promotion with atomic rollback:** Every continual learning cycle verifies candidate updates against held-out outcomes from real coding sessions before promotion and keeps rollback snapshots (`continual/snapshots/`), so a regressing update is rejected or rolled back cleanly.
+- **Untouched upstream fallback:** Optional upstream Qwen3 open weights (`weights/`) are kept strictly read-only as a reference oracle, fallback (`open` mode), and donor source for surgical add-back.
+
+See [docs/cartridges-and-parameters.md](docs/cartridges-and-parameters.md) and [docs/continuous-learning.md](docs/continuous-learning.md) for the full design.
+
+---
+
+## Precision Parameter Mapping, Surgery & Live Editing
+
+Neuromorph Nano approaches model specialization with the engineering discipline of **functional brain mapping and stereotactic neurosurgery**: map the exact circuits responsible for each capability before intervening, protect critical pathways at exact coordinates, verify every change against held-out checks, and preserve full reversibility.
+
+### 1. Functional Parameter Mapping & Bidirectional Cartridge Surgery
+- **Coordinate-level functional mapping (Wanda + OWL):** Before modifying any parameter, Neuromorph Nano runs calibrated task prompts through the untouched reference open weights to measure per-weight importance (`s_t(w_ij) = |w_ij| * ||x_j||_t`) across every attention and feed-forward linear projection (`q_proj`, `k_proj`, `v_proj`, `o_proj`, `gate_proj`, `up_proj`, `down_proj`). Outlier-Weighted Layerwise sparsity (`OWL`) allocates per-layer retention budgets inversely to activation outlier ratios so sensitive layers remain denser while meeting the global parameter budget.
+- **Eloquent-pathway protection (`super-weights.json` & pinned heads):** Just as neurosurgical mapping marks critical regions that must remain intact, Neuromorph Nano records exact `[row, col]` high-leverage super-weight coordinates and pins tentacle relevance heads so pruning and cascade surgery never sever essential pathways.
+- **Bidirectional surgical intervention (pruning + surgical add-back):** Unlike destructive one-way pruning, surgery is bidirectional. Unused parameter coordinates are removed (`M_next = M_current AND NOT M_unused`), and if a held-out evaluation gate detects regression on any job, Neuromorph Nano computes the exact missing coordinate set (`Delta = M_failing AND NOT M_current`) and performs **surgical add-back** from the untouched reference open weights into cartridge version `N+1`, logging parent provenance and SHA-256 checksums.
+- **Hardware-aware sparse execution:** On consumer GPUs without hardware sparse tensor cores, `kernels/cukern/bmq8.cu` compresses 8-bit linear tensors with >= 20% exact zeros into packed bitmask blocks decompressed inline with `__popc()`, reducing VRAM footprint and memory bandwidth while keeping disk cartridges at full shapes.
+
+![Precision Parameter Mapping: BF16 heatmap of model.layers.0.mlp.down_proj.weight with 128/128 pinned super-weight coordinates, floating block Inspector, and per-layer L0-L27 switches](docs/images/14-superweights-map.png)
+
+*Coordinate-level functional mapping: whole-tensor BF16 heatmap of `model.layers.0.mlp.down_proj.weight` (`3,145,728` weights, `15%` zeros) with `128/128` pinned `super-weights.json` coordinates overlaid in gold, the floating Parameter Inspector open on a selected 49-weight block (`rows 457:464, cols 1197:1204`) with inline block editing, and per-layer `L0..L27` switches on the right.*
+
+### 2. Whole-Set Parameter Viewer, Reversible Live Overlays & Direct Editing
+Every parameter-holding object (**base cartridges**, **job filters**, **compensation/socket cartridges**, **adapters and project lenses**, **learning units**, **preference cartridges**, and **optional upstream open weights**) is governed by one unified inspection and editing engine (`nm-parameters/1`, `crates/nmcore/src/bin/pedit.rs`):
+
+- **Chunk-streamed whole-set imaging:** Inspect every tensor grouped by layer and block (`attention`, `mlp`, `norm`, token table) via interactive heatmaps with signed (`diverging`) or magnitude (`sequential`) scales, index rulers, distributions, and `mean / min / max / rms` summaries. Regions stream in `<= 4 MiB` chunks so even the `151,669 x 1,024` token embedding matrix is never loaded whole into host RAM.
+- **Map overlays on live tensors:** Project `super-weights.json` directly onto heatmaps as gold `[row, col]` coordinate pins, or highlight layer coverage from job filters and OWL maps, with `on / emphasize / hide` visual controls.
+- **Floating, movable, resizable Parameter Inspector:** Click any individual weight or multi-weight block to inspect exact stored values, coordinates, tensor percentile, and paired parameter-map readings; double-click any cell or block to open and focus manual inline editing directly.
+- **Addressable coordinate operations with norm-diff previews:** Target `*`, whole layers (`L<n>`), individual tensors, rows, columns, channels, attention heads, or `[r0:r1, c0:c1]` blocks with `set`, `add`, `mul`, `scale`, `clamp`, `zero`, `identity`, `negate`, `paste`, `import`, `export`, `copy`, `interpolate`, `blend`, `drop`, `add_point`, and truncated-SVD `rank` reduction. Every operation computes a dry-run diff (`changed` count, L2 norm delta, max delta, sampled old vs new values) before writing.
+- **Reversible live overlays & per-layer controls:** Like reversible functional silencing during surgical mapping, every **edit**, **mask** (exact residual identity pass), or **freeze** (read-only protection lock) can be applied in a live overlay (`memory/overlays/`) without modifying the underlying cartridge or open-weight files, or written as a new trial version beside the source. Engineers can toggle individual MicroModel layers on or off directly from the **Models** page or inside the Parameter Viewer. Every change is audited with one-click Undo and shares identical parity across the UI, MCP (`nm_cartridges`), HTTP API, and CLI.
+
+![1:1 Exact Square Parameter Grid with Pinned Super-Weights and Floating Inspector](docs/images/15-parameter-inspector-1to1.png)
+
+*Zoomed-in `1:1 EXACT` (`70x`) view of `model.layers.0.mlp.down_proj.weight`: individual BF16 parameters rendered as square cells with numeric values, three gold-outlined pinned super-weights visible across row 712 (`3/128 pts`), and the floating Parameter Inspector locked on `row 712, col 677` showing `★ super-weights · PINNED`, exact value (`0.010925293`), tensor percentile (`66.8%`), and inline reversible overlay editing (`set`, `mask`, `freeze`, `unmask`).*
+
+![MicroModels Per-Layer On/Off Controls](docs/images/16-layer-controls.png)
+
+*Per-layer controls (`L0..L27`): toggle any MicroModel layer on or off through the reversible parameter overlay directly beside live layer activity and base-cartridge controls.*
+
+---
+
+## Complete Feature Set
+
+| Subsystem | Engineering Capabilities | Control Surface |
+|---|---|---|
+| **Symbiotic Codebase Recall & 4-Level World Model** | Parallel Neuropod foraging across source code, Markdown, PDFs, CSV/TSV, JSON/YAML/HTML/XML, logs, and zip/tar/Office containers; multi-stage Core Brain (`G0 -> G1 -> G2 -> G3`) returning cited context packs within token budgets and withholding unsupported answers; idle Writer generating `L1 Piece -> L2 File -> L3 Module -> L4 System` notes while yielding to interactive calls in `< 300 ms`. | MCP (`nm_context_pack`, `nm_repo_map`, `nm_symbol_find`, `nm_deps`, `nm_view`, `nm_sync`), UI |
+| **Modular Parameter Cartridges & Anti-Forgetting Stacking** | Gavriel Technologies architecture separating fixed MicroModel assemblies from modular weight cartridges; deterministic runtime stacking (`base -> hardware -> adapters/lenses -> job filters -> learned units -> preferences`) with unmerged application, `f64`-folded affine sockets, compartment isolation, instant swap without restart, and bit-identical rollback when unplugged. | UI (**Cartridges**), MCP (`nm_cartridges`), API, CLI |
+| **Precision Parameter Mapping, Surgery & Live Overlays** | Wanda + OWL per-weight functional mapping, pinned `super-weights.json` coordinates, bidirectional pruning and surgical add-back, `bmq8.cu` bitmask-sparse GPU execution, chunk-streamed whole-set heatmaps, floating movable/resizable Inspector, per-layer on/off switches, and reversible `edit / mask / freeze` overlays. | UI (**Parameters**, **Models**), MCP (`nm_cartridges`), API, CLI |
+| **Continuous Learning, Evidence Ledger & Distillation** | Closed-loop session evidence ledger tracking cited reads, edits, build/test outcomes, and reverts; split-gate validation with atomic rollback snapshots; curated and live teacher distillation (`adapter`, `filter`, `readout`, `unit`) with license provenance; dynamic dense-index following that automatically rebuilds project vectors at idle whenever Embedder weights or overlays change. | UI (**Learning**, **Audit**), MCP (`nm_learning`, `nm_feedback`, `nm_unit`), API, CLI |
+| **Stated Preference Cartridges** | Natural-language preference parser supporting 5 languages (English, Spanish, French, German, Portuguese): enforced text transformations, checked code/style rules, bounded logit-bias wanted terms with per-rule strength (`0.1-2.0`), and scoped style guidance (global, project, file extension, or folder), always plugged last in the stack. | UI (**Learning -> Preferences**), MCP (`nm_learning`), API, CLI |
+| **Agent Guidance, Priming & Build Verification** | Claude Code hook integration delivering verified primes at prompts, edits, test failures, and compactions; stop-hook completion loops (`check-passes`, `goal-done`, `steps-done`, `all-of`, `any-of`, with stall and tool/time budgets); error-repeat reminders; dependency step graphs; offline Cargo build help, Step Check, and improvement scanning (`nm_build_run`, `nm_build_explain`, `nm_stepcheck`, `nm_verify`, `nm_improve_scan`, `nm_patch_propose`). | UI (**Memory -> Loops & graph**), MCP (`nm_goal`, `nm_build_*`, `nm_verify`, `nm_stepcheck`), Hooks, CLI |
+| **Hugging Face Cartridge Libraries & Download Manager** | Built-in public official library (`gavriel-tech/neuromorph-nano-cartridges`, no token required) + third-party Hugging Face sources; floating movable/resizable **HF downloads** window covering base cartridges, job filters, parameter maps, shared stacks, and optional open weights with category/role/search filters, explicit what-it-maps descriptions, `archived/` hiding, SHA-256 verification, two-step delete, and confirmation-gated **Publish to Hugging Face** (`source_publish`). | UI (**Cartridges**, **Models**, **Parameters**), MCP (`nm_settings`), API |
+| **Zero-Dependency Runtime, Hardware Scaling & Privacy** | 21 `std`-only Rust crates (`unsafe` confined to `nmffi`), 12 prebuilt multi-arch CUDA fatbins (`sm_75`-`sm_90` + PTX) with AVX2/FMA/F16C CPU fallback, per-card `dp4a` auto-tuner, multi-session loopback engine sharing, idle KV-cache release, hard VRAM/RAM/CPU/memory-area caps (`content`, `caches`, `weights`), user-owned backup/restore repositories, opt-in paired LAN tablet access, and verifiable one-switch Air-Gap Mode. | Engine, UI (**Settings**, **Storage**), MCP (`nm_settings`, `nm_storage`, `nm_status`, `nm_live`) |
 
 ---
 
@@ -161,6 +242,10 @@ Captured at 1920x1080 during live MCP calls against a real repository, started t
 ### Cartridge Libraries
 
 The official cartridge library is on Hugging Face at [`gavriel-tech/neuromorph-nano-cartridges`](https://huggingface.co/gavriel-tech/neuromorph-nano-cartridges) (public, no token required). You can also add third-party Hugging Face libraries as cartridge sources, or publish your own job filters, parameter maps, and non-base cartridge stacks directly to your own Hugging Face repository (or as a Pull Request to the official library) via **Publish to Hugging Face** (`source_publish`). Nothing is fetched or uploaded until you ask; everything fetched goes through the same checks as the cartridge library on this machine (stacks arrive on trial, an existing map is never replaced, base cartridges come from the official library only, and decommissioned files under `archived/` are hidden from the downloader). See [docs/cartridges-and-parameters.md](docs/cartridges-and-parameters.md) and [docs/build-flow.md](docs/build-flow.md).
+
+![Floating Hugging Face Download Manager over the Cartridge Rack](docs/images/18-hf-download-manager.png)
+
+*The floating Hugging Face Download Manager: inspect everything in `gavriel-tech/neuromorph-nano-cartridges` (base cartridges, job filters, parameter maps, shared stacks, and optional open weights) with explicit descriptions, category/role filters, multi-select downloads, and safe two-step deletion.*
 
 ---
 
