@@ -125,8 +125,8 @@ export function CallDetail({ row: first }: { row: AuditRow }) {
   const coverage = num(cm?.coverage);
   return (
     <div className="grid" data-e2e="call-detail" data-call={row.id}>
-      <div className="grid gap-0.5 pb-3">
-        <div className="mono text-[11.5px] text-text">
+      <div className="grid gap-1 pb-3">
+        <div className="mono whitespace-pre-wrap break-words text-[11.5px] leading-relaxed text-text">
           <CallText id={row.id} label={row.label} tool={row.tool} />
         </div>
         <div className="mono text-[10.5px] text-faint">
@@ -249,7 +249,7 @@ export default function AgentCalls({ project, limit = 12 }: { project: string | 
                   <Dot tone={running ? "signal" : r.ok === false ? "error" : "verified"} />
                   <span className="mono shrink-0 text-[10.5px] text-muted">{callerOf(r)}</span>
                   <span className="min-w-0 truncate text-[11.5px] text-text">
-                    <CallText id={r.id} label={r.label} tool={r.tool} />
+                    <CallText id={r.id} label={r.label} tool={r.tool} onDetail={open} />
                   </span>
                 </span>
                 <span className="mono block truncate pl-4 text-[10px] text-faint group-hover:text-muted">{factsLine(r)}</span>

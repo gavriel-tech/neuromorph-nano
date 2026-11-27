@@ -20,31 +20,32 @@ Your coding agent is separate: the context the Nano gives it (context packs, pri
 - Building the interface uses npm on the development machine; the built interface is served by
   the engine and loads nothing from outside.
 
-### Downloads, only when you ask
+### Downloads and publishing, only when you ask
 
-The Nano has one piece of outbound network code: downloads from Hugging Face (`huggingface.co`),
-started only by you, from the interface (Models, Downloads; Cartridges, Get more) or through MCP
-(`nm_settings`). It downloads through Windows' own HTTPS service (WinHTTP, part of Windows; `curl.exe` only as the
+The Nano has one piece of outbound network code: requests to Hugging Face (`huggingface.co`),
+started only by you, from the interface (Models, Downloads / Libraries; Cartridges, Get more) or through MCP
+(`nm_settings`). It connects through Windows' own HTTPS service (WinHTTP, part of Windows; `curl.exe` only as the
 fallback), one download at a time, and sends a token only to huggingface.co. What it
-fetches:
+fetches or publishes:
 
-- the released open weights, each from the Hugging Face repository and revision its card pins;
-- base cartridges, from the official Neuromorph cartridge library on Hugging Face,
-  `gavriel-tech/neuromorph-nano-cartridges`;
+- the four base cartridges, active parameter maps, job filters and shared stacks from the official Neuromorph cartridge library on Hugging Face,
+  `gavriel-tech/neuromorph-nano-cartridges` (public; fetched without sending a token by default);
+- the optional released open weights, each from the Hugging Face repository and revision its card pins;
 - files from cartridge libraries you add yourself by their Hugging Face repository name
   (third-party sources). Browsing a source lists its files (one request); fetching downloads one
-  file. A third party's file is held to the same checks as one of ours: a library stack arrives on
+  file (or `fetch all` downloads every active parameter map and non-base stack listed). A third party's file is held to the same checks as one of ours: a library stack arrives on
   trial, a parameter map goes through the map checks and never over an existing map, and a base
   cartridge from a third party is listed but not installed. The list of sources is
   `cartridge-sources.json` in the Nano folder; every change to it is an audit row (kind
-  `cartridge-source`).
+  `cartridge-source`);
+- explicit, confirmation-gated publishing (**Publish to Hugging Face**, `source_publish`): uploads only the single local parameter map or non-base stack you pick to a Hugging Face repository you specify (or as a Pull Request to the official library), via native WinHTTP `POST`, audited and refused while Air-Gap Mode is on.
 
-A file is placed only once its SHA-256 matches (where the source publishes one); a partial file
+A downloaded file is placed only once its SHA-256 matches (where the source publishes one); a partial file
 resumes. Your Hugging Face token (`HF_TOKEN`, else the `hf` login file) is sent only to
-`huggingface.co`, and only for a source you marked as needing it; it is passed in a header file
-that is removed afterwards. Nothing about your code, questions or memory is sent with a download.
-The download state is kept in `memory/downloads.json`. With the air gap on, browsing and
-downloading are refused.
+`huggingface.co`, and only when you explicitly publish or mark a private/gated third-party source as needing it; on the fallback path it is passed in a header file
+that is removed afterwards. Nothing about your code, questions or memory is sent with a download or publish.
+The download state is kept in `memory/downloads.json`. With the air gap on, browsing,
+downloading and publishing are refused.
 
 ### Your own repositories, only when you back up
 

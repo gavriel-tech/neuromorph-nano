@@ -22,11 +22,11 @@ The Apache License 2.0 text is distributed with each model (`LICENSE` in the mod
 ## Cartridge library
 
 The official cartridge library (`gavriel-tech/neuromorph-nano-cartridges` on Hugging Face) holds
-base cartridges, parameter maps and job filters derived from the models above. The library is
+base cartridges, parameter maps, job filters and shared hardware stacks derived from the models above. The library is
 licensed under the PolyForm Noncommercial License 1.0.0, the same licence as the Nano, with
 commercial use only under an individually negotiated licence (`COMMERCIAL.md`). The upstream
 Apache-2.0 notices ship beside it (`NOTICE.md` naming each model and its pinned revision, and a
-copy of the Apache License 2.0 as `LICENSE-APACHE-2.0`).
+copy of the Apache License 2.0 at `third_party/APACHE-2.0.txt`).
 
 A third-party cartridge library you add as a cartridge source keeps its own licence; check it
 before you use what you fetch from it.

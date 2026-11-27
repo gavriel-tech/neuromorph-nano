@@ -15,7 +15,7 @@ import { roleTitle } from "@/components/MicroModel";
 import { useRail } from "@/components/Workspace";
 import { Pill } from "@/components/ui";
 import { ago, bytes } from "@/lib/api";
-import { OUTCOME_TONE, STATE_TONE, cleanable, covers, filterOf, kindTone, layersOf, stateOf, useMaps, type MapRow, type RoleMaps } from "@/components/MapCore";
+import { OUTCOME_TONE, STATE_TONE, cleanable, covers, filterOf, kindTone, layersOf, nodeKind, stateOf, useMaps, type MapRow, type RoleMaps } from "@/components/MapCore";
 
 const act = "press mono border-b border-line-strong px-0.5 text-[10px] uppercase tracking-[0.1em] text-muted hover:text-text disabled:opacity-40";
 const delCls = "press mono border-b border-line px-0.5 text-[10px] uppercase tracking-[0.1em] text-faint hover:text-error disabled:opacity-40";
@@ -174,7 +174,7 @@ function LineageForm({ r, m, onClose }: { r: RoleMaps; m: MapRow; onClose: () =>
 }
 
 export function MapDetail({ k, inspect: inspect0 = false, lineage: lineage0 = false }: { k: string; inspect?: boolean; lineage?: boolean }) {
-  const { roles, filtersOf, layerCount, now, busy, run, onNote, buildRunning, rebuild } = useMaps();
+  const { roles, filtersOf, layerCount, now, busy, run, onNote, buildRunning, rebuild, openObject } = useMaps();
   const rail = useRail();
   const { select } = useSelectMap();
   const [inspect, setInspect] = useState(inspect0);
@@ -203,6 +203,35 @@ export function MapDetail({ k, inspect: inspect0 = false, lineage: lineage0 = fa
   const id = `${r.role}/${m.file}`;
   const what = covers(m);
   const st = stateOf(m);
+  // Connected parameter objects: job filter itself, lineage made_on / used_by cartridges, serving base cartridge, and optional open weights.
+  const connected: { key: string; label: string; tag: string; relation: string }[] = [];
+  const seenConn = new Set<string>();
+  const addConn = (key: string, label: string, tag: string, relation: string) => {
+    if (!key || seenConn.has(key)) return;
+    seenConn.add(key);
+    connected.push({ key, label, tag, relation });
+  };
+  if (f) addConn(`filter:${r.role}/${f.job}`, `filter:${r.role}/${f.job}`, "job filter", "this filter");
+  for (const u of m.lineage?.used_by ?? []) {
+    const nk = nodeKind(u, r, jf);
+    if (nk === "map" || nk === "archived" || nk === "missing") continue;
+    const fc = nk === "filter-cart" ? jf.find((x) => x.cartridge === u) : undefined;
+    const targetKey = fc ? `filter:${r.role}/${fc.job}` : u;
+    const tag = nk === "base" ? "base cartridge" : nk === "comp" ? "compensation cartridge" : nk === "filter-cart" ? "job filter" : nk === "weights" ? "open weights" : "cartridge";
+    addConn(targetKey, u, tag, "feeds");
+  }
+  if (m.lineage?.made_on) {
+    const onId = m.lineage.made_on;
+    const nk = nodeKind(onId, r, jf);
+    if (nk !== "map" && nk !== "archived" && nk !== "missing") {
+      const fc = nk === "filter-cart" ? jf.find((x) => x.cartridge === onId) : undefined;
+      const targetKey = fc ? `filter:${r.role}/${fc.job}` : onId;
+      const tag = nk === "base" ? "base cartridge" : nk === "comp" ? "compensation cartridge" : nk === "filter-cart" ? "job filter" : nk === "weights" ? "open weights (upstream)" : "cartridge";
+      addConn(targetKey, nk === "weights" ? onId.slice(5) : onId, tag, "measured on");
+    }
+  }
+  if (r.serving_base) addConn(r.serving_base, r.serving_base, "base cartridge", "serving now");
+  addConn(`open:${r.model}`, r.model, "open weights (optional)", "upstream model");
   return (
     <div className="grid gap-5" data-e2e="pmap-detail">
       {/* What it is, now. */}
@@ -223,10 +252,61 @@ export function MapDetail({ k, inspect: inspect0 = false, lineage: lineage0 = fa
         </p>
       </div>
 
+      {/* Connected parameter objects: open this map directly on the Parameter Viewer or jump to parameter masking. */}
+      {openObject && connected.length > 0 && (
+        <div className="mono grid gap-2 border border-line bg-bg-1/70 p-2.5 text-[10px]" data-e2e="pmap-connected">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="text-[9.5px] uppercase tracking-[0.14em] text-muted">Connected parameter objects</span>
+            <span className="text-[9px] text-quiet">{connected.length} linked</span>
+          </div>
+          <ul className="grid gap-2">
+            {connected.map((c) => (
+              <li key={c.key} className="grid gap-1 border-t border-line/50 pt-1.5 first:border-t-0 first:pt-0">
+                <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="min-w-0 truncate text-text" title={c.key}>
+                    {c.label}
+                  </span>
+                  <span className="text-[9px] text-learned">{c.tag}</span>
+                  <span className="ml-auto text-[9px] text-quiet">{c.relation}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openObject(c.key, { map: id })}
+                    className="press border border-sense-pale bg-sense/15 px-2 py-0.5 text-[9.5px] uppercase tracking-[0.08em] text-sense-pale hover:bg-sense/25 hover:text-text"
+                    title={`Open ${c.label} in the Parameter Viewer with ${m.file} overlaid`}
+                  >
+                    view map on viewer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openObject(c.key, { map: id, controls: true })}
+                    className="press border border-line-strong bg-bg-2 px-2 py-0.5 text-[9.5px] uppercase tracking-[0.08em] text-muted hover:border-sense-pale hover:text-text"
+                    title={`Open ${c.label} with ${m.file} overlaid and jump straight to masking, freezing, and overlay controls`}
+                  >
+                    mask on viewer
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {/* Controls first: this is a tool. */}
       <div className="flex flex-wrap items-start gap-x-4 gap-y-2">
-        <button type="button" aria-expanded={inspect} onClick={() => setInspect((v) => !v)} className="press mono border-b border-sense-pale px-0.5 text-[10px] uppercase tracking-[0.1em] text-sense-pale hover:text-text">
-          {inspect ? "close" : m.kind === "job filter" ? "inspect / edit" : "inspect"}
+        {f && openObject && (
+          <button
+            type="button"
+            onClick={() => openObject(`filter:${r.role}/${f.job}`)}
+            className="press mono border-b border-sense-pale px-0.5 text-[10px] uppercase tracking-[0.1em] text-sense-pale hover:text-text"
+            title="Open this job filter in the full Parameter Viewer (heatmap, zoom, overlay, edit)"
+          >
+            parameter viewer
+          </button>
+        )}
+        <button type="button" aria-expanded={inspect} onClick={() => setInspect((v) => !v)} className={f && openObject ? act : "press mono border-b border-sense-pale px-0.5 text-[10px] uppercase tracking-[0.1em] text-sense-pale hover:text-text"}>
+          {inspect ? "close" : m.kind === "job filter" ? "inspect / edit JSON" : "inspect"}
         </button>
         {f && (
           <>
@@ -285,7 +365,7 @@ export function MapDetail({ k, inspect: inspect0 = false, lineage: lineage0 = fa
         <div className="eyebrow" title="From the made on and used by records of each map; read top to bottom">
           Lineage
         </div>
-        <MapLineage r={r} file={m.file} jf={jf} onMap={(x) => select(`${r.role}/${x}`)} />
+        <MapLineage r={r} file={m.file} jf={jf} onMap={(x) => select(`${r.role}/${x}`)} onObject={openObject} />
         {m.lineage?.made_by && (
           <span className="mono truncate text-[9.5px] text-quiet" title={m.lineage.made_by}>
             made by {m.lineage.made_by}

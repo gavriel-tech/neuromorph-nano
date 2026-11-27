@@ -43,7 +43,7 @@ function Glyph({ kind, color, y, me }: { kind: NodeKind; color: string; y: numbe
   }
 }
 
-export default function MapLineage({ r, file, jf, onMap }: { r: RoleMaps; file: string; jf: JobFilter[]; onMap: (file: string) => void }) {
+export default function MapLineage({ r, file, jf, onMap, onObject }: { r: RoleMaps; file: string; jf: JobFilter[]; onMap: (file: string) => void; onObject?: (key: string) => void }) {
   const [hover, setHover] = useState<string | null>(null);
   const { rows, edges, more } = useMemo(() => {
     const g = graphOf(r);
@@ -146,12 +146,24 @@ export default function MapLineage({ r, file, jf, onMap }: { r: RoleMaps; file: 
                       ? `${NODE_WORD["filter-cart"]} · ${f.enabled !== false ? "plugged in" : "unplugged"}`
                       : NODE_WORD[x.kind];
             const label = x.kind === "weights" ? x.id.slice(5) : x.id;
+            const objKey =
+              x.kind === "filter-cart"
+                ? f
+                  ? `filter:${r.role}/${f.job}`
+                  : null
+                : x.kind === "base" || x.kind === "comp" || x.kind === "cartridge" || x.kind === "weights"
+                  ? x.id
+                  : null;
             return (
               <li key={x.id} className={`flex min-w-0 items-center gap-2 ${hover === x.id ? "bg-bg-2/60" : ""}`} style={{ height: ROW }} onMouseEnter={() => setHover(x.id)}>
                 {me ? (
                   <span className="mono shrink-0 text-[11px] text-text">this map</span>
                 ) : m ? (
                   <button type="button" onClick={() => onMap(x.id)} onFocus={() => setHover(x.id)} className="press mono min-w-0 truncate border-b border-line-strong text-left text-[10.5px] text-muted hover:text-text" title={`Open ${x.id}`}>
+                    {label}
+                  </button>
+                ) : objKey && onObject ? (
+                  <button type="button" onClick={() => onObject(objKey)} onFocus={() => setHover(x.id)} className="press mono min-w-0 truncate border-b border-line-strong text-left text-[10.5px] text-muted hover:border-sense-pale hover:text-text" title={`Open ${label} in Parameter Viewer`}>
                     {label}
                   </button>
                 ) : (

@@ -19,11 +19,12 @@
 //! - a base cartridge is listed but not installed from a third party: base cartridges come from the
 //!   official library and the serving list (`designs/base-cartridges.json`) only, in v0.1.0.
 //!
-//! The air gap blocks browsing and fetching. A token is sent only where the user said so (the
-//! official library while it is private; a third-party source only with `token: true`), only to
-//! huggingface.co. The list of sources is `<home>/cartridge-sources.json`; every change is an audit
-//! row (kind `cartridge-source`); removing a source goes through the two-step delete gate and keeps
-//! whatever was already imported from it.
+//! The air gap blocks browsing, fetching and publishing. A token is sent only where the user said
+//! so (a third-party source with `token: true`, or an explicit publish to Hugging Face; the
+//! official public library sends no token on browse or fetch), only to huggingface.co. The list of
+//! sources is `<home>/cartridge-sources.json`; every change is an audit row (kind
+//! `cartridge-source`); removing a source goes through the two-step delete gate and keeps whatever
+//! was already imported from it.
 use crate::fetch::{Then, Want};
 use nmjson::Value;
 use std::path::{Path, PathBuf};
@@ -47,6 +48,9 @@ pub const OFFICIAL: &str = "official";
 const ROLES: [&str; 4] = ["reader", "writer", "embedder", "reranker"];
 /// The listing keeps at most this many files.
 const MAX_FILES: usize = 5000;
+/// Direct Hugging Face commit uploads (NDJSON base64) stay at or below 10 MiB; larger files use
+/// `hf upload` (Xet/LFS).
+pub const PUBLISH_DIRECT_LIMIT: u64 = 10 * 1024 * 1024;
 
 /// One source.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -69,10 +73,10 @@ fn listing_file(home: &Path, id: &str) -> PathBuf {
     home.join("memory").join("cartridge-sources").join(format!("{id}.json"))
 }
 
-/// The official library, as the downloads use it.
+/// The official public library, as the downloads use it.
 #[must_use]
 pub fn official() -> Source {
-    Source { id: OFFICIAL.into(), repo: crate::fetch::CARTRIDGE_REPO.into(), kind: "model".into(), revision: "main".into(), official: true, token: true, added_ms: 0 }
+    Source { id: OFFICIAL.into(), repo: crate::fetch::CARTRIDGE_REPO.into(), kind: "model".into(), revision: "main".into(), official: true, token: false, added_ms: 0 }
 }
 
 /// A repository name as Hugging Face writes it: `owner/name`, letters, digits, `-`, `_`, `.`.
@@ -134,9 +138,22 @@ fn base_url(src: &Source) -> String {
     if src.kind == "dataset" { format!("https://huggingface.co/datasets/{}", src.repo) } else { format!("https://huggingface.co/{}", src.repo) }
 }
 
+/// True when any path segment is `archived` or `archive` (decommissioned versions kept on Hugging
+/// Face in an archive tree mirroring `base/`, `parameter-maps/`, and `stacks/`, invisible to the
+/// downloader so users only ever see healthy current content).
+fn is_archived_path(path: &str) -> bool {
+    path.split('/').any(|seg| {
+        let s = seg.to_ascii_lowercase();
+        s == "archived" || s == "archive"
+    })
+}
+
 /// What a listed file is to the Nano, and whether it installs from this source: (kind, role for a
 /// map, why not when it does not).
 fn class_of(src: &Source, path: &str) -> (&'static str, Option<String>, Option<String>) {
+    if is_archived_path(path) {
+        return ("archived", None, Some("archived (decommissioned version; hidden from downloads)".into()));
+    }
     let lower = path.to_ascii_lowercase();
     if lower.ends_with("/lineage.json") {
         return ("lineage record", None, Some("the library's record of where its maps came from; read with the maps, not installed on its own".into()));
@@ -181,8 +198,137 @@ fn source_value(home: &Path, x: &Source) -> Value {
     ])
 }
 
-/// `GET /api/cartridge-sources`: every source with its last listing, the air gap and whether a
-/// token is on this machine.
+fn is_base_cartridge(c: &nmlearn::library::Cartridge) -> bool {
+    c.family == "base" || c.kind == "tensors" || c.files.iter().any(|f| f.name.starts_with("base/"))
+}
+
+/// Plain-English description of what a cartridge, parameter map, job filter or stack file does,
+/// for expandable UI info drawers and listings.
+#[must_use]
+pub fn describe_file(path: &str, kind: &str, role: Option<&str>) -> String {
+    let lower = path.to_ascii_lowercase();
+    let name = path.rsplit('/').next().unwrap_or(path);
+    let r = role.unwrap_or("MicroModel");
+    if kind == "base cartridge" || lower.ends_with(".cartridge") {
+        if lower.contains("reader-base") {
+            return "Standalone base cartridge for the Reader MicroModel: reads workspace files and extracts cited spans without needing upstream .safetensors.".into();
+        }
+        if lower.contains("writer-base") {
+            return "Standalone base cartridge for the Writer MicroModel: writes idle L1-L4 world-model comprehension notes without needing upstream .safetensors.".into();
+        }
+        if lower.contains("embedder-base") {
+            return "Standalone base cartridge for the Embedder MicroModel: builds and queries dense semantic embeddings across your workspace.".into();
+        }
+        if lower.contains("reranker-base") {
+            return "Standalone base cartridge for the Reranker MicroModel: ranks and judges close candidate spans and enforces decoy withholding.".into();
+        }
+        return "Neuromorph cartridge file holding verified parameter tensors or hardware/tuning settings.".into();
+    }
+    if name.starts_with("job-filter-") && name.ends_with(".json") {
+        return match (role, name) {
+            (Some("reader"), "job-filter-read.json") => "Maps per-layer affine gain and bias sockets across Reader layers for workspace reading and cited span extraction (active while plugged into reader-base).".into(),
+            (Some("writer"), "job-filter-write.json") => "Maps per-layer affine gain and bias sockets across Writer layers for idle L1-L4 world-model note and outline writing (active while plugged into writer-base).".into(),
+            (Some("reranker"), "job-filter-judge-code.json") => "Maps per-layer affine gain and bias sockets across Reranker layers for close-candidate code judging and decoy withholding (active while plugged into reranker-base).".into(),
+            (_, "job-filter-code-slice.json") => format!("Maps per-layer affine gain and bias sockets across {r} layers for code-slice representation and retrieval (active while plugged into {r}-base)."),
+            _ => {
+                let job = name.strip_prefix("job-filter-").and_then(|x| x.strip_suffix(".json")).unwrap_or("job");
+                format!("Maps per-layer affine gain and bias sockets across {r} layers for the '{job}' job (active while plugged in without altering base weights).")
+            }
+        };
+    }
+    if name == "super-weights.json" {
+        return format!("Maps exact [row, col] high-leverage super-weight coordinates across {r} attention and MLP projections pinned so surgery and pruning preserve them.");
+    }
+    if name.starts_with("pmap-") && name.ends_with(".json") {
+        if let Some(pct) = name.strip_prefix("pmap-owl-").and_then(|x| x.strip_suffix(".json")).filter(|s| s.chars().all(|c| c.is_ascii_digit())) {
+            return format!("Maps per-weight Wanda sensitivity (|w| * ||x||) and OWL outlier-weighted layer budgets across {r} attention and MLP projections ({pct}% target sparsity), used to prune and build {r}-base.");
+        }
+        return format!("Maps per-weight sensitivity and layer sparsity budgets across {r} attention and MLP projections, used to prune and build {r}-base from upstream open weights.");
+    }
+    if name.starts_with("act-") && name.ends_with("-bias.json") {
+        return format!("Maps per-output mean-activation bias compensation offsets paired with an activation channel mask across {r} layers.");
+    }
+    if name.starts_with("act-") && name.ends_with(".json") {
+        return format!("Maps per-channel feed-forward activation magnitudes across {r} layers to score low-activity channels.");
+    }
+    if name.starts_with("role") && name.ends_with(".json") {
+        return format!("Maps per-layer role activation energy and sensitivity separation across {r} layers.");
+    }
+    if name.starts_with("tol") && name.ends_with(".json") {
+        return format!("Maps per-layer pruning tolerance thresholds measuring hidden-state drift per layer for {r}.");
+    }
+    if name.starts_with("swigate") && name.ends_with(".json") {
+        return format!("Maps mean SwiGLU gate activations per channel across {r} MLP layers.");
+    }
+    if name == "surgery-probe.json" {
+        return format!("Maps layer-by-layer hidden-state cosine similarity and max drift comparing {r}-base against upstream open weights.");
+    }
+    if kind == "stack file" || lower.ends_with(".stack.json") {
+        if lower.contains("gtx-1650") {
+            return "Shared hardware tuning stack for NVIDIA GeForce GTX 1650 (4 GB VRAM): bundles measured precision, batching, and co-residency settings for a 4 GB Turing GPU. Imports on trial.".into();
+        }
+        return "Exported cartridge stack bundling verified non-base cartridges and their SHA-256 hashes. Imports on trial so you can evaluate before activating.".into();
+    }
+    if kind == "parameter map" {
+        let stem = name.strip_suffix(".json").unwrap_or(name);
+        return format!("Maps parameter measurements ({stem}) across {r} layers.");
+    }
+    if name.eq_ignore_ascii_case("MANIFEST.md") {
+        return "SHA-256 integrity manifest and provenance log describing every file in this folder.".into();
+    }
+    format!("Repository file ({kind}).")
+}
+
+/// Local parameter maps and exportable non-base stacks the user can publish to Hugging Face.
+fn publishable(home: &Path) -> Value {
+    let mut maps = Vec::new();
+    for role in ROLES {
+        let dir = home.join("library/parameter-maps").join(role);
+        let mut names: Vec<(String, u64)> = std::fs::read_dir(&dir)
+            .ok()
+            .into_iter()
+            .flatten()
+            .flatten()
+            .filter_map(|e| {
+                let name = e.file_name().to_string_lossy().into_owned();
+                let md = e.metadata().ok()?;
+                if !md.is_file() || !name.ends_with(".json") || name == nmapi::lineage::FILE || name.starts_with('.') {
+                    return None;
+                }
+                Some((name, md.len()))
+            })
+            .collect();
+        names.sort_by(|a, b| a.0.cmp(&b.0));
+        for (name, len) in names {
+            let desc = describe_file(&name, "parameter map", Some(role));
+            maps.push(obj(vec![
+                ("role", s(role)),
+                ("file", s(&name)),
+                ("bytes", n(len)),
+                ("direct_ok", Value::Bool(len <= PUBLISH_DIRECT_LIMIT)),
+                ("description", s(&desc)),
+            ]));
+        }
+    }
+    let mut stacks = Vec::new();
+    if let Ok(lib) = nmlearn::library::Library::open(home) {
+        for st in &lib.stacks {
+            let has_base = st.cartridges.iter().any(|k| lib.cartridge(k).is_some_and(is_base_cartridge));
+            if has_base {
+                continue;
+            }
+            stacks.push(obj(vec![
+                ("key", s(&st.key())),
+                ("use", s(&st.use_for)),
+                ("description", s(&st.description)),
+            ]));
+        }
+    }
+    obj(vec![("maps", Value::Array(maps)), ("stacks", Value::Array(stacks))])
+}
+
+/// `GET /api/cartridge-sources`: every source with its last listing, the air gap, publishable
+/// local items, and whether a token is on this machine.
 #[must_use]
 pub fn view(home: &Path) -> Value {
     obj(vec![
@@ -191,6 +337,8 @@ pub fn view(home: &Path) -> Value {
         ("token_found", Value::Bool(crate::fetch::token_found())),
         ("fallback", s("the Qwen3 open weights (Apache-2.0), from Downloads: the optional upstream fallback, unchanged")),
         ("file", s(&file(home).display().to_string())),
+        ("publishable", publishable(home)),
+        ("publish_limit_bytes", n(PUBLISH_DIRECT_LIMIT)),
     ])
 }
 
@@ -341,6 +489,9 @@ pub fn browse(home: &Path, id: &str, by: &str) -> Result<Value, String> {
     let mut files = Vec::new();
     for e in entries.iter().filter(|e| text(e, "type") == "file").take(MAX_FILES) {
         let path = text(e, "path");
+        if is_archived_path(&path) {
+            continue;
+        }
         let lfs = e.get("lfs").ok();
         let sha = lfs.map(|l| text(l, "oid")).filter(|o| o.len() == 64).unwrap_or_default();
         let size = lfs.and_then(|l| l.get("size").and_then(Value::integer).ok()).or_else(|| e.get("size").and_then(Value::integer).ok()).unwrap_or(0);
@@ -351,6 +502,7 @@ pub fn browse(home: &Path, id: &str, by: &str) -> Result<Value, String> {
         if present && why.is_none() {
             why = Some(format!("already among your {} maps (to swap it, import with replace on Parameters)", role.as_deref().unwrap_or("")));
         }
+        let desc = describe_file(&path, kind, role.as_deref());
         files.push(obj(vec![
             ("present", Value::Bool(present)),
             ("path", s(&path)),
@@ -358,6 +510,7 @@ pub fn browse(home: &Path, id: &str, by: &str) -> Result<Value, String> {
             ("sha256", if sha.is_empty() { Value::Null } else { s(&sha) }),
             ("kind", s(kind)),
             ("role", role.as_deref().map_or(Value::Null, s)),
+            ("description", s(&desc)),
             ("installable", Value::Bool(why.is_none())),
             ("why_not", why.as_deref().map_or(Value::Null, s)),
         ]));
@@ -370,6 +523,33 @@ pub fn browse(home: &Path, id: &str, by: &str) -> Result<Value, String> {
     std::fs::write(&p, nmjson::pretty::pretty(&listing)).map_err(|e| format!("{}: {e}", p.display()))?;
     let _ = crate::controls::audit(home, "cartridge-source", vec![("action", s("browse")), ("source", s(id)), ("files", n(files.len() as u64)), ("by", s(by)), ("label", s(&format!("Cartridge source {} listed: {} files", src.repo, files.len())))]);
     Ok(listing)
+}
+
+fn want_for_entry(home: &Path, src: &Source, entry: &Value) -> Result<Want, String> {
+    let path = text(entry, "path");
+    if path.split('/').any(|seg| seg == ".." || seg.is_empty()) || path.contains('\\') {
+        return Err(format!("{path}: not a plain path in the repository"));
+    }
+    let name = path.rsplit('/').next().unwrap_or(&path);
+    let (sub, then) = match text(entry, "kind").as_str() {
+        "parameter map" => {
+            let role = text(entry, "role");
+            (format!("maps-{role}"), Then::ImportMap(role))
+        }
+        _ => ("stacks".to_owned(), Then::ImportStack),
+    };
+    let dest = home.join("incoming").join(&src.id).join(sub).join(name);
+    if dest.is_file() {
+        let _ = std::fs::remove_file(&dest);
+    }
+    Ok(Want {
+        dest,
+        url: format!("{}/resolve/{}/{path}", base_url(src), src.revision),
+        sha: text(entry, "sha256"),
+        label: format!("{}:{path}", src.repo),
+        auth: src.token,
+        then,
+    })
 }
 
 /// Fetches one listed file of a source and installs it through its checks, in the background.
@@ -390,26 +570,277 @@ pub fn fetch(home: &Path, id: &str, path: &str, by: &str) -> Result<String, Stri
     if !matches!(entry.get("installable"), Ok(Value::Bool(true))) {
         return Err(format!("{path}: {}", text(&entry, "why_not")));
     }
-    if path.split('/').any(|seg| seg == ".." || seg.is_empty()) || path.contains('\\') {
-        return Err(format!("{path}: not a plain path in the repository"));
-    }
-    let name = path.rsplit('/').next().unwrap_or(path);
-    let then = match text(&entry, "kind").as_str() {
-        "parameter map" => Then::ImportMap(text(&entry, "role")),
-        _ => Then::ImportStack,
-    };
-    let want = Want {
-        dest: home.join("incoming").join(&src.id).join(name),
-        url: format!("{}/resolve/{}/{path}", base_url(&src), src.revision),
-        sha: text(&entry, "sha256"),
-        label: format!("{}:{path}", src.repo),
-        auth: src.token,
-        then,
-    };
-    if want.dest.is_file() {
-        let _ = std::fs::remove_file(&want.dest);
-    }
+    let want = want_for_entry(home, &src, &entry)?;
     crate::fetch::start_wants(home, &format!("source:{id}"), vec![want], "the libraries on this machine, through their checks", by)
+}
+
+fn is_serving_map_name(name: &str) -> bool {
+    name.starts_with("job-filter-") || name == "super-weights.json"
+}
+
+/// Fetches all missing installable files from a source (browsing it first if needed) and installs
+/// each through its checks in the background. `only` optionally restricts the batch: `"serving"`
+/// (job filters, super-weights and surgery probes), `"parameter-maps"`, or `"stacks"`.
+/// # Errors
+/// The air gap, no such source, browse failing, nothing new to fetch, or a download running.
+pub fn fetch_all(home: &Path, id: &str, only: Option<&str>, by: &str) -> Result<String, String> {
+    if crate::controls::air_gap_on(home) {
+        return Err("the air gap is on: nothing is downloaded until it is turned off".into());
+    }
+    let src = find(home, id)?;
+    let listing = browse(home, id, by)?;
+    let entries = listing.get("files").and_then(Value::array).map_err(|_| "the listing has no files".to_owned())?;
+    let mut wants = Vec::new();
+    for entry in entries {
+        if !matches!(entry.get("installable"), Ok(Value::Bool(true))) {
+            continue;
+        }
+        let kind = text(entry, "kind");
+        let path = text(entry, "path");
+        let name = path.rsplit('/').next().unwrap_or(&path);
+        let keep = match only.unwrap_or("") {
+            "" => true,
+            "serving" => kind == "parameter map" && is_serving_map_name(name),
+            "parameter-maps" => kind == "parameter map",
+            "stacks" => kind == "stack file",
+            other => return Err(format!("only {other}: use serving, parameter-maps or stacks")),
+        };
+        if keep {
+            wants.push(want_for_entry(home, &src, entry)?);
+        }
+    }
+    if wants.is_empty() {
+        return Err("every matching file from this source is already on disk".into());
+    }
+    let label = match only.unwrap_or("") {
+        "serving" => format!("source:{id}:serving"),
+        "parameter-maps" => format!("source:{id}:maps"),
+        "stacks" => format!("source:{id}:stacks"),
+        _ => format!("source:{id}:all"),
+    };
+    crate::fetch::start_wants(home, &label, wants, "the libraries on this machine, through their checks", by)
+}
+
+/// Pure-Rust RFC 4648 standard base64 encoding (no outside crates).
+fn base64_encode(bytes: &[u8]) -> String {
+    const TABLE: &[u8; 64] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let mut out = String::with_capacity(bytes.len().div_ceil(3) * 4);
+    for chunk in bytes.chunks(3) {
+        let b0 = u32::from(chunk[0]);
+        let b1 = u32::from(*chunk.get(1).unwrap_or(&0));
+        let b2 = u32::from(*chunk.get(2).unwrap_or(&0));
+        let n = (b0 << 16) | (b1 << 8) | b2;
+        out.push(char::from(TABLE[((n >> 18) & 0x3f) as usize]));
+        out.push(char::from(TABLE[((n >> 12) & 0x3f) as usize]));
+        out.push(if chunk.len() > 1 { char::from(TABLE[((n >> 6) & 0x3f) as usize]) } else { '=' });
+        out.push(if chunk.len() > 2 { char::from(TABLE[(n & 0x3f) as usize]) } else { '=' });
+    }
+    out
+}
+
+fn slug_of(raw: &str) -> String {
+    let mut out = String::new();
+    let mut dash = false;
+    for ch in raw.chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.push(ch.to_ascii_lowercase());
+            dash = false;
+        } else if !dash && !out.is_empty() {
+            out.push('-');
+            dash = true;
+        }
+    }
+    out.trim_end_matches('-').to_owned()
+}
+
+fn post_ndjson(url: &str, token: &str, body: &[u8]) -> Result<(u16, Vec<u8>), String> {
+    if nmffi::http::available() {
+        return nmffi::http::post(url, Some(token), "huggingface.co", "application/x-ndjson", body, 120_000);
+    }
+    let stamp = format!("{}-{}", std::process::id(), nmtype::now_ms());
+    let hdr = std::env::temp_dir().join(format!("nano-hf-pub-h-{stamp}.txt"));
+    let dat = std::env::temp_dir().join(format!("nano-hf-pub-b-{stamp}.ndjson"));
+    std::fs::write(&hdr, format!("Authorization: Bearer {token}")).map_err(|e| format!("{}: {e}", hdr.display()))?;
+    std::fs::write(&dat, body).map_err(|e| {
+        let _ = std::fs::remove_file(&hdr);
+        format!("{}: {e}", dat.display())
+    })?;
+    let out = std::process::Command::new("curl.exe")
+        .args(["--silent", "--show-error", "--max-time", "120", "-X", "POST", "-H", "Content-Type: application/x-ndjson", "-H"])
+        .arg(format!("@{}", hdr.display()))
+        .arg("--data-binary")
+        .arg(format!("@{}", dat.display()))
+        .args(["-w", "\n%{http_code}", url])
+        .output();
+    let _ = std::fs::remove_file(&hdr);
+    let _ = std::fs::remove_file(&dat);
+    let out = out.map_err(|e| format!("curl.exe could not start: {e}"))?;
+    if !out.status.success() {
+        return Err(String::from_utf8_lossy(&out.stderr).trim().to_owned());
+    }
+    let text = String::from_utf8_lossy(&out.stdout);
+    let (body_part, code_part) = text.rsplit_once('\n').unwrap_or(("", text.as_ref()));
+    let code = code_part.trim().parse::<u16>().map_err(|_| format!("unexpected HTTP status from Hugging Face: {}", code_part.trim()))?;
+    Ok((code, body_part.as_bytes().to_vec()))
+}
+
+/// Parameters for publishing a local parameter map or stack file to a Hugging Face repository.
+pub struct PublishRequest<'a> {
+    pub repo: &'a str,
+    pub kind: Option<&'a str>,
+    pub revision: Option<&'a str>,
+    pub create_pr: bool,
+    pub item_kind: &'a str,
+    pub role: Option<&'a str>,
+    pub item: &'a str,
+    pub summary: Option<&'a str>,
+}
+
+/// Publishes one local parameter map or non-base stack to a Hugging Face repository (directly on a
+/// branch or as a Pull Request when `create_pr` is true). Blocked by the air gap; requires the
+/// user's Hugging Face token (`HF_TOKEN` or `hf auth login`), sent only to huggingface.co.
+/// # Errors
+/// Air gap on, missing token, invalid repo/item, base cartridge refused, file over 10 MiB direct
+/// upload limit, or Hugging Face refusing the commit.
+pub fn publish(home: &Path, req: &PublishRequest<'_>, by: &str) -> Result<Value, String> {
+    if crate::controls::air_gap_on(home) {
+        return Err("the air gap is on: nothing is published until it is turned off".into());
+    }
+    let repo = req.repo.trim().trim_start_matches("https://huggingface.co/").trim_start_matches("datasets/").trim_end_matches('/').to_owned();
+    if !repo_ok(&repo) {
+        return Err(format!("{repo}: give owner/name as Hugging Face writes it"));
+    }
+    let repo_kind = if req.kind == Some("dataset") { "dataset" } else { "model" };
+    let rev = req.revision.map(str::trim).filter(|r| !r.is_empty()).unwrap_or("main");
+    if rev.len() > 96 || !rev.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.' | '/')) {
+        return Err(format!("{rev}: not a revision name"));
+    }
+    let token = crate::fetch::token().ok_or_else(|| "no Hugging Face token found: set HF_TOKEN or run `hf auth login` first".to_owned())?;
+
+    let (bytes, remote_path, local_hint, default_summary) = match req.item_kind {
+        "parameter-map" => {
+            let role = req.role.map(str::trim).unwrap_or("");
+            if !ROLES.contains(&role) {
+                return Err(format!("{role}: not a role (reader, writer, embedder or reranker)"));
+            }
+            let file = req.item.trim();
+            if file.is_empty() || file.contains(['/', '\\']) || file.starts_with('.') || file == nmapi::lineage::FILE || !file.ends_with(".json") {
+                return Err(format!("{file}: give a .json parameter map file name in library/parameter-maps/{role}/"));
+            }
+            let local = home.join("library/parameter-maps").join(role).join(file);
+            let md = std::fs::metadata(&local).map_err(|e| format!("{}: {e}", local.display()))?;
+            if !md.is_file() {
+                return Err(format!("{}: not a file", local.display()));
+            }
+            let remote = format!("parameter-maps/{role}/{file}");
+            if md.len() > PUBLISH_DIRECT_LIMIT {
+                let pr_flag = if req.create_pr { " --create-pr" } else { "" };
+                return Err(format!(
+                    "{role}/{file} is {} bytes (over the 10 MiB direct browser/API upload limit). Upload it with Xet/LFS instead:\n  hf upload {repo} \"{}\" \"{remote}\"{pr_flag}",
+                    md.len(),
+                    local.display()
+                ));
+            }
+            let data = std::fs::read(&local).map_err(|e| format!("{}: {e}", local.display()))?;
+            crate::pmaps::check_import(file, &data, None)?;
+            (data, remote, local.display().to_string(), format!("Add {role} parameter map {file}"))
+        }
+        "stack" => {
+            let key = req.item.trim();
+            if key.is_empty() {
+                return Err("item: give a stack key (id@version)".into());
+            }
+            let lib = nmlearn::library::Library::open(home).map_err(|e| e.to_string())?;
+            let st = lib.stack(key).ok_or_else(|| format!("no stack {key}"))?;
+            if st.cartridges.iter().any(|k| lib.cartridge(k).is_some_and(is_base_cartridge)) {
+                return Err(format!("{key}: contains a base cartridge; upload base cartridges via `hf upload`"));
+            }
+            let data = lib.export_stack(&st.key()).map_err(|e| e.to_string())?;
+            let slug = slug_of(&st.key());
+            if slug.is_empty() {
+                return Err(format!("{key}: stack name cannot be turned into a file name"));
+            }
+            let remote = format!("stacks/{slug}.stack.json");
+            if data.len() as u64 > PUBLISH_DIRECT_LIMIT {
+                return Err(format!("{key} export is {} bytes (over the 10 MiB direct upload limit); run `neuromorph-nano library export {key} --out {slug}.stack.json` and upload with `hf upload`", data.len()));
+            }
+            (data, remote, key.to_owned(), format!("Add stack {}", st.key()))
+        }
+        other => return Err(format!("item_kind {other}: use parameter-map or stack")),
+    };
+
+    let summary = req.summary.map(str::trim).filter(|x| !x.is_empty()).map_or(default_summary, str::to_owned);
+    let sha = nmhash::sha256_bytes(&bytes);
+    let header_line = obj(vec![
+        ("key", s("header")),
+        ("value", obj(vec![("summary", s(&summary)), ("description", s(&format!("Published from Neuromorph Nano (SHA-256: {sha})")))])),
+    ])
+    .encode()
+    .map_err(|e| format!("encode header: {e}"))?;
+    let file_line = obj(vec![
+        ("key", s("file")),
+        ("value", obj(vec![("content", s(&base64_encode(&bytes))), ("path", s(&remote_path)), ("encoding", s("base64"))])),
+    ])
+    .encode()
+    .map_err(|e| format!("encode file: {e}"))?;
+    let payload = format!("{header_line}\n{file_line}\n");
+
+    let api_kind = if repo_kind == "dataset" { "datasets" } else { "models" };
+    let query = if req.create_pr { "?create_pr=1" } else { "" };
+    let url = format!("https://huggingface.co/api/{api_kind}/{repo}/commit/{rev}{query}");
+    let (status, reply) = post_ndjson(&url, &token, payload.as_bytes())?;
+    let reply_text = String::from_utf8_lossy(&reply);
+    if !(200..300).contains(&status) {
+        let hint = match status {
+            401 => " (check HF_TOKEN or run `hf auth login` with a write token)",
+            403 => " (no write permission on this branch; enable 'open as Pull Request' or publish to your own repo)",
+            404 => " (repository or revision not found on Hugging Face)",
+            _ => "",
+        };
+        let detail = reply_text.trim();
+        let detail = if detail.len() > 240 { &detail[..240] } else { detail };
+        return Err(format!("Hugging Face returned HTTP {status}{hint}: {detail}"));
+    }
+    let parsed = nmjson::parse(&reply).ok();
+    let published_url = parsed
+        .as_ref()
+        .and_then(|v| {
+            v.get("pullRequestUrl")
+                .or_else(|_| v.get("commitUrl"))
+                .and_then(Value::string)
+                .ok()
+                .map(str::to_owned)
+        })
+        .unwrap_or_else(|| format!("https://huggingface.co/{repo}/blob/{rev}/{remote_path}"));
+
+    let audit = crate::controls::audit(
+        home,
+        "cartridge-source",
+        vec![
+            ("action", s("publish")),
+            ("repo", s(&repo)),
+            ("kind", s(repo_kind)),
+            ("revision", s(rev)),
+            ("create_pr", Value::Bool(req.create_pr)),
+            ("item_kind", s(req.item_kind)),
+            ("source", s(&local_hint)),
+            ("path", s(&remote_path)),
+            ("bytes", n(bytes.len() as u64)),
+            ("sha256", s(&sha)),
+            ("url", s(&published_url)),
+            ("by", s(by)),
+            ("label", s(&format!("Published {remote_path} to {repo}{}", if req.create_pr { " (PR)" } else { "" }))),
+        ],
+    )?;
+    Ok(obj(vec![
+        ("repo", s(&repo)),
+        ("path", s(&remote_path)),
+        ("bytes", n(bytes.len() as u64)),
+        ("sha256", s(&sha)),
+        ("create_pr", Value::Bool(req.create_pr)),
+        ("url", s(&published_url)),
+        ("audit_id", s(&audit)),
+    ]))
 }
 
 #[cfg(test)]
@@ -456,5 +887,22 @@ mod tests {
         assert!(class_of(&third, "README.md").2.is_some());
         assert!(class_of(&third, "config.json").2.is_some(), "a model's config is not a stack");
         assert!(class_of(&third, "my-fast-code.stack.json").2.is_none());
+        assert!(is_archived_path("archived/base/reader/reader-base-v2.cartridge"));
+        assert!(is_archived_path("archived/parameter-maps/reader/job-filter-read.json"));
+        assert!(is_archived_path("archived/stacks/gpu-old-v1.stack.json"));
+        assert!(!is_archived_path("parameter-maps/reader/job-filter-read.json"));
+        assert_eq!(class_of(&third, "archived/parameter-maps/reranker/job-filter-x.json").0, "archived");
+        assert!(class_of(&third, "archived/stacks/fast-code.stack.json").2.is_some());
+    }
+
+    #[test]
+    fn official_source_is_public_and_base64_matches_rfc4648() {
+        assert!(!official().token, "official public library sends no token on browse/fetch");
+        assert_eq!(base64_encode(b""), "");
+        assert_eq!(base64_encode(b"f"), "Zg==");
+        assert_eq!(base64_encode(b"fo"), "Zm8=");
+        assert_eq!(base64_encode(b"foo"), "Zm9v");
+        assert_eq!(base64_encode(b"foobar"), "Zm9vYmFy");
+        assert_eq!(slug_of("gpu-nvidia-geforce-gtx-1650-4096mib@3"), "gpu-nvidia-geforce-gtx-1650-4096mib-3");
     }
 }

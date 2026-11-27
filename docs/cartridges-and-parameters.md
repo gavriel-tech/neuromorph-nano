@@ -363,29 +363,29 @@ layer.
 
 ## 6. Cartridge libraries: official and third party
 
-Neuromorph Nano takes cartridges from the official library on Hugging Face,
+Neuromorph Nano takes cartridges and parameter maps from the official library on Hugging Face,
 [`gavriel-tech/neuromorph-nano-cartridges`](https://huggingface.co/gavriel-tech/neuromorph-nano-cartridges)
-(built in), and from any third-party Hugging Face library you add by its repository name (Models
-page, side panel, Libraries; MCP `nm_settings` `op: sources|source_add|source_browse|source_fetch|source_remove`).
-The Qwen3 open weights are the upstream fallback, from Downloads. The official library is under
-the same PolyForm Noncommercial License 1.0.0 as the Nano, with the upstream Apache-2.0 notices
-beside it.
+(built in, public, no token required), and from any third-party Hugging Face library you add by its repository name (Models
+page, side panel, Libraries; MCP `nm_settings` `op: sources|source_add|source_browse|source_fetch|source_fetch_all|source_publish|source_remove`).
+The Qwen3 open weights are the optional upstream fallback, from Downloads. The official library is under
+the same PolyForm Noncommercial License 1.0.0 as the Nano (`LICENSE` at root), with the upstream Apache-2.0 notices
+at `NOTICE.md` and `third_party/APACHE-2.0.txt`.
 
-- **Nothing is fetched until you ask.** Browse lists a library's files (one request to
-  huggingface.co); fetch downloads one file through the same downloader as the base cartridges (its
+- **Nothing is fetched or uploaded until you ask.** Browse lists a library's files (one request to
+  huggingface.co); fetch downloads one file (and `fetch all` downloads every active parameter map and non-base stack) through the same downloader as the base cartridges (its
   SHA-256 checked when the library publishes one, partial files resumed) and installs it through
-  the checks of the cartridge library on this machine. The air gap blocks both.
+  the checks of the cartridge library on this machine. The air gap blocks browsing, downloading and publishing.
 - **What a library can share, and how it is checked:**
   - stacks: the Nano's own stack export (`neuromorph-nano library export`), under `stacks/` or named
     `<name>.stack.json`; every file and the whole body carry hashes; an imported stack and its
     cartridges arrive on trial and serve only once their evidence allows;
   - parameter maps and job filters: under `parameter-maps/<role>/` (`reader`, `writer`, `embedder`,
     `reranker`); each is checked by its kind and never replaces a map you have;
-  - base cartridges: from the official library only in v0.1.0 (a third-party library's base
-    cartridges are listed, not installed).
-- **Your Hugging Face token** (`HF_TOKEN`, or the `hf` login) is sent only to huggingface.co: for
-  the official library when one is set on this machine, and for a third-party library only where
-  you ticked "send my token" (a private or gated library you trust).
+  - base cartridges: from the official library only (a third-party library's base
+    cartridges are listed, not installed);
+  - archived / decommissioned versions: superseded base cartridges, parameter maps, job filters, and stacks are stored under `archived/` mirroring the active layout (`archived/base/<role>/`, `archived/parameter-maps/<role>/`, `archived/stacks/`). The downloader automatically ignores `archived/` (and `archive/`) so users only ever see healthy, current, up-to-date downloadable content with no duplicates or decommissioned versions.
+- **Publish to Hugging Face (`source_publish`):** From **Models -> Libraries**, API `POST /api/cartridge-sources` (`action: "publish"`), or MCP `nm_settings` (`op: "source_publish"`), you can upload a local parameter map or non-base stack directly to your own Hugging Face repository or open a Pull Request against `gavriel-tech/neuromorph-nano-cartridges` using native WinHTTP `POST`. Publishing is confirmation-gated, audited, blocked in Air-Gap Mode, and prints exact `hf upload` command guidance for files larger than 10 MiB that need Git LFS.
+- **Your Hugging Face token** (`HF_TOKEN`, or the `hf` login) is not sent for public official library reads by default; it is sent only to `huggingface.co` when you explicitly publish or tick "send my token" on a private or gated third-party library you trust.
 - **The list of sources** is `cartridge-sources.json` in the Nano folder. Adding or removing a source
   is logged in the audit and can be undone; removing one goes through a preview and a confirmation
   and keeps whatever was already imported from it.

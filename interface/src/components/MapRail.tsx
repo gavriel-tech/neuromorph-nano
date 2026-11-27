@@ -86,9 +86,9 @@ function LayerPicker({ total, value, onChange }: { total: number; value: string;
         ))}
       </div>
       <div className="mono flex justify-between text-[9px] text-quiet">
-        <span>0</span>
-        <span>{anchor !== null ? `from ${anchor}: click the last layer` : `${set?.size ?? 0} of ${total}`}</span>
-        <span>{total - 1}</span>
+        <span>L0</span>
+        <span>{anchor !== null ? `from L${anchor}: click end layer` : set?.size === total ? `fitting all ${total} layers` : `fitting ${set?.size ?? 0} of ${total} layers`}</span>
+        <span>L{total - 1}</span>
       </div>
     </div>
   );
@@ -101,10 +101,22 @@ function LayerPicker({ total, value, onChange }: { total: number; value: string;
 const KINDS = ["filter", "map", "base"] as const;
 type Kind = (typeof KINDS)[number];
 const KIND_WORD: Record<Kind, string> = { filter: "job filter", map: "parameter map", base: "base cartridge" };
-const KIND_DOES: Record<Kind, string> = {
-  filter: "Fits a job filter on the lab's built-in prompts for this MicroModel's role; kept only if it passes the held-out split gate. It appears on the MicroModel's deck, ready to plug in.",
-  map: "Measures how much each part of the MicroModel's weights matters (a parameter map), then cuts a new base cartridge version from it, checked against the upstream open weights.",
-  base: "Builds a new base cartridge version by restoring the weights that matter most into the one serving now, checked against the upstream open weights.",
+const KIND_INFO: Record<Kind, { creates: string; gate: string; how: string }> = {
+  filter: {
+    creates: "A small plug-in filter (job-filter-<job>.json) that improves this MicroModel on one task.",
+    gate: "Only saved if it beats the base cartridge on a held-out split; shows up on Cartridges ready to plug in.",
+    how: "Runs the compressed base cartridge alongside the upstream open weights on prompts for the chosen task, fits per-channel gain and bias corrections on the selected layers, and checks them on held-out prompts before keeping the filter.",
+  },
+  map: {
+    creates: "A weight-sensitivity map (pmap-*.json) plus a new base cartridge version cut from it.",
+    gate: "Checked against upstream open weights; saved beside your existing base versions (nothing deleted).",
+    how: "Measures how much each weight matters across attention and feed-forward matrices, compresses out the chosen share, and writes a new base cartridge version you can choose on Cartridges -> Base versions.",
+  },
+  base: {
+    creates: "A new base cartridge version with the highest-impact weights restored.",
+    gate: "Checked against upstream open weights; saved beside your serving base (nothing overwritten).",
+    how: "Restores the top high-sensitivity weights into the current serving base cartridge to tighten accuracy, keeping the new version beside your existing ones so you pick which serves.",
+  },
 };
 
 export function AddFilter({ role, setRole, job, setJob, layers, setLayers, build, note, kinds = KINDS, e2e = "pmap-add" }: { role: string; setRole: (v: string) => void; job: string; setJob: (v: string) => void; layers: string; setLayers: (v: string) => void; build: BuildState | null; note: Note | null; kinds?: readonly Kind[]; e2e?: string }) {
@@ -112,6 +124,7 @@ export function AddFilter({ role, setRole, job, setJob, layers, setLayers, build
   const [kind, setKind] = useState<Kind>(kinds[0] ?? "filter");
   const [share, setShare] = useState("0.40");
   const [device, setDevice] = useState("gpu");
+  const [showHow, setShowHow] = useState(false);
   const r = roles.find((x) => x.role === role);
   const total = r ? layerCount(r.model) : null;
   const jf = filtersOf(role);
@@ -119,96 +132,156 @@ export function AddFilter({ role, setRole, job, setJob, layers, setLayers, build
   const shareN = Number(share);
   const okShare = Number.isFinite(shareN) && shareN >= 0.05 && shareN <= 0.6;
   const running = build?.status === "running";
+  const info = KIND_INFO[kind];
+  const existingJob = jf.find((f) => f.job === job.trim());
   const start = () => {
     if (kind === "filter") return void run("build", "/api/surgery/job-filter/build", { role, job: job.trim(), layers: layers.trim() || "all" }, `Building the job filter ${roleTitle(role)}/${job.trim()}; it passes the held-out split gate before it is kept.`);
     return void run("build", "/api/lab/build", kind === "map" ? { kind, role, share: shareN, device } : { kind, role }, `Building a ${KIND_WORD[kind]} for the ${roleTitle(role)}; a new base cartridge version is kept beside the others, and you choose what serves on Cartridges, Base versions.`);
   };
   const can = !busy && !running && (kind === "filter" ? !!job.trim() && okLayers : kind === "map" ? okShare : true);
+  const buildLabel = running
+    ? "building..."
+    : kind === "filter"
+      ? `${existingJob ? "rebuild" : "build"} ${roleTitle(role)}/${job.trim() || "job"} (${layers.trim() || "all"})`
+      : kind === "map"
+        ? `build ${roleTitle(role)} map (${Math.round((okShare ? shareN : 0.4) * 100)}%)`
+        : `build ${roleTitle(role)} base cartridge`;
+  const presetBtn = "press mono border border-line px-1.5 py-0.5 text-[9px] uppercase tracking-[0.08em] text-faint hover:border-sense-pale hover:text-text";
   return (
     <div className="grid gap-4" data-e2e={e2e}>
-      <div className="grid gap-1.5" data-e2e="lab-kind">
-        <span className="eyebrow">build</span>
+      <div className="grid gap-2" data-e2e="lab-kind">
+        <span className="eyebrow">1 · what to build</span>
         {kinds.length > 1 && <Segmented label="What the lab builds" values={[...kinds]} value={kind} onPick={(v) => setKind(v as Kind)} render={(v) => KIND_WORD[v as Kind]} />}
-        <span className="mono text-[10px] leading-relaxed text-quiet">{KIND_DOES[kind]}</span>
+        <div className="mono grid gap-1 border border-line bg-bg-1/70 p-2 text-[10px]">
+          <div className="flex items-start justify-between gap-2">
+            <span className="leading-snug text-muted">{info.creates}</span>
+            <button type="button" onClick={() => setShowHow((v) => !v)} className={`${linkBtn} shrink-0`}>
+              {showHow ? "hide" : "how it works"}
+            </button>
+          </div>
+          <span className="text-[9.5px] text-quiet">{info.gate}</span>
+          {showHow && <p className="read border-t border-line/50 pt-1.5 text-[10.5px] leading-relaxed text-faint">{info.how}</p>}
+        </div>
       </div>
+
       <label className="grid gap-1">
-        <span className="eyebrow">MicroModel</span>
+        <span className="eyebrow">2 · target MicroModel</span>
         <select value={role} onChange={(e) => setRole(e.target.value)} className={`${field} w-full`}>
           {roles.map((x) => (
             <option key={x.role} value={x.role} className="bg-bg-1">
-              {roleTitle(x.role)} · {x.serving_base ?? "open mode"}
+              {roleTitle(x.role)} · {x.serving_base ? `base cartridge ${x.serving_base}` : "open mode"}
             </option>
           ))}
         </select>
       </label>
+
       {kind === "map" && (
-        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3" data-e2e="lab-map-options">
-          <label className="grid gap-1">
-            <span className="eyebrow" title="The part of each attention and FFN matrix the map marks as least needed (0.05 to 0.60)">share mapped out</span>
-            <input value={share} onChange={(e) => setShare(e.target.value)} aria-label="Share mapped out" className={`${field} w-full`} spellCheck={false} />
-          </label>
-          <Segmented label="Device" values={["gpu", "cpu"]} value={device} onPick={setDevice} render={(v) => (v === "gpu" ? "graphics card" : "processor")} />
-          {!okShare && <span className="col-span-2 mono text-[10px] text-attention">a share between 0.05 and 0.60</span>}
+        <div className="grid gap-2.5 border border-line bg-bg-1/40 p-2.5" data-e2e="lab-map-options">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="eyebrow" title="The fraction of each attention and feed-forward matrix mapped out (0.05 to 0.60)">3 · share mapped out</span>
+            <span className="mono text-[10.5px] text-text">
+              {okShare ? `${Math.round(shareN * 100)}% cut · ${Math.round((1 - shareN) * 100)}% kept` : "invalid"}
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={0.05}
+              max={0.6}
+              step={0.05}
+              value={okShare ? shareN : 0.4}
+              onChange={(e) => setShare(Number(e.target.value).toFixed(2))}
+              aria-label="Share mapped out slider"
+              className="flex-1 accent-[var(--sense-pale)]"
+            />
+            <input value={share} onChange={(e) => setShare(e.target.value)} aria-label="Share mapped out" className={`${field} w-16 text-right`} spellCheck={false} />
+          </div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="eyebrow text-quiet">compute device</span>
+            <Segmented label="Device" values={["gpu", "cpu"]} value={device} onPick={setDevice} render={(v) => (v === "gpu" ? "graphics card" : "processor")} />
+          </div>
+          {!okShare && <span className="mono text-[10px] text-attention">enter a share between 0.05 and 0.60</span>}
         </div>
       )}
+
       {kind !== "filter" && (
         <p className="mono text-[10px] leading-relaxed text-faint">
-          The new version is kept beside the ones you have, nothing is removed; choose what serves on{" "}
+          Requires upstream open weights on disk. The new version is kept beside existing ones; pick what serves on{" "}
           <Link href="/cartridges/#bases" className="link">
             Cartridges, Base versions
           </Link>
-          . It needs the upstream open weights on disk and takes a while on the graphics card.
+          .
         </p>
       )}
+
       {kind === "filter" && (
-      <label className="grid gap-1">
-        <span className="eyebrow">job</span>
-        <input value={job} onChange={(e) => setJob(e.target.value)} className={`${field} w-full`} spellCheck={false} />
-      </label>
-      )}
-      {kind === "filter" && jf.length > 0 && (
-        <div className="grid gap-1">
-          <span className="eyebrow text-quiet">built on this MicroModel</span>
-          <ul className="grid gap-0.5">
-            {jf.map((f) => (
-              <li key={f.job}>
-                <button type="button" onClick={() => setJob(f.job)} className={`press mono flex w-full items-baseline justify-between gap-3 border-b border-line/40 py-1 text-left text-[10.5px] hover:text-text ${job === f.job ? "text-text" : "text-muted"}`} title="Use this job (rebuilding it on the layers below replaces it once it passes the gate)">
-                  <span className="truncate">{f.job}</span>
-                  <span className="shrink-0 text-faint">
-                    {typeof f.layers === "number" ? `${f.layers} layers · ` : ""}
-                    {f.enabled !== false ? "plugged in" : "unplugged"}
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
+        <div className="grid gap-2">
+          <label className="grid gap-1">
+            <span className="eyebrow">3 · task / job name</span>
+            <input value={job} onChange={(e) => setJob(e.target.value)} placeholder="e.g. code-slice, read, write, judge-code" className={`${field} w-full`} spellCheck={false} />
+          </label>
+          {jf.length > 0 && (
+            <div className="grid gap-1">
+              <span className="mono text-[9.5px] uppercase tracking-[0.1em] text-quiet">existing filters on {roleTitle(role)} (click to rebuild)</span>
+              <ul className="grid gap-0.5">
+                {jf.map((f) => (
+                  <li key={f.job}>
+                    <button type="button" onClick={() => setJob(f.job)} className={`press mono flex w-full items-baseline justify-between gap-3 border-b border-line/40 py-1 text-left text-[10.5px] hover:text-text ${job === f.job ? "text-sense-pale" : "text-muted"}`} title="Fill this job name to rebuild its filter on the layers selected below">
+                      <span className="truncate">{f.job}</span>
+                      <span className="shrink-0 text-faint">
+                        {typeof f.layers === "number" ? `${f.layers}L · ` : ""}
+                        {f.enabled !== false ? "plugged in" : "unplugged"}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
+
       {kind === "filter" && (
+        <div className="grid gap-2 border border-line bg-bg-1/40 p-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="eyebrow">4 · layers to correct</span>
+            <div className="flex flex-wrap items-center gap-1">
+              <button type="button" onClick={() => setLayers("all")} className={`${presetBtn} ${layers.trim() === "all" ? "border-sense-pale text-text" : ""}`}>
+                all
+              </button>
+              {total !== null && total >= 4 && (
+                <>
+                  <button type="button" onClick={() => setLayers(`0-${Math.floor(total / 2) - 1}`)} className={presetBtn}>
+                    first half
+                  </button>
+                  <button type="button" onClick={() => setLayers(`${Math.floor(total / 2)}-${total - 1}`)} className={presetBtn}>
+                    second half
+                  </button>
+                  <button type="button" onClick={() => setLayers(`${Math.max(0, total - 8)}-${total - 1}`)} className={presetBtn}>
+                    last 8
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+          <span className="mono text-[9.5px] leading-snug text-quiet">click start + end bar for a range, or ctrl+click to toggle single layers</span>
+          {total !== null && <LayerPicker key={role} total={total} value={layers} onChange={setLayers} />}
+          <input value={layers} onChange={(e) => setLayers(e.target.value)} placeholder="all or 12-27" aria-label="Layers to fit" className={`${field} w-full`} spellCheck={false} />
+          {!okLayers && <span className="mono text-[10px] text-attention">enter all, a range like 12-27, or a list like 3,5,9-12 (max 32 chars)</span>}
+        </div>
+      )}
+
       <div className="grid gap-1.5">
-        <div className="flex items-end justify-between gap-3">
-          <span className="eyebrow">layers</span>
-          <button type="button" onClick={() => setLayers("all")} className={`${linkBtn} ${layers.trim() === "all" ? "text-text" : ""}`}>
-            all
-          </button>
-        </div>
-        {total !== null && <LayerPicker key={role} total={total} value={layers} onChange={setLayers} />}
-        <input value={layers} onChange={(e) => setLayers(e.target.value)} placeholder="all or 12-27" aria-label="Layers" className={`${field} w-full`} spellCheck={false} />
-        {!okLayers && <span className="mono text-[10px] text-attention">the engine takes all, a range like 12-27, or a list like 3,5,9-12 (at most 32 characters)</span>}
-      </div>
-      )}
-      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={!can}
           data-e2e="lab-build"
           onClick={start}
-          className="press mono min-h-9 border border-sense-pale/70 px-3 text-[10.5px] uppercase tracking-[0.12em] text-sense-pale hover:bg-sense-pale/10 hover:text-text disabled:opacity-40"
-          title={kind === "filter" ? "Fits the filter on the training split, then keeps it only if it is closer to the upstream open weights on the held-out split" : "Runs the lab in the background; one build at a time"}
+          className="press mono min-h-9 w-full border border-sense-pale/80 bg-sense/15 px-3 text-[10.5px] uppercase tracking-[0.12em] text-sense-pale hover:bg-sense/25 hover:text-text disabled:opacity-40"
+          title={kind === "filter" ? "Fits the filter on the training split, then keeps it only if it beats the base cartridge on the held-out split" : "Runs the lab in the background; one build at a time"}
         >
-          {running ? "building" : "build"}
+          {buildLabel}
         </button>
-        <span className="mono text-[10px] text-quiet">{kind === "filter" ? "kept only if it passes the held-out split gate" : "checked against the upstream open weights before it is kept"}</span>
       </div>
       {build && (
         <div className="mono grid gap-1 border-l-2 border-line-strong pl-3 text-[10.5px]">

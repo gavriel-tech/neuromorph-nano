@@ -8,7 +8,7 @@
 
 *Give Claude Code, Cursor, VS Code, Antigravity, or Windsurf a local nervous system, persistent memory, and sub-3-second cited codebase recall, running entirely on your own machine.*
 
-[![Version](https://img.shields.io/badge/version-v0.1.0-0ea5e9?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v0.1.01-0ea5e9?style=flat-square)](CHANGELOG.md)
 [![Rust](https://img.shields.io/badge/Rust-21%20crates%20%7C%20std%20only-f97316?style=flat-square)](crates/)
 [![CUDA](https://img.shields.io/badge/CUDA-12%20fatbins%20%2B%20CPU%20fallback-22c55e?style=flat-square)](kernels/)
 [![Cartridges](https://img.shields.io/badge/Hugging%20Face-Cartridge%20Library-ff9d00?style=flat-square)](https://huggingface.co/gavriel-tech/neuromorph-nano-cartridges)
@@ -69,9 +69,9 @@ Instead of loading one slow giant model for every operation, Neuromorph Nano run
 
 ## Release Status, Hardware, and System Requirements
 
-**`v0.1.0` is the first public prototype of Neuromorph Nano** (Windows 10/11 x64), built on a 4 GB GPU. It ships the complete end-to-end local organism: zero-dependency Rust runtime, 12 custom multi-arch CUDA fatbins, four coexisting MicroModels seated on base cartridges with dynamic VRAM/RAM scaling, 25 MCP tools, parameter mapping and cartridge surgery, continuous learning primitives, and the 11-page local observability interface. Formal cross-hardware benchmark reports will be published as the platform matures beyond this initial prototype.
+**`v0.1.01` is the current public prototype release of Neuromorph Nano** (Windows 10/11 x64), built on a 4 GB GPU. It ships the complete end-to-end local organism: zero-dependency Rust runtime, 12 custom multi-arch CUDA fatbins, four coexisting MicroModels seated on base cartridges with dynamic VRAM/RAM scaling, 25 MCP tools, parameter mapping and cartridge surgery, public Hugging Face parameter-map/filter downloads and opt-in publishing, continuous learning primitives, and the 11-page local observability interface. Formal cross-hardware benchmark reports will be published as the platform matures beyond this initial prototype.
 
-### System Requirements (`v0.1.0`)
+### System Requirements (`v0.1.01`)
 
 | Component | Requirement |
 |---|---|
@@ -103,7 +103,7 @@ The installer downloads the release zip and `SHA256SUMS.txt` from GitHub Release
 Installing on an offline or air-gapped machine? Copy the release zip, `SHA256SUMS.txt`, the models and the cartridges over once, then run:
 
 ```powershell
-.\tools\install.ps1 -LocalZip .\neuromorph-nano-v0.1.0-win-x64.zip -ModelsFrom E:\nano\weights -CartridgesFrom E:\nano\library
+.\tools\install.ps1 -LocalZip .\neuromorph-nano-v0.1.01-win-x64.zip -ModelsFrom E:\nano\weights -CartridgesFrom E:\nano\library
 ```
 
 ### Option 2: Build From Source (Windows 11 x64)
@@ -140,8 +140,8 @@ neuromorph-nano launch ui
 | Group | Pages |
 |---|---|
 | **Observe** | **Live Activity** (`/`): every coding agent's calls, the organism at work (zoom and pan), stage times. **Topology**: ganglion stages, tentacles, base and learned cartridges. **Anatomy**: every part, its card and what it depends on. |
-| **Engine** | **Models**: the four MicroModels, what each runs on, base cartridge choice, routing and weights downloads. **Cartridges**: one deck per MicroModel with its base cartridge seated and its cartridges docked to plug, unplug or change version; the cartridge library, base versions, learned units and cartridge sources in the side panel. **Parameters**: the map atlas, with each map's lineage (what it was made on, by which command, for what), archive and restore. **Memory**: memory tiers, the world model and recall. **Learning**: learning cycles and rollback, the evidence ledger and the training data. |
-| **System** | **Storage**: disk use by category, with safe pruning. **Audit**: every call and change, with undo. **Settings**: every control, hardware limits and Air-Gap Mode. |
+| **Engine** | **Models**: the four MicroModels, what each runs on, per-layer on/off switches, base cartridge choice, routing, the floating **HF downloads** window, and Hugging Face library browsing, `fetch all`, and opt-in publishing. **Cartridges**: one deck per MicroModel with its base cartridge seated and its cartridges docked to plug, unplug, inspect parameters or change version; the floating **HF downloads** manager (browse everything Hugging Face offers, check items to download, or safely delete downloaded items), plus the cartridge library, base versions, Downloads, Sources, and learned units in the side panel. **Parameters**: the map atlas and universal Parameter Viewer (clickable layer bars, base cartridges and filters, paired parameter-map overlays, floating movable/resizable Inspector with inline manual overlay editing, floating **HF downloads**, and the 4-step Build panel), with each map's lineage, archive and restore. **Memory**: memory tiers, the world model and recall. **Learning**: learning cycles and rollback, the evidence ledger and the training data. |
+| **System** | **Storage**: disk use by category, with safe pruning. **Audit**: every call and change, with inline question show/hide and undo. **Settings**: every control, project drive storage summary, hardware limits and Air-Gap Mode. |
 
 The interface shows measured data only; a figure that was not measured is named as not measured. Every feature is also reachable through MCP and the local JSON API ([docs/interface-api.md](docs/interface-api.md)), and deleting anything goes through a preview and more than one confirmation step.
 
@@ -160,7 +160,7 @@ Captured at 1920x1080 during live MCP calls against a real repository, started t
 
 ### Cartridge Libraries
 
-The official cartridge library is on Hugging Face at [`gavriel-tech/neuromorph-nano-cartridges`](https://huggingface.co/gavriel-tech/neuromorph-nano-cartridges). You can also add third-party Hugging Face libraries as cartridge sources. Nothing is fetched until you ask; everything fetched goes through the same checks as the cartridge library on this machine (stacks arrive on trial, an existing map is never replaced, base cartridges come from the official library only). See [docs/cartridges-and-parameters.md](docs/cartridges-and-parameters.md) and [docs/build-flow.md](docs/build-flow.md).
+The official cartridge library is on Hugging Face at [`gavriel-tech/neuromorph-nano-cartridges`](https://huggingface.co/gavriel-tech/neuromorph-nano-cartridges) (public, no token required). You can also add third-party Hugging Face libraries as cartridge sources, or publish your own job filters, parameter maps, and non-base cartridge stacks directly to your own Hugging Face repository (or as a Pull Request to the official library) via **Publish to Hugging Face** (`source_publish`). Nothing is fetched or uploaded until you ask; everything fetched goes through the same checks as the cartridge library on this machine (stacks arrive on trial, an existing map is never replaced, base cartridges come from the official library only, and decommissioned files under `archived/` are hidden from the downloader). See [docs/cartridges-and-parameters.md](docs/cartridges-and-parameters.md) and [docs/build-flow.md](docs/build-flow.md).
 
 ---
 
@@ -197,7 +197,7 @@ Every user-facing capability works the same in the interface and over MCP: `nm_c
 
 ## Privacy, Air-Gap, and User Control
 
-- **The Nano sends nothing off your machine on its own:** The engine sends no telemetry and makes no network request of its own. Your coding agent is separate: the context the Nano hands it goes to the agent's model like any file the agent reads (with a cloud model, to its provider); run a local model behind your agent for nothing to leave at all (see [Agents and models](docs/agents.md)). The MCP server talks to your agent over standard input and output; the interface binds `127.0.0.1`. The only outbound requests are downloads and library listings you explicitly trigger (models, cartridges, cartridge sources), fetched from Hugging Face over HTTPS (`curl.exe`) with every file verified against its SHA-256.
+- **The Nano sends nothing off your machine on its own:** The engine sends no telemetry and makes no network request of its own. Your coding agent is separate: the context the Nano hands it goes to the agent's model like any file the agent reads (with a cloud model, to its provider); run a local model behind your agent for nothing to leave at all (see [Agents and models](docs/agents.md)). The MCP server talks to your agent over standard input and output; the interface binds `127.0.0.1`. The only outbound requests are downloads, library listings, and confirmation-gated **Publish to Hugging Face** uploads you explicitly trigger (models, base cartridges, parameter maps, job filters, stacks), made over Windows' native HTTPS (WinHTTP, with `curl.exe` fallback) with every downloaded file verified against its SHA-256.
 - **Verifiable Air-Gap Mode:** Turn on **Air-Gap Mode** in Settings, over MCP (`nm_settings op=set key=air_gap value=on`), or lock it for the process with `$env:NANO_AIR_GAP = "on"`. Air-Gap Mode keeps the interface on `127.0.0.1`, turns off local network access and tablet pairing, and refuses every download and remote listing. `GET /api/airgap` and `nm_settings op=airgap` show its state live.
 - **Hardware limiters:** Cap GPU VRAM (`limits.vram_mb`), host RAM (`limits.ram_mb`) or background threads (`limits.cpu_threads`) in Settings or over MCP, or apply the recommended values detected for your hardware in one click.
 - **Transparent storage:** See the exact paths and sizes of memory, dense vectors, quantized copies and cartridges in Storage or `nm_storage`, and prune rebuildable caches whenever you want.

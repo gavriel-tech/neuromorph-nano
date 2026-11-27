@@ -201,6 +201,8 @@ export type MapsApi = {
   buildRunning: boolean;
   /** Puts a job filter's MicroModel and job into the Add form (the caller opens the Add tab). */
   rebuild: (role: string, job: string) => void;
+  /** Opens a cartridge or parameter object in the full Parameter Viewer, optionally overlaying a parameter map, filtering to a layer, or jumping to masking/overlay controls. */
+  openObject?: (key: string, opts?: { map?: string; layer?: number | null; controls?: boolean }) => void;
 };
 
 const noop = async () => {};

@@ -54,7 +54,7 @@
     {"id": "nmapi.live", "version": 1, "hash": "af1e0cb64b89fd8ef94f45dfb08c2734bbcb710fc92e4c1a61af3383550dfc91"},
     {"id": "nmapi.memory_areas", "version": 1, "hash": "602e2d70e647dc670a463379b08985c191897f4b00ac8897678f210161ba9014"},
     {"id": "nmapi.memory_write", "version": 1, "hash": "2e3abff4621cc366a860deeb60c22848152f4f3b0c9af44c628c9f57c661350e"},
-    {"id": "nmapi.parity", "version": 1, "hash": "3b2c44dbf4252079998f76b33f924a7411153fa4d8b20cda21b432ad858840ed"},
+    {"id": "nmapi.parity", "version": 1, "hash": "e03f6c83db6aaf4611bca9f4936cc09b9c477c74c6f20271167e994add8c271e"},
     {"id": "nmapi.plugs", "version": 1, "hash": "3fe5472555b1f491b837f4cc1604f36bcbee3a98c93be06f85558d2ebd14dcdd"},
     {"id": "nmapi.engine", "version": 1, "hash": "f9a98a42a979fd1d20b80759f6e0fb9937a46e3bfbb1ba4a001fed8ddbe99e4a"},
     {"id": "nmapi.preload", "version": 1, "hash": "c9c4ed08fa14425ad807b19761a50774bba2f1f18b793eb86911c3e791ab2b33"},
@@ -63,5 +63,5 @@
   ],
   "lineage": [],
   "source": "in-house engine, Gavriel Technologies",
-  "hash": "a5a0027c4c8f94ed6cb55aad5999f6db79f4c2b74bc69d8a6a774eab9c6a368a"
+  "hash": "faffd19c145f8235c4d72d66cfb6de96ee29ca4197eccfbed48f3182634c9184"
 }

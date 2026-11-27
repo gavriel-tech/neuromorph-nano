@@ -162,10 +162,10 @@ impl Tier {
     #[must_use]
     pub const fn label(self) -> &'static str {
         match self {
-            Self::CpuOnly => "Processor only (no usable graphics card)",
-            Self::Small => "Small card (under 6 GB, for example a 4 GB GTX 1650)",
-            Self::Mid => "Mid card (8 to 12 GB)",
-            Self::Large => "Large card (16 GB and up)",
+            Self::CpuOnly => "CPU only",
+            Self::Small => "4 GB+ GPU",
+            Self::Mid => "8-12 GB GPU",
+            Self::Large => "16 GB+ GPU",
         }
     }
 }

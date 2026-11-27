@@ -41,21 +41,76 @@ const refreshCarts = () => {
 };
 
 /** "view parameters": opens an object on the Parameters page, focused on it (its tensors, its
- *  mapping, detailed editing). An object that holds no parameters says so in the link's place. */
-export function ViewParams({ paramKey }: { paramKey: string }) {
-  const q = useApi<{ holds?: boolean; error?: string }>(`/api/cartridges/parameters?key=${encodeURIComponent(paramKey)}`);
-  if (!q.data) return null;
-  if (q.data.error || !q.data.holds) {
+ *  mapping, detailed editing). When `withOptions` is set (inside a cartridge's detail panel on
+ *  Cartridges), also offers direct links to overlay/edit controls, role parameter maps, and Build. */
+export function ViewParams({ paramKey, role, withOptions = false }: { paramKey: string; role?: string; withOptions?: boolean }) {
+  const q = useApi<{ holds?: boolean; error?: string; totals?: { tensors?: number; values?: number } }>(`/api/cartridges/parameters?key=${encodeURIComponent(paramKey)}`);
+  if (!withOptions) {
+    if (!q.data) return null;
+    if (q.data.error || !q.data.holds) {
+      return (
+        <span className="mono text-[10px] text-faint" data-e2e="view-params-none" title={q.data.error ?? undefined}>
+          {q.data.error ? "parameters not read" : "holds no parameters"}
+        </span>
+      );
+    }
     return (
-      <span className="mono text-[10px] text-faint" data-e2e="view-params-none" title={q.data.error ?? undefined}>
-        {q.data.error ? "parameters not read" : "holds no parameters"}
-      </span>
+      <Link href={`/parameters/?cartridge=${encodeURIComponent(paramKey)}`} className={link} data-e2e="view-params" title="Open its parameters on the Parameters page: every tensor on the layer strip, the maps beside it, detailed editing">
+        view parameters
+      </Link>
     );
   }
+  const hasParams = Boolean(q.data && !q.data.error && q.data.holds);
+  const noParams = Boolean(q.data && (q.data.error || !q.data.holds));
   return (
-    <Link href={`/parameters/?cartridge=${encodeURIComponent(paramKey)}`} className={link} data-e2e="view-params" title="Open its parameters on the Parameters page: every tensor on the layer strip, the maps beside it, detailed editing">
-      view parameters
-    </Link>
+    <div className="mono grid gap-2 border border-line bg-bg-1/70 p-2.5 text-[10px]" data-e2e="cartridge-param-actions">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <span className="text-[9.5px] uppercase tracking-[0.14em] text-muted">Parameters</span>
+        {hasParams && q.data?.totals && (
+          <span className="text-faint">
+            {q.data.totals.tensors ?? 0} tensors · {(q.data.totals.values ?? 0).toLocaleString()} values
+          </span>
+        )}
+      </div>
+      {!q.data ? (
+        <span className="text-quiet">checking parameters...</span>
+      ) : noParams ? (
+        <span className="text-faint" data-e2e="view-params-none" title={q.data.error ?? undefined}>
+          {q.data.error ? "parameters not read" : "holds operating settings (no weight tensors; edit values below)"}
+        </span>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/parameters/?cartridge=${encodeURIComponent(paramKey)}`}
+            className="press border border-sense-pale bg-sense/15 px-2 py-1 text-[10px] uppercase tracking-[0.1em] text-sense-pale hover:bg-sense/25 hover:text-text"
+            data-e2e="view-params"
+            title="Open this cartridge directly in the full Parameter Viewer"
+          >
+            open parameter viewer
+          </Link>
+          <Link
+            href={`/parameters/?cartridge=${encodeURIComponent(paramKey)}#controls`}
+            className="press border border-line-strong bg-bg-2 px-2 py-1 text-[10px] uppercase tracking-[0.1em] text-muted hover:border-sense-pale hover:text-text"
+            title="Open this cartridge in the Parameter Viewer and jump to overlay, mask, freeze, and edit controls"
+          >
+            edit · mask · freeze
+          </Link>
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line/60 pt-1.5 text-[9.5px]">
+        {role && (
+          <Link href={`/parameters/?role=${encodeURIComponent(role)}`} className={link} title={`Filter Parameters to ${role} maps and parameter objects`}>
+            {role} maps &amp; objects
+          </Link>
+        )}
+        <Link href="/parameters/#add" className={link} title="Build a job filter, parameter map, or base cartridge on Parameters">
+          build on Parameters
+        </Link>
+        <Link href="/parameters/" className={link} title="Open the Parameters page">
+          all parameters
+        </Link>
+      </div>
+    </div>
   );
 }
 

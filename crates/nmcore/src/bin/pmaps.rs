@@ -1364,11 +1364,12 @@ pub fn local_file(path: &str, limit: u64) -> Result<PathBuf, String> {
 }
 
 /// The checks an imported map passes for its kind (by its name): JSON throughout (a ledger: every
-/// line), the top-level keys its kind is read by (`jobs` for a parameter map, `off` for an
-/// activation map, `tensors` for the super-weights, `parts` with each part's target and equal-length
-/// numeric gain and bias for a job filter), finite numbers where it is parsed; a map over the size
-/// a save parses is checked by its structure without being built. Replacing a map keeps its shape.
-fn check_import(file: &str, bytes: &[u8], old: Option<&Value>) -> Result<(), String> {
+/// line), the top-level keys its kind is read by (`jobs` for a parameter map, `bias` for an
+/// activation bias map, `off` for an activation mask, `tensors` for the super-weights, `parts`
+/// with each part's target and equal-length numeric gain and bias for a job filter), finite
+/// numbers where it is parsed; a map over the size a save parses is checked by its structure
+/// without being built. Replacing a map keeps its shape.
+pub(crate) fn check_import(file: &str, bytes: &[u8], old: Option<&Value>) -> Result<(), String> {
     if file.ends_with(".jsonl") {
         for (i, l) in bytes.split(|c| *c == b'\n').enumerate().filter(|(_, l)| l.iter().any(|c| !c.is_ascii_whitespace())) {
             nmjson::parse(l).map_err(|e| format!("line {}: not JSON ({e})", i + 1))?;
@@ -1390,7 +1391,11 @@ fn check_import(file: &str, bytes: &[u8], old: Option<&Value>) -> Result<(), Str
     if file.starts_with("pmap-") {
         need("jobs")?;
     } else if file.starts_with("act-") {
-        need("off")?;
+        if file.ends_with("-bias.json") {
+            need("bias")?;
+        } else {
+            need("off")?;
+        }
     } else if file == "super-weights.json" {
         need("tensors")?;
     } else if file.starts_with("job-filter-") {
@@ -1562,6 +1567,9 @@ mod tests {
         let r = import(&home, "writer", &src.display().to_string(), None, false, "test").unwrap();
         assert!(d.join("tol-mine.json").is_file() && matches!(r.get("replaced"), Ok(Value::Bool(false))));
         assert!(import(&home, "writer", &bad.display().to_string(), None, false, "test").is_err(), "gain and bias lengths differ");
+        assert!(check_import("act-20-bias.json", br#"{"bias":{},"socket":"s","what":"b"}"#, None).is_ok(), "act-*-bias.json uses bias");
+        assert!(check_import("act-20.json", br#"{"off":{},"what":"a"}"#, None).is_ok(), "act-*.json uses off");
+        assert!(check_import("act-20.json", br#"{"bias":{}}"#, None).is_err(), "act-*.json without off is refused");
         assert!(import(&home, "writer", &src.display().to_string(), None, false, "test").is_err(), "exists without replace");
         assert!(import(&home, "writer", "\\\\server\\share\\x.json", None, false, "test").is_err(), "no network paths");
         std::fs::write(&src, r#"{"L0":{"low25":0.75}}"#).unwrap();

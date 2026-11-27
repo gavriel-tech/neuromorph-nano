@@ -1564,7 +1564,29 @@ fn write_api(home: &Path, path: &str, body: &[u8], by: &str) -> Result<Value, St
                 let line = crate::sources::fetch(home, need_id()?, field("path")?, by)?;
                 Ok(obj(vec![("line", s(&line)), ("downloads", crate::fetch::view(home))]))
             }
-            other => Err(format!("action {other}: use add, remove, browse or fetch")),
+            "fetch_all" => {
+                let only = v.get("only").and_then(Value::string).ok();
+                let line = crate::sources::fetch_all(home, need_id()?, only, by)?;
+                Ok(obj(vec![("line", s(&line)), ("downloads", crate::fetch::view(home))]))
+            }
+            "publish" => {
+                if !matches!(v.get("confirm"), Ok(Value::Bool(true))) {
+                    return Err("confirm: publishing uploads a local file to Hugging Face; send confirm: true".into());
+                }
+                let req = crate::sources::PublishRequest {
+                    repo: field("repo")?,
+                    kind: v.get("kind").and_then(Value::string).ok(),
+                    revision: v.get("revision").and_then(Value::string).ok(),
+                    create_pr: matches!(v.get("create_pr"), Ok(Value::Bool(true))),
+                    item_kind: field("item_kind")?,
+                    role: v.get("role").and_then(Value::string).ok(),
+                    item: field("item")?,
+                    summary: v.get("summary").and_then(Value::string).ok(),
+                };
+                let published = crate::sources::publish(home, &req, by)?;
+                Ok(obj(vec![("published", published), ("sources", crate::sources::view(home))]))
+            }
+            other => Err(format!("action {other}: use add, remove, browse, fetch, fetch_all or publish")),
         };
     }
     if path == "/api/downloads" {

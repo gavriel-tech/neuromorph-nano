@@ -302,12 +302,29 @@ export function KartDetail({ kartKey }: { kartKey: string }) {
   const f = src?.type === "filter" ? (d.surgeryQ.data?.roles[src.role]?.job_filters ?? []).find((x) => x.cartridge === src.id) : undefined;
   const u = src?.type === "unit" ? d.unitsQ.data?.compartments.flatMap((c) => c.units).find((x) => x.key === src.key) : undefined;
   const c = src?.type === "cart" ? d.all.find((x) => x.id === src.id && x.version === src.version) : undefined;
-  // The key its parameters answer to (a library cartridge carries its own link in its inspector).
-  const paramKey = src?.type === "filter" ? `filter:${src.role}/${src.job}` : src?.type === "base" ? src.key : src?.type === "unit" ? (u?.id ?? null) : null;
+  // The key its parameters answer to, across every cartridge kind (base, job filter, adapter/unit, lens, library cartridge).
+  const paramKey =
+    src?.type === "filter"
+      ? `filter:${src.role}/${src.job}`
+      : src?.type === "base"
+        ? src.key
+        : src?.type === "unit"
+          ? u
+            ? u.kind === "adapter" && typeof u.version === "number"
+              ? `${u.id}@${u.version}`
+              : u.id
+            : null
+          : src?.type === "lens"
+            ? src.id
+            : src?.type === "cart"
+              ? `${src.id}@${src.version}`
+              : null;
+  const cartRole = src?.type === "filter" ? src.role : src?.type === "lens" ? src.role : k.model ? d.roleMap.roleOf(k.model) : "";
   return (
     <div className="grid gap-4" data-e2e="cartridge-drawer" data-key={k.key}>
       <NoteLine note={plug.note} />
       <CartridgeCard k={k} busy={plug.busyKey === k.key} link={k.plugged ? link : undefined} onPlug={k.plug ? () => void plug.act(k, "plug") : undefined} onEject={k.eject ? () => void plug.act(k, "eject") : undefined} landing={plug.landing === k.key} />
+      {paramKey && <ViewParams paramKey={paramKey} role={cartRole || undefined} withOptions />}
       <div className="grid">
         <KV k="Kind">{KIND_WORD[k.kind]}</KV>
         <KV k="MicroModel">{k.model ? <MicroModelName model={k.model} /> : "the whole engine"}</KV>
@@ -322,11 +339,6 @@ export function KartDetail({ kartKey }: { kartKey: string }) {
         <p className="read -mt-2 text-[11px] leading-relaxed text-faint" data-e2e="cart-link-why">
           {link.why}
         </p>
-      )}
-      {paramKey && (
-        <div className="flex justify-end">
-          <ViewParams paramKey={paramKey} />
-        </div>
       )}
       {src?.type === "base" && <BaseVersions only={src.model} onNote={plug.setNote} />}
       {f && src?.type === "filter" && (
@@ -422,6 +434,17 @@ export function DeckDetail({ model }: { model: string }) {
         <KV k="Graphics memory" mono>{lm?.vram_mb ? `${lm.vram_mb.toLocaleString()} MiB` : "not measured"}</KV>
         <KV k="Layers" mono>{typeof m?.layers === "number" ? m.layers : "not reported"}</KV>
         <KV k="Heads" mono>{typeof m?.heads === "number" ? m.heads : "not reported"}</KV>
+      </div>
+      <div className="mono flex flex-wrap items-center gap-x-3 gap-y-1 border-y border-line py-2 text-[10px]">
+        <span className="text-[9.5px] uppercase tracking-[0.12em] text-quiet">parameters</span>
+        {roles.map((r) => (
+          <Link key={r} href={`/parameters/?role=${encodeURIComponent(r)}`} className={linkCls}>
+            {roleTitle(r)} maps &amp; objects
+          </Link>
+        ))}
+        <Link href="/parameters/#add" className={linkCls}>
+          build
+        </Link>
       </div>
       {roles.length ? (
         <div className="grid gap-2">

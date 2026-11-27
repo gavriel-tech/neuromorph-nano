@@ -15,8 +15,8 @@
 // state, activity by layer, and its tensors and clusters.
 
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { ControlRow } from "@/components/Controls";
+import { useState, type ReactNode } from "react";
+import { ControlRow, NoteLine } from "@/components/Controls";
 import DotText from "@/components/DotText";
 import MicroModelName, { BaseMark, WeightsMark, roleTitle } from "@/components/MicroModel";
 import MicroModelWeights from "@/components/MicroModelWeights";
@@ -26,7 +26,7 @@ import { WeightsReading, WeightsDrawer } from "@/components/WeightsDrawers";
 import { RailSection, useRail } from "@/components/Workspace";
 import { KV, Pill, Placeholder } from "@/components/ui";
 import { modelLayers, msText, useActivity } from "@/lib/activity";
-import { ago, bits, bytes, useApi, type Cartridge, type Control, type Model, type Status } from "@/lib/api";
+import { ago, bits, bytes, post, refreshAll, useApi, type Cartridge, type Control, type Model, type Status } from "@/lib/api";
 import { useNow } from "@/lib/clock";
 import { engineServing, liveModelFor, modelState, type LiveModel } from "@/lib/livefeed";
 import { useLive } from "@/lib/livehook";
@@ -214,10 +214,104 @@ export function ModelMachine({
         </div>
       )}
       <MicroModelWeights model={m.id} onNote={onNote} />
-      <button type="button" onClick={onInspect} className="press mono mt-3 border-b border-line-strong px-0.5 text-[10px] uppercase tracking-[0.12em] text-muted hover:text-text" title="Its tensors and parameter clusters, read only, in the side panel">
-        Inspect tensors · {m.id}
-      </button>
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <button type="button" onClick={onSelect} className="press mono border-b border-sense-pale px-0.5 text-[10px] uppercase tracking-[0.12em] text-sense-pale hover:text-text" title="Open layer on/off switches, base cartridge versions, and parameter viewer links in the side panel">
+          Layers on/off
+        </button>
+        <button type="button" onClick={onInspect} className="press mono border-b border-line-strong px-0.5 text-[10px] uppercase tracking-[0.12em] text-muted hover:text-text" title="Its tensors and parameter clusters, read only, in the side panel">
+          Inspect tensors · {m.id}
+        </button>
+      </div>
     </section>
+  );
+}
+
+type OverlayLayersReply = {
+  editable?: boolean;
+  why?: string | null;
+  layers?: { layer: number; edited: boolean; masked: boolean; frozen: boolean }[];
+  takes_effect?: { when?: string; reason?: string };
+  error?: string;
+};
+
+/** Real per-layer ON/OFF switches for a MicroModel's active base cartridge or open weights,
+ *  backed by POST /api/parameters/overlay (mask = identity pass on residual stream, unmask = on). */
+function LayerControls({ targetKey, layers, role }: { targetKey: string; layers: number; role: string }) {
+  const q = useApi<OverlayLayersReply>(`/api/parameters/overlay?key=${encodeURIComponent(targetKey)}`);
+  const [busyLayer, setBusyLayer] = useState<number | null>(null);
+  const [note, setNote] = useState<Note | null>(null);
+  const maskedSet = new Set((q.data?.layers ?? []).filter((x) => x.masked).map((x) => x.layer));
+  const frozenSet = new Set((q.data?.layers ?? []).filter((x) => x.frozen).map((x) => x.layer));
+  const editedSet = new Set((q.data?.layers ?? []).filter((x) => x.edited).map((x) => x.layer));
+  const toggle = async (l: number) => {
+    const isOff = maskedSet.has(l);
+    setBusyLayer(l);
+    setNote(null);
+    try {
+      const r = await post<{ audit_id?: string; takes_effect?: { when?: string } }>("/api/parameters/overlay", {
+        key: targetKey,
+        action: isOff ? "unmask" : "mask",
+        path: `L${l}`,
+      });
+      setNote({
+        text: `Layer L${l} turned ${isOff ? "on" : "off (masked to identity)"}${r.takes_effect?.when ? ` (${r.takes_effect.when})` : ""}${r.audit_id ? `. Audit ${r.audit_id} undoes it.` : "."}`,
+        tone: "verified",
+      });
+      for (const p of ["/api/parameters/overlay", "/api/cartridges/parameters", "/api/audit"]) void refreshAll(p);
+    } catch (e) {
+      setNote({ text: e instanceof Error ? e.message : String(e), tone: "error" });
+    }
+    setBusyLayer(null);
+  };
+  return (
+    <div className="mono grid gap-2 text-[10px]" data-e2e="model-layer-controls">
+      <div className="flex flex-wrap items-baseline justify-between gap-2 text-faint">
+        <span className="truncate" title={targetKey}>
+          target: <span className="text-text">{targetKey}</span>
+        </span>
+        <span>
+          {layers - maskedSet.size} of {layers} on
+        </span>
+      </div>
+      <NoteLine note={note} />
+      <div className="grid grid-cols-7 gap-1">
+        {Array.from({ length: layers }, (_, l) => {
+          const off = maskedSet.has(l);
+          const fz = frozenSet.has(l);
+          const ed = editedSet.has(l);
+          return (
+            <button
+              key={l}
+              type="button"
+              disabled={busyLayer !== null || q.data?.editable === false}
+              onClick={() => void toggle(l)}
+              aria-pressed={!off}
+              title={`Layer ${l}: ${off ? "OFF (masked to identity pass) · click to turn on" : "ON · click to turn off (mask to identity)"}${fz ? " · frozen" : ""}${ed ? " · edited" : ""}`}
+              className={`press border px-1 py-1 text-center text-[9.5px] transition-colors disabled:opacity-40 ${
+                off
+                  ? "border-attention/70 bg-bg-1 text-attention/80 line-through"
+                  : ed
+                    ? "border-verified/70 bg-verified/10 text-text hover:border-sense-pale"
+                    : "border-line-strong bg-bg-2 text-text hover:border-sense-pale"
+              }`}
+            >
+              L{l}
+            </button>
+          );
+        })}
+      </div>
+      {q.data?.takes_effect?.when && <span className="text-[9.5px] text-quiet">changes apply {q.data.takes_effect.when}; click a layer to toggle on/off</span>}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-line/50 pt-1.5 text-[9.5px]">
+        <Link href={`/parameters/?cartridge=${encodeURIComponent(targetKey)}`} className="link">
+          open in Parameter Viewer
+        </Link>
+        {role && (
+          <Link href={`/parameters/?role=${encodeURIComponent(role)}`} className="link">
+            {roleTitle(role)} maps &amp; objects
+          </Link>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -240,11 +334,18 @@ export function ModelDetail({ model, tensors = false }: { model: string; tensors
   const lm = liveFor(live.reply?.models, model, roleMap.rolesOf(model));
   const ml = m && typeof m.layers === "number" ? modelLayers(act, tree, model, m.layers, roleMap.rolesOf(model)) : null;
   const loaded = status.data?.loaded?.find((x) => x.id === model);
+  const roles = roleMap.rolesOf(model);
+  const activeKey = b?.serving && b.serving !== "open weights" ? b.serving : `open:${model}`;
   return (
     <div className="grid min-w-0" data-e2e="model-detail" data-model={model}>
       <div className="mb-3">
         <MicroModelName model={model} layout="stack" nameClass="text-[13px] uppercase tracking-[0.2em] text-text" />
       </div>
+      {typeof m?.layers === "number" && m.layers > 0 && (
+        <RailSection title="Layer controls · on / off">
+          <LayerControls targetKey={activeKey} layers={m.layers} role={roles[0] ?? ""} />
+        </RailSection>
+      )}
       <RailSection title="Runs on · base cartridge">
         {!b ? (
           <span className="mono text-[10.5px] text-faint">{bases.error ? "base cartridges not reported" : "reading"}</span>

@@ -25,9 +25,10 @@
 
 import Link from "next/link";
 import { maskPath, maskPathsIn } from "@/lib/privacy";
-import { useEffect, useMemo, useState } from "react";
-import { ParamDetail, NormStrip, fmt, type ParamLayer } from "@/components/CartridgeParams";
-import ParamOverview from "@/components/ParamOverview";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { KIND_WORD, ParamDetail, ParamObjectPicker, NormStrip, fmt, type ParamLayer } from "@/components/CartridgeParams";
+import ParamOverview, { type ActiveMapOverlay } from "@/components/ParamOverview";
+import { layersOf, type MapRow as CatalogMapRow, type RoleMaps } from "@/components/MapCore";
 import { NoteLine } from "@/components/Controls";
 import { roleTitle } from "@/components/MicroModel";
 import { useRail } from "@/components/Workspace";
@@ -40,7 +41,7 @@ type TensorRow = { name: string; target: string; layer: number | null; part: str
 type OvEntry = { id: string; action: "edit" | "mask" | "freeze"; op: string | null; selection: string; whole: boolean; regions: { path: string; tensor: string; values: number }[]; values: number; by: string; at_ms: number; note: string | null };
 type TakesEffect = { view: string; when: string; reason: string };
 type OverlaySec = { editable?: boolean; why?: string | null; entries?: OvEntry[]; counts?: { edits: number; masks: number; freezes: number }; tensors?: Record<string, { edited: number; masked: number; frozen: number }>; layers?: { layer: number; edited: boolean; masked: boolean; frozen: boolean }[]; whole_masked?: boolean; takes_effect?: TakesEffect; error?: string };
-type Section = { key?: string; kind?: string; role?: string; model?: string; state?: string; holds?: boolean; note?: string; error?: string; editable?: { why: string | null; small: number }; layers?: ParamLayer[]; tensors?: TensorRow[]; overlay?: OverlaySec };
+type Section = { key?: string; source?: string; kind?: string; role?: string; model?: string; state?: string; holds?: boolean; note?: string; error?: string; editable?: { why: string | null; small: number }; layers?: ParamLayer[]; tensors?: TensorRow[]; overlay?: OverlaySec };
 type MapRow = { file: string; kind: string; why: string[]; made_on: string | null; used_by: string[]; targets: string[]; layers: { layer: number; value: number | null }[]; read: boolean };
 type Maps = { maps?: MapRow[]; base?: string | null; error?: string };
 type MapAt = { map: string; at: string; values?: (number | null)[]; value?: number | null };
@@ -590,7 +591,7 @@ function SelectionState({ k, path, d, maps, onShow }: { k: string; path: string;
 /** The overlay of the object: mask, freeze, unmask and unfreeze on the selection (the whole object
  *  for `*`), the entries with unmask or unfreeze each (a click on an entry selects its region and
  *  shows it in the viewer), undo of the newest change, and clear through the delete gate. */
-function OverlayPanel({ k, path, ov, onShow }: { k: string; path: string; ov: OverlaySec | undefined; onShow: (e: OvEntry) => void }) {
+function OverlayPanel({ k, path, ov, onShow, pulse = false }: { k: string; path: string; ov: OverlaySec | undefined; onShow: (e: OvEntry) => void; pulse?: boolean }) {
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<Note | null>(null);
   const [clearTok, setClearTok] = useState<string | null>(null);
@@ -618,7 +619,7 @@ function OverlayPanel({ k, path, ov, onShow }: { k: string; path: string; ov: Ov
   const entries = ov.entries ?? [];
   const sel = whole ? { whole: true } : { path };
   return (
-    <div className="grid gap-2 border-t border-line pt-3" data-e2e="cparam-overlay">
+    <div id="overlay-controls" className={`grid gap-2 border-t pt-3 transition-colors ${pulse ? "border-sense-pale bg-sense/10 px-2 pb-2" : "border-line"}`} data-e2e="cparam-overlay">
       <div className="mono flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
         <span className="text-[9.5px] uppercase tracking-[0.12em] text-quiet">overlay</span>
         <span className="text-faint">on {whole ? "the whole object" : path}</span>
@@ -719,19 +720,53 @@ function ExportPanel({ k, path }: { k: string; path: string }) {
   );
 }
 
-export default function ParamFocus({ k, layerCount, onLeave, onOpen }: { k: string; layerCount: (model: string) => number | null; onLeave: () => void; onOpen: (key: string) => void }) {
+export default function ParamFocus({
+  k,
+  layerCount,
+  activeMap = null,
+  initialLayer = null,
+  onSelectMap,
+  onLeave,
+  onOpen,
+}: {
+  k: string;
+  layerCount: (model: string) => number | null;
+  activeMap?: string | null;
+  initialLayer?: number | null;
+  onSelectMap?: (map: string | null) => void;
+  onLeave: () => void;
+  onOpen: (key: string) => void;
+}) {
   const q = useApi<Section>(`/api/cartridges/parameters?key=${enc(k)}`);
   // The header alone (no value read), so the frame says what it is reading while the section is made.
   const head = useApi<{ tensors?: number | null }>(`/api/cartridges/parameters?key=${enc(k)}&head=1`);
   const m = useApi<Maps>(`/api/cartridges/parameters?key=${enc(k)}&maps=1`);
+  const allMapsQ = useApi<{ roles?: RoleMaps[] }>("/api/parameter-maps", 15000);
   const rail = useRail();
-  const [layer, setLayer] = useState<number | null>(null);
+  const [layer, setLayer] = useState<number | null>(initialLayer);
   const [tensor, setTensor] = useState<string | null>(null);
-  const [path, setPath] = useState("*");
+  const [path, setPath] = useState(initialLayer !== null ? `L${initialLayer}` : "*");
   const [ctlOpen, setCtlOpen] = useState(true);
+  const [overlayPulse, setOverlayPulse] = useState(false);
   const [typed, setTyped] = useState("");
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const focusOverlayControls = () => {
+    setCtlOpen(true);
+    setOverlayPulse(true);
+    window.setTimeout(() => {
+      const el = document.getElementById("overlay-controls");
+      el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      const btn = el?.querySelector<HTMLButtonElement>('[data-e2e="cparam-mask"]');
+      btn?.focus();
+    }, 30);
+    window.setTimeout(() => setOverlayPulse(false), 1200);
+  };
   // A region to show in the viewer (an overlay entry picked in the controls); each pick a new `n`.
   const [target, setTarget] = useState<{ path: string; n: number } | null>(null);
+  const leave = () => {
+    if (rail.shown?.key?.startsWith("cparam:")) rail.clear();
+    onLeave();
+  };
   const showEntry = (e: OvEntry) => {
     const p = e.whole ? "*" : e.regions.length === 1 ? e.regions[0].path : e.selection;
     setPath(p);
@@ -745,8 +780,106 @@ export default function ParamFocus({ k, layerCount, onLeave, onOpen }: { k: stri
   const width = total ?? Math.max(1, ...layers.map((l) => l.layer + 1));
   const shown = tensors.filter((t) => layer === null || t.layer === layer);
   const t = tensors.find((x) => x.name === tensor) ?? null;
-  const maps = m.data?.maps ?? [];
+  const maps = useMemo(() => m.data?.maps ?? [], [m.data]);
   const editable = !d?.editable?.why;
+  // Only parameter maps paired/connected to THIS selected parameter object (from &maps=1), enriched with catalog metadata.
+  const roleName = d?.role ?? null;
+  const roleMaps = useMemo<CatalogMapRow[]>(() => {
+    if (!roleName) return [];
+    return allMapsQ.data?.roles?.find((r) => r.role === roleName)?.maps ?? [];
+  }, [allMapsQ.data, roleName]);
+  const pairedMaps = useMemo(() => {
+    const byFile = new Map(roleMaps.map((rm) => [rm.file, rm]));
+    return maps.map((mp) => {
+      const cat = byFile.get(mp.file);
+      return {
+        file: mp.file,
+        kind: cat?.kind ?? mp.kind,
+        why: mp.why.join("; "),
+      };
+    });
+  }, [maps, roleMaps]);
+  const activeParsed = useMemo(() => {
+    if (!activeMap) return null;
+    const i = activeMap.indexOf("/");
+    if (i < 0) return roleName ? { role: roleName, file: activeMap } : null;
+    return { role: activeMap.slice(0, i), file: activeMap.slice(i + 1) };
+  }, [activeMap, roleName]);
+  const activeCatalog = useMemo(() => {
+    if (!activeParsed) return null;
+    return allMapsQ.data?.roles?.find((r) => r.role === activeParsed.role)?.maps.find((x) => x.file === activeParsed.file) ?? null;
+  }, [allMapsQ.data, activeParsed]);
+  // Read full JSON only for reasonably sized maps (<= 4 MiB, e.g. super-weights.json, job filters, tol-*).
+  const readActivePath =
+    activeParsed && (!activeCatalog || activeCatalog.bytes <= 4 * 1024 * 1024)
+      ? `/api/parameter-maps/read?role=${enc(activeParsed.role)}&file=${enc(activeParsed.file)}`
+      : null;
+  const activeReadQ = useApi<{ mode?: string; content?: unknown; kind?: string; about?: string }>(readActivePath);
+  const mapOverlay = useMemo<ActiveMapOverlay | null>(() => {
+    if (!activeParsed) return null;
+    const pointsByTensor: Record<string, [number, number][]> = {};
+    const layerSet = new Set<number>();
+    const layerValues: Record<number, number> = {};
+    const targets: string[] = [];
+    if (activeCatalog) {
+      for (const l of layersOf(activeCatalog)) layerSet.add(l);
+    }
+    const related = maps.find((x) => x.file === activeParsed.file);
+    if (related) {
+      for (const lv of related.layers) {
+        layerSet.add(lv.layer);
+        if (typeof lv.value === "number") layerValues[lv.layer] = lv.value;
+      }
+      for (const tg of related.targets) targets.push(tg);
+    }
+    const content = activeReadQ.data?.mode === "full" ? activeReadQ.data.content : null;
+    if (content && typeof content === "object" && !Array.isArray(content)) {
+      const obj = content as Record<string, unknown>;
+      // super-weights.json: { tensors: { "model.layers.0...": [[r, c], ...] } }
+      if (obj.tensors && typeof obj.tensors === "object" && !Array.isArray(obj.tensors)) {
+        for (const [tName, coords] of Object.entries(obj.tensors as Record<string, unknown>)) {
+          if (!Array.isArray(coords)) continue;
+          const pts: [number, number][] = [];
+          for (const pair of coords) {
+            if (Array.isArray(pair) && pair.length >= 2 && typeof pair[0] === "number" && typeof pair[1] === "number") {
+              pts.push([pair[0], pair[1]]);
+            }
+          }
+          if (pts.length > 0) {
+            pointsByTensor[tName] = pts;
+            const lm = /^model\.layers\.(\d+)\./.exec(tName);
+            if (lm) layerSet.add(Number(lm[1]));
+          }
+        }
+      }
+      // job-filter-*.json: { parts: [{ target: "L2.swigate", gain: [...], bias: [...] }] }
+      if (Array.isArray(obj.parts)) {
+        for (const p of obj.parts) {
+          if (!p || typeof p !== "object") continue;
+          const tg = (p as { target?: unknown }).target;
+          if (typeof tg === "string" && tg) {
+            if (!targets.includes(tg)) targets.push(tg);
+            const lm = /(?:^|[.#/:])L(\d+)(?:$|[.#/:])/.exec(tg);
+            if (lm) layerSet.add(Number(lm[1]));
+          }
+        }
+      }
+    }
+    return {
+      id: `${activeParsed.role}/${activeParsed.file}`,
+      file: activeParsed.file,
+      role: activeParsed.role,
+      kind: activeCatalog?.kind ?? activeReadQ.data?.kind ?? "parameter map",
+      about: activeCatalog?.about ?? activeReadQ.data?.about,
+      pointsByTensor,
+      layers: [...layerSet].sort((a, b) => a - b),
+      layerValues,
+      targets,
+    };
+  }, [activeParsed, activeCatalog, maps, activeReadQ.data]);
+  const totalOverlayPoints = useMemo(() => (mapOverlay ? Object.values(mapOverlay.pointsByTensor).reduce((a, b) => a + b.length, 0) : 0), [mapOverlay]);
+  const totalOverlayTensors = useMemo(() => (mapOverlay ? Object.keys(mapOverlay.pointsByTensor).length : 0), [mapOverlay]);
+  const overlayCount = (d?.overlay?.counts?.edits ?? 0) + (d?.overlay?.counts?.masks ?? 0) + (d?.overlay?.counts?.freezes ?? 0);
   // The object's summary and quick controls stay in the side panel.
   useEffect(() => {
     if (!d) return;
@@ -754,20 +887,29 @@ export default function ParamFocus({ k, layerCount, onLeave, onOpen }: { k: stri
     // Shown once per object opened, when its MicroModel is known.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [k, d === null]);
+  useEffect(() => {
+    if (!d?.holds || typeof window === "undefined") return;
+    if (window.location.hash === "#controls") {
+      controlsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [k, d?.holds]);
 
   if (!d && q.error) return <Empty title="The parameters did not answer">{q.error}</Empty>;
   if (!d)
     return (
       <section className="grid min-w-0 gap-5" data-e2e="cparam-focus" data-key={k} aria-busy="true">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="mono text-[13px] tracking-[0.06em] text-text">{k}</span>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <button
+            type="button"
+            className="press mono border border-line-strong bg-bg-2 px-2.5 py-1 text-[10px] uppercase tracking-[0.1em] text-text hover:border-sense-pale hover:text-sense-pale"
+            onClick={leave}
+            data-e2e="cparam-leave"
+          >
+            ← Parameters
+          </button>
+          <ParamObjectPicker value={k} onPick={onOpen} ariaLabel="Switch parameter object" />
           <span className="mono text-[10.5px] text-faint" data-e2e="cparam-reading">
             {head.data?.tensors != null ? `reading ${head.data.tensors} tensors` : "reading its parameters"}
-          </span>
-          <span className="mono ml-auto flex gap-4 text-[10px]">
-            <button type="button" className={link} onClick={onLeave} data-e2e="cparam-leave">
-              all maps
-            </button>
           </span>
         </div>
         <Placeholder className="h-72" what="parameter map" />
@@ -775,32 +917,129 @@ export default function ParamFocus({ k, layerCount, onLeave, onOpen }: { k: stri
     );
   return (
     <section className="grid min-w-0 gap-5" data-e2e="cparam-focus" data-key={k}>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <span className="mono text-[13px] tracking-[0.06em] text-text">{k}</span>
-        {d.kind && <Pill tone="muted">{d.kind}</Pill>}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <button
+          type="button"
+          className="press mono border border-line-strong bg-bg-2 px-2.5 py-1 text-[10px] uppercase tracking-[0.1em] text-text hover:border-sense-pale hover:text-sense-pale"
+          onClick={leave}
+          data-e2e="cparam-leave"
+          title="Return to the main Parameters page (map atlas, list, and all parameter objects)"
+        >
+          ← Parameters
+        </button>
+        <ParamObjectPicker value={k} onPick={onOpen} ariaLabel="Switch parameter object" />
+        {d.kind && (
+          <Pill tone={d.kind === "base" ? "learned" : d.kind === "open" ? "muted" : "signal"}>
+            {d.source === "job-filter" ? "job filter" : (KIND_WORD[d.kind] ?? d.kind)}
+          </Pill>
+        )}
         {d.role && <span className="mono text-[10.5px] uppercase tracking-[0.14em] text-muted">{roleTitle(d.role)}</span>}
         {d.state && <Pill tone={d.state === "trial" || d.state === "plugged out" ? "attention" : "verified"}>{d.state}</Pill>}
         <span className="mono ml-auto flex gap-4 text-[10px]">
           <Link href="/cartridges/" className={link} data-e2e="cparam-back">
-            back to Cartridges
+            ← Cartridges
           </Link>
-          <button type="button" className={link} onClick={onLeave} data-e2e="cparam-leave">
-            all maps
-          </button>
         </span>
       </div>
       {d.error ? (
         <Empty title="Not readable">{d.error}</Empty>
       ) : !d.holds ? (
-        <Empty title="This cartridge holds no parameters">{d.editable?.why ?? undefined}</Empty>
+        <Empty title="This cartridge holds no parameters">
+          {d.editable?.why ?? "It holds operating settings rather than weight tensors."}{" "}
+          <Link href="/cartridges/" className="link">
+            Edit its settings on Cartridges
+          </Link>
+          , or pick another cartridge above.
+        </Empty>
       ) : (
         <>
+          {/* Parameter map overlay & parameter masking bar: lists only maps paired with this object, plus direct controls toggle & focus. */}
+          <div className="mono flex flex-wrap items-center gap-x-3 gap-y-1.5 border border-line bg-bg-1/80 px-3 py-2 text-[10px]" data-e2e="param-map-overlay-bar">
+            <span className="text-[9.5px] uppercase tracking-[0.12em] text-muted">map overlay</span>
+            {onSelectMap && (pairedMaps.length > 0 || activeMap) ? (
+              <select
+                value={activeMap ?? ""}
+                onChange={(e) => onSelectMap(e.target.value || null)}
+                aria-label="Overlay a paired parameter map on the viewer"
+                className="mono h-6 min-w-[13rem] max-w-full border border-line-strong bg-bg-2 px-1.5 text-[10px] text-text outline-none focus-visible:border-sense-pale"
+              >
+                <option value="" className="bg-bg-1 text-faint">
+                  none ({pairedMaps.length} paired {pairedMaps.length === 1 ? "map" : "maps"})
+                </option>
+                {activeMap && activeParsed && !pairedMaps.some((pm) => pm.file === activeParsed.file) && (
+                  <option value={activeMap} className="bg-bg-1 text-text">
+                    {activeParsed.file}
+                  </option>
+                )}
+                {pairedMaps.map((pm) => (
+                  <option key={pm.file} value={`${d.role}/${pm.file}`} className="bg-bg-1 text-text">
+                    {pm.file} · {pm.kind}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span className="text-quiet">{m.data ? "no paired maps for this object" : "checking paired maps..."}</span>
+            )}
+            {mapOverlay && (
+              <>
+                <span className="text-faint">
+                  {totalOverlayPoints > 0
+                    ? `${totalOverlayPoints.toLocaleString()} pinned weights across ${totalOverlayTensors} tensors`
+                    : mapOverlay.layers.length > 0
+                      ? `covers ${mapOverlay.layers.length} layers${mapOverlay.targets.length > 0 ? ` · ${mapOverlay.targets.length} sockets` : ""}`
+                      : mapOverlay.kind}
+                </span>
+                {onSelectMap && (
+                  <button type="button" className={link} onClick={() => onSelectMap(null)}>
+                    clear map
+                  </button>
+                )}
+              </>
+            )}
+            <span className="ml-auto flex flex-wrap items-center gap-3">
+              <span className={overlayCount > 0 ? "text-attention" : "text-quiet"}>
+                masking: {overlayCount > 0 ? `${d.overlay?.counts?.masks ?? 0} masked · ${d.overlay?.counts?.freezes ?? 0} frozen · ${d.overlay?.counts?.edits ?? 0} edited` : "none"}
+              </span>
+              <button
+                type="button"
+                className="press border border-sense-pale bg-sense/15 px-2 py-0.5 text-[10px] uppercase tracking-[0.08em] text-sense-pale hover:bg-sense/25 hover:text-text"
+                onClick={focusOverlayControls}
+                title="Open and highlight the mask, freeze, and overlay controls below"
+              >
+                mask / freeze
+              </button>
+              <button
+                type="button"
+                className={link}
+                onClick={() => setCtlOpen((o) => !o)}
+                aria-expanded={ctlOpen}
+              >
+                {ctlOpen ? "hide controls" : "show controls"}
+              </button>
+            </span>
+          </div>
           {/* The whole-set viewer, the primary working view of an opened object: a region dragged
               or picked there becomes the selection the edit, mask and freeze controls act on. */}
-          <ParamOverview objectKey={k} onSelect={(p) => setPath(p)} marks={d.overlay?.entries} maps={maps} target={target} />
+          <ParamOverview
+            key={k}
+            objectKey={k}
+            onSelect={(p) => setPath(p)}
+            marks={d.overlay?.entries}
+            maps={maps}
+            mapOverlay={mapOverlay}
+            layerFilter={layer}
+            onSelectLayer={(l) => {
+              setLayer(l);
+              setTensor(null);
+              setPath(l === null ? "*" : `L${l}`);
+            }}
+            target={target}
+          />
           {/* The controls stay at the bottom of the screen while the viewer above scrolls, so a weight
               picked anywhere in the set is edited, masked or frozen without leaving it. */}
           <div
+            ref={controlsRef}
+            id="controls"
             className={`sticky bottom-0 z-10 grid gap-3 border-t border-line-strong bg-bg-1 pt-3 pb-2 ${ctlOpen ? "max-h-[46vh] overflow-y-auto" : "max-h-[2.5rem] overflow-hidden"}`}
             data-e2e="cparam-controls"
           >
@@ -830,7 +1069,7 @@ export default function ParamFocus({ k, layerCount, onLeave, onOpen }: { k: stri
             </div>
 
             <SelectionState k={k} path={path} d={d} maps={maps} onShow={showEntry} />
-            <OverlayPanel k={k} path={path} ov={d.overlay} onShow={showEntry} />
+            <OverlayPanel k={k} path={path} ov={d.overlay} onShow={showEntry} pulse={overlayPulse} />
             {d.overlay?.editable || editable ? (
               <EditPanel k={k} path={path} maps={maps} onDone={onOpen} canVersion={editable} why={d.editable?.why ?? null} />
             ) : (

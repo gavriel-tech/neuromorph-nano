@@ -618,8 +618,33 @@ pub fn settings(v: &Value) -> Result<Value, ApiError> {
             confirmed(v, op)?;
             route("/api/cartridge-sources", "", Some(body(vec![("action", s("fetch")), ("id", s(need(v, "id", op)?)), ("path", s(need(v, "path", op)?))])?))
         }
+        "source_fetch_all" => {
+            confirmed(v, op)?;
+            let mut b = vec![("action", s("fetch_all")), ("id", s(need(v, "id", op)?))];
+            if let Some(only) = arg(v, "only").filter(|x| !x.is_empty()) {
+                b.push(("only", s(only)));
+            }
+            route("/api/cartridge-sources", "", Some(body(b)?))
+        }
+        "source_publish" => {
+            confirmed(v, op)?;
+            let mut b = vec![
+                ("action", s("publish")),
+                ("confirm", Value::Bool(true)),
+                ("repo", s(need(v, "repo", op)?)),
+                ("item_kind", s(need(v, "item_kind", op)?)),
+                ("item", s(need(v, "item", op)?)),
+                ("create_pr", Value::Bool(matches!(v.get("create_pr"), Ok(Value::Bool(true))))),
+            ];
+            for k in ["kind", "revision", "role", "summary"] {
+                if let Some(x) = arg(v, k).filter(|x| !x.is_empty()) {
+                    b.push((k, s(x)));
+                }
+            }
+            route("/api/cartridge-sources", "", Some(body(b)?))
+        }
         other => Err(bad(format!(
-            "op {other}: use view, saved, set, undo, status, projects, designs, audit, activity, stage_times, session, parts, airgap, connect, devices, device_revoke, roles, role_set, downloads, download, sources, source_add, source_remove, source_browse, source_fetch, backups, backup_add, backup_remove, backup_now, backup_snapshots, backup_preview, backup_restore, limits, recommend, set_limit or apply_recommended"
+            "op {other}: use view, saved, set, undo, status, projects, designs, audit, activity, stage_times, session, parts, airgap, connect, devices, device_revoke, roles, role_set, downloads, download, sources, source_add, source_remove, source_browse, source_fetch, source_fetch_all, source_publish, backups, backup_add, backup_remove, backup_now, backup_snapshots, backup_preview, backup_restore, limits, recommend, set_limit or apply_recommended"
         ))),
     }
 }
@@ -775,6 +800,8 @@ pub const OPS: &[(&str, &str, &str, &str)] = &[
     ("nm_settings", "source_remove", "POST", "/api/cartridge-sources"),
     ("nm_settings", "source_browse", "POST", "/api/cartridge-sources"),
     ("nm_settings", "source_fetch", "POST", "/api/cartridge-sources"),
+    ("nm_settings", "source_fetch_all", "POST", "/api/cartridge-sources"),
+    ("nm_settings", "source_publish", "POST", "/api/cartridge-sources"),
     ("nm_settings", "backup_add", "POST", "/api/backups"),
     ("nm_settings", "backup_remove", "POST", "/api/backups"),
     ("nm_settings", "backup_now", "POST", "/api/backups"),
@@ -946,22 +973,26 @@ pub const IN_COMPREHENSION: &[Field] = &[
 ];
 /// Inputs of `nm_settings`.
 pub const IN_SETTINGS: &[Field] = &[
-    field("op", FieldKind::String, "view (default), saved (settings.json key by key: the keys beside the controls, each entry with its choices and the key set takes for it), set, undo, status, projects, designs, audit, activity, stage_times, session, parts, airgap, connect, devices, device_revoke, roles, role_set, downloads, download, sources (the official and third-party cartridge libraries), source_add, source_remove (two calls: a preview with a confirm_token, then the same call with it), source_browse (lists a source's files from huggingface.co), source_fetch (fetches one listed file and imports it through the cartridge library's checks; needs confirm), backups (your own repositories for backup and rollback), backup_add, backup_remove, backup_now (sends a snapshot of the chosen parts to your repository), backup_snapshots, backup_preview (what a restore would write; writes nothing), backup_restore (needs confirm; Audit undoes it), limits, recommend, set_limit or apply_recommended"),
-    field("repo", FieldKind::String, "source_add: a Hugging Face repository, owner/name"),
+    field("op", FieldKind::String, "view (default), saved (settings.json key by key: the keys beside the controls, each entry with its choices and the key set takes for it), set, undo, status, projects, designs, audit, activity, stage_times, session, parts, airgap, connect, devices, device_revoke, roles, role_set, downloads, download, sources (the official and third-party cartridge libraries), source_add, source_remove (two calls: a preview with a confirm_token, then the same call with it), source_browse (lists a source's files from huggingface.co), source_fetch (fetches one listed file and imports it through the cartridge library's checks; needs confirm), source_fetch_all (fetches all missing installable files from a source, optionally filtered by only; needs confirm), source_publish (uploads a local parameter map or stack to a Hugging Face repo or PR using HF_TOKEN; needs confirm), backups (your own repositories for backup and rollback), backup_add, backup_remove, backup_now (sends a snapshot of the chosen parts to your repository), backup_snapshots, backup_preview (what a restore would write; writes nothing), backup_restore (needs confirm; Audit undoes it), limits, recommend, set_limit or apply_recommended"),
+    field("repo", FieldKind::String, "source_add, source_publish: a Hugging Face repository, owner/name"),
     field("url", FieldKind::String, "backup_add: your repository's git URL (GitHub or any git host, or a Hugging Face repository) or a local folder"),
     field("parts", FieldKind::Array, "backup_add: what it holds: memory, maps, cartridges, units, settings (all but cartridges by default)"),
     field("commit", FieldKind::String, "backup_preview, backup_restore: a snapshot's commit id as backup_snapshots lists it"),
-    field("revision", FieldKind::String, "source_add: a branch, tag or commit (main by default)"),
+    field("revision", FieldKind::String, "source_add, source_publish: a branch, tag or commit (main by default)"),
     field("token", FieldKind::Bool, "source_add: true sends your Hugging Face token to huggingface.co for this source (private or gated libraries); backup_add: true sends your token for that host (HF_TOKEN for Hugging Face, GITHUB_TOKEN or GH_TOKEN for other hosts) to that host only"),
     field("path", FieldKind::String, "source_fetch: the file's path in the source, as source_browse lists it"),
+    field("item_kind", FieldKind::String, "source_publish: parameter-map or stack"),
+    field("item", FieldKind::String, "source_publish: file name (for parameter-map) or stack key id@version (for stack)"),
+    field("create_pr", FieldKind::Bool, "source_publish: true opens a Hugging Face Pull Request instead of committing directly to the branch"),
+    field("summary", FieldKind::String, "source_publish: optional commit or Pull Request title"),
     field("key", FieldKind::String, "set: a control key as view lists it, or one entry of a settings.json map as saved lists it (base_cartridges:<model id>, base_compensation:<model id>, role_models:<role>); set_limit: vram_mb, ram_mb, cpu_threads, or a memory area: content_mb, caches_mb, weights_mb"),
     field("value", FieldKind::String, "set: the new value; set_limit: auto or a number (vram_mb 0 is processor only from the next start)"),
-    field("role", FieldKind::String, "role_set: reader, writer, embedder or reranker"),
+    field("role", FieldKind::String, "role_set, source_publish (parameter-map): reader, writer, embedder or reranker"),
     field("model", FieldKind::String, "role_set: an installed model id, or default"),
-    field("what", FieldKind::String, "download: models:<model id> (that model's files) or cartridges (the serving base cartridges); needs confirm"),
-    field("only", FieldKind::String, "download: only the files whose name ends with this (for example .json)"),
-    field("id", FieldKind::String, "undo: audit id of the change; device_revoke: the paired device id; source_remove, source_browse, source_fetch: the source's id as sources lists it; backup_remove, backup_now, backup_snapshots, backup_preview, backup_restore: the repository's id as backups lists it"),
-    field("kind", FieldKind::String, "audit: row kind; source_add: model (default) or dataset"),
+    field("what", FieldKind::String, "download: models:<model id> (that model's files), cartridges (the serving base cartridges and tokenizer/config JSONs), or parameter-maps (official parameter maps and job filters from Hugging Face); needs confirm"),
+    field("only", FieldKind::String, "download: file suffix for models/cartridges (e.g. .json), or serving for parameter-maps; source_fetch_all: serving, parameter-maps or stacks"),
+    field("id", FieldKind::String, "undo: audit id of the change; device_revoke: the paired device id; source_remove, source_browse, source_fetch, source_fetch_all: the source's id as sources lists it; backup_remove, backup_now, backup_snapshots, backup_preview, backup_restore: the repository's id as backups lists it"),
+    field("kind", FieldKind::String, "audit: row kind; source_add, source_publish: model (default) or dataset"),
     field("project", FieldKind::String, "audit, activity, session: project key; connect: the project's folder (or key)"),
     field("window", FieldKind::String, "activity: time window, as the interface names it"),
     field("file", FieldKind::String, "stage_times: another stage-bench report"),

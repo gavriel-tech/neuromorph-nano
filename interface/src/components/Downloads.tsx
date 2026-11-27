@@ -13,21 +13,28 @@
 // one under the other, the explanations in hover titles.
 
 import { useState } from "react";
+import DeleteFlow from "@/components/DeleteFlow";
+import { HFDownloadButton } from "@/components/HFDownloadManager";
 import { Pill, Placeholder } from "@/components/ui";
 import { bytes, post, refreshAll, useApi } from "@/lib/api";
 
 type ModelRow = { id: string; repo: string; revision: string; bytes: number; files: number; present: number; partial: number; on_disk: number; state: string };
-type CartRow = { key: string; present: boolean; on_disk: number; path: string };
+type CartRow = { key: string; present: boolean; on_disk: number; path: string; description?: string };
+type MapFileRow = { file: string; kind: string; bytes: number; description?: string };
+type MapRoleRow = { role: string; files: number; job_filters: number; super_weights: boolean; on_disk: number; items?: MapFileRow[] };
+type LocalStackRow = { key: string; use: string; description: string };
+type SourceFileRow = { path: string; bytes: number; kind: string; description?: string | null; installable: boolean };
+type SourcesLite = { sources?: { id: string; repo: string; official: boolean; listing?: { files: SourceFileRow[] } | null }[]; publishable?: { stacks: LocalStackRow[] } };
 /** `stopped`: set when the process running the download ended before it finished (then
  *  `running` is false). */
 type Job = { what: string; running: boolean; done: number; total: number; current: string; current_bytes: number; failed: string[]; finished_ms: number; by?: string; updated_ms?: number; stopped?: string };
-type Payload = { models?: ModelRow[]; cartridges?: CartRow[]; cartridge_repo?: string; token?: boolean; air_gap?: boolean; job?: Job | null };
+type Payload = { models?: ModelRow[]; cartridges?: CartRow[]; parameter_maps?: MapRoleRow[]; cartridge_repo?: string; token?: boolean; air_gap?: boolean; job?: Job | null };
 type Note = { text: string; tone: "verified" | "error" };
 
 const btn = "press mono border-b px-0.5 text-[10px] uppercase tracking-[0.12em] disabled:opacity-40";
 
 /** A download waiting for its confirmation: what it fetches, in words and figures. */
-type Armed = { what: string; label: string; files: number; bytes: number | null };
+type Armed = { what: string; only?: string; label: string; files: number | null; bytes: number | null };
 
 /** 2026-11-26: the confirmation sits inline, on the ground (no browser dialog): what will be
  *  fetched, how many files, about how large, and that every file is checked against its SHA-256. */
@@ -44,8 +51,8 @@ function ConfirmRow({ armed, busy, onConfirm, onCancel }: { armed: Armed; busy: 
     >
       <span className="text-text">Download {armed.label}?</span>
       <span className="text-faint">
-        {armed.files} {armed.files === 1 ? "file" : "files"}
-        {armed.bytes !== null ? ` · about ${bytes(armed.bytes)}` : " · each size is shown as the file arrives"} · every file is checked against its SHA-256 before it is kept; a partial file resumes
+        {armed.files !== null ? `${armed.files} ${armed.files === 1 ? "file" : "files"}` : "missing files from the official Hugging Face library"}
+        {armed.bytes !== null ? ` · about ${bytes(armed.bytes)}` : " · each size is shown as the file arrives"} · every file is checked before it is kept; a partial file resumes
       </span>
       <span className="flex items-center gap-4">
         <button type="button" autoFocus disabled={busy} onClick={onConfirm} className={`${btn} border-sense-pale text-sense-pale hover:text-text`}>
@@ -59,18 +66,47 @@ function ConfirmRow({ armed, busy, onConfirm, onCancel }: { armed: Armed; busy: 
   );
 }
 
+const ACTIVE_MAP_FILE = (name: string) =>
+  name.startsWith("job-filter-") || name === "super-weights.json" || name.startsWith("pmap-");
+
+function latestStacks(stacks: LocalStackRow[]): LocalStackRow[] {
+  const best = new Map<string, { ver: number; row: LocalStackRow }>();
+  for (const st of stacks) {
+    const m = /^(.+)@(\d+)$/.exec(st.key);
+    const base = (m ? m[1] : st.key).toLowerCase();
+    const ver = m ? Number(m[2]) : 0;
+    const prev = best.get(base);
+    if (!prev || ver > prev.ver) best.set(base, { ver, row: st });
+  }
+  return [...best.values()].map((x) => x.row);
+}
+
 export function DownloadsPanel({ onNote }: { onNote: (n: Note) => void }) {
   const q = useApi<Payload>("/api/downloads", 2000);
+  const srcQ = useApi<SourcesLite>("/api/cartridge-sources", 15000);
   const [busy, setBusy] = useState(false);
   const [armed, setArmed] = useState<Armed | null>(null);
+  const [openInfo, setOpenInfo] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const toggleInfo = (id: string) => setOpenInfo((prev) => (prev === id ? null : id));
+  const infoBtn = "press mono border-b border-line px-0.5 text-[9.5px] uppercase tracking-[0.1em] text-quiet hover:text-text";
   const d = q.data;
+  const localStacks = latestStacks(srcQ.data?.publishable?.stacks ?? []);
+  const localStackSlugs = new Set(localStacks.map((st) => `${st.key.replace("@", "-v")}.stack.json`.toLowerCase()));
+  const officialSource = (srcQ.data?.sources ?? []).find((s) => s.official);
+  const remoteStacks = (officialSource?.listing?.files ?? []).filter((f) => {
+    if (f.kind !== "stack file" || !f.installable) return false;
+    const name = (f.path.split("/").pop() ?? f.path).toLowerCase();
+    return !localStackSlugs.has(name);
+  });
   const job = d?.job;
   const running = !!job?.running;
   const start = async (a: Armed) => {
     setBusy(true);
     try {
-      const r = await post<{ line?: string }>("/api/downloads", { what: a.what });
-      refreshAll("/api/downloads");
+      const payload = a.only ? { what: a.what, only: a.only } : { what: a.what };
+      const r = await post<{ line?: string }>("/api/downloads", payload);
+      for (const p of ["/api/downloads", "/api/parameter-maps", "/api/cartridge-sources"]) refreshAll(p);
       onNote({ text: `${r.line ?? "Download started"}.`, tone: "verified" });
       setArmed(null);
     } catch (e) {
@@ -79,15 +115,29 @@ export function DownloadsPanel({ onNote }: { onNote: (n: Note) => void }) {
     setBusy(false);
   };
   const missingCarts = (d?.cartridges ?? []).filter((c) => !c.present);
-  const confirmFor = (what: string) =>
-    armed && armed.what === what ? <ConfirmRow armed={armed} busy={busy} onConfirm={() => void start(armed)} onCancel={() => setArmed(null)} /> : null;
+  const mapRoles = (d?.parameter_maps ?? []).map((r) => {
+    const activeItems = (r.items ?? []).filter((it) => ACTIVE_MAP_FILE(it.file));
+    return {
+      ...r,
+      items: activeItems,
+      files: activeItems.length,
+      job_filters: activeItems.filter((it) => it.file.startsWith("job-filter-")).length,
+      on_disk: activeItems.reduce((sum, it) => sum + (it.bytes || 0), 0),
+    };
+  });
+  const totalMapFiles = mapRoles.reduce((sum, r) => sum + r.files, 0);
+  const confirmFor = (what: string, only?: string) =>
+    armed && armed.what === what && armed.only === only ? <ConfirmRow armed={armed} busy={busy} onConfirm={() => void start(armed)} onCancel={() => setArmed(null)} /> : null;
   return (
     <section className="min-w-0" aria-label="Downloads">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <span className="eyebrow text-muted" title="Base cartridges are required to run (downloading them also fetches the small tokenizer and config JSONs). Upstream open weights are optional: used for fallback, output-parity reference checks, parameter mapping, and cartridge surgery. Every file is checked against its SHA-256 before it is kept; a partial file resumes.">
           Downloads
         </span>
-        {d?.air_gap && <Pill tone="attention">air gap on: no downloads</Pill>}
+        <span className="flex flex-wrap items-center gap-2">
+          <HFDownloadButton label="open HF download window" />
+          {d?.air_gap && <Pill tone="attention">air gap on: no downloads</Pill>}
+        </span>
       </div>
       {!d && q.error ? (
         <div className="mono text-[11px] text-error">Downloads did not answer: {q.error}</div>
@@ -124,40 +174,281 @@ export function DownloadsPanel({ onNote }: { onNote: (n: Note) => void }) {
             <div className="mono flex flex-wrap items-baseline justify-between gap-2 text-[10px] uppercase tracking-[0.12em]">
               <span
                 className="flex items-center gap-1.5 text-muted"
-                title={`The Neuromorph base cartridges the MicroModels run on standalone, from ${d.cartridge_repo ?? "the cartridge repository"} (also fetches the small tokenizer and config JSONs). You can also load or contribute your own cartridges and parameter maps on Cartridges and Parameters.`}
+                title={`The Neuromorph base cartridges the MicroModels run on standalone, from ${d.cartridge_repo ?? "the public Hugging Face cartridge library"} (also fetches the small tokenizer and config JSONs).`}
               >
                 <i aria-hidden className="inline-block h-1.5 w-1.5 bg-learned" />
                 Base cartridges · required
               </span>
-              <span className={`normal-case tracking-normal ${d.token ? "text-verified" : "text-quiet"}`} title={d.token ? "A Hugging Face token was found on this machine" : "A private repository needs a Hugging Face token"}>
-                {d.token ? "token found" : "no token"}
+              <span className="normal-case tracking-normal text-quiet" title={`Public Hugging Face repository: https://huggingface.co/${d.cartridge_repo ?? "gavriel-tech/neuromorph-nano-cartridges"}`}>
+                public library
               </span>
             </div>
             <div className="mono mb-2 mt-0.5 text-[10px] text-faint">Runs all four MicroModels standalone.</div>
             <ul className="grid">
-              {(d.cartridges ?? []).map((c) => (
-                <li key={c.key} className="flex min-w-0 items-center justify-between gap-3 border-b border-line/60 py-1.5">
-                  <span className="mono min-w-0 truncate text-[11.5px] text-text" title={c.path}>
-                    {c.key}
-                  </span>
-                  <span className="flex shrink-0 items-center gap-3">
-                    <span className="mono text-[10.5px] text-faint">{c.present ? bytes(c.on_disk) : "not on disk"}</span>
-                    <Pill tone={c.present ? "verified" : "muted"}>{c.present ? "in the cartridge library" : "missing"}</Pill>
-                  </span>
-                </li>
-              ))}
+              {(d.cartridges ?? []).map((c) => {
+                const infoId = `cart:${c.key}`;
+                const shown = openInfo === infoId;
+                return (
+                  <li key={c.key} className="grid gap-1 border-b border-line/60 py-1.5">
+                    <div className="flex min-w-0 items-center justify-between gap-3">
+                      <span className="mono min-w-0 truncate text-[11.5px] text-text" title={c.path}>
+                        {c.key}
+                      </span>
+                      <span className="flex shrink-0 items-center gap-3">
+                        <span className="mono text-[10.5px] text-faint">{c.present ? bytes(c.on_disk) : "not on disk"}</span>
+                        <Pill tone={c.present ? "verified" : "muted"}>{c.present ? "in library" : "missing"}</Pill>
+                        <button type="button" onClick={() => toggleInfo(infoId)} aria-expanded={shown} className={infoBtn}>
+                          {shown ? "hide" : "info"}
+                        </button>
+                        {c.present && deleting !== `base:${c.key}` && (
+                          <button
+                            type="button"
+                            onClick={() => setDeleting(`base:${c.key}`)}
+                            className="press mono border-b border-line px-0.5 text-[9.5px] uppercase tracking-[0.1em] text-faint hover:border-error hover:text-error"
+                            title="Preview and remove this base cartridge (serving or chosen versions are protected)"
+                          >
+                            delete
+                          </button>
+                        )}
+                        {!c.present && !(armed && armed.what === "cartridges" && armed.only === c.key) && (
+                          <button
+                            type="button"
+                            disabled={busy || running || d.air_gap}
+                            onClick={() => setArmed({ what: "cartridges", only: c.key, label: c.key, files: 1, bytes: null })}
+                            className={`${btn} border-sense-pale text-sense-pale hover:text-text`}
+                          >
+                            download
+                          </button>
+                        )}
+                      </span>
+                    </div>
+                    {deleting === `base:${c.key}` && (
+                      <div className="border-l border-error/60 pl-2.5">
+                        <DeleteFlow
+                          autoStart
+                          path="/api/cartridges/bases/remove"
+                          body={{ key: c.key }}
+                          label="delete"
+                          done={() => `Removed ${c.key}.`}
+                          refresh={["/api/downloads", "/api/cartridges/bases", "/api/cartridges", "/api/status"]}
+                          onNote={onNote}
+                          onClose={() => setDeleting(null)}
+                        />
+                      </div>
+                    )}
+                    {shown && (
+                      <div className="mono border-l border-line-strong pl-2.5 text-[10.5px] leading-relaxed text-faint">
+                        <div>{c.description || "Standalone MicroModel base cartridge."}</div>
+                        <div className="text-quiet">path: {c.path}</div>
+                      </div>
+                    )}
+                    {confirmFor("cartridges", c.key)}
+                  </li>
+                );
+              })}
             </ul>
-            {missingCarts.length > 0 && !(armed && armed.what === "cartridges") && (
+            {missingCarts.length > 0 && !(armed && armed.what === "cartridges" && !armed.only) && (
               <button
                 type="button"
                 disabled={busy || running || d.air_gap}
-                onClick={() => setArmed({ what: "cartridges", label: "the missing base cartridges", files: missingCarts.length, bytes: null })}
+                onClick={() => setArmed({ what: "cartridges", label: "all missing base cartridges", files: missingCarts.length, bytes: null })}
                 className={`${btn} mt-3 border-sense-pale text-sense-pale hover:text-text`}
               >
-                download the missing base cartridges
+                download all missing base cartridges ({missingCarts.length})
               </button>
             )}
             {confirmFor("cartridges")}
+          </section>
+          <section className="min-w-0">
+            <div className="mono flex flex-wrap items-baseline justify-between gap-2 text-[10px] uppercase tracking-[0.12em]">
+              <span
+                className="flex items-center gap-1.5 text-muted"
+                title={`Serving job filters, super-weights and base-build parameter maps from ${d.cartridge_repo ?? "the official Hugging Face cartridge library"}. Existing local maps are never overwritten here.`}
+              >
+                <i aria-hidden className="inline-block h-1.5 w-1.5 bg-sense-pale" />
+                Parameter maps &amp; job filters
+              </span>
+              <span className="normal-case tracking-normal text-quiet">{totalMapFiles} on disk</span>
+            </div>
+            <div className="mono mb-2 mt-0.5 text-[10px] text-faint">Serving job filters, surgery baselines and full maps from Hugging Face.</div>
+            {mapRoles.length > 0 && (
+              <ul className="grid">
+                {mapRoles.map((r) => {
+                  const infoId = `maps:${r.role}`;
+                  const shown = openInfo === infoId;
+                  return (
+                    <li key={r.role} className="grid gap-1 border-b border-line/60 py-1.5">
+                      <div className="flex min-w-0 items-center justify-between gap-3">
+                        <span className="mono min-w-0 truncate text-[11.5px] text-text">{r.role}</span>
+                        <span className="flex shrink-0 items-center gap-3">
+                          <span className="mono text-[10.5px] text-faint">
+                            {r.files} {r.files === 1 ? "map" : "maps"} · {r.job_filters} {r.job_filters === 1 ? "filter" : "filters"} · {bytes(r.on_disk)}
+                          </span>
+                          <Pill tone={r.job_filters > 0 ? "verified" : "muted"}>{r.job_filters > 0 ? "installed" : "missing"}</Pill>
+                          <button type="button" onClick={() => toggleInfo(infoId)} aria-expanded={shown} className={infoBtn}>
+                            {shown ? "hide" : "info"}
+                          </button>
+                        </span>
+                      </div>
+                      {(r.items ?? []).length > 0 && !shown && (
+                        <div className="mono flex flex-wrap gap-1 pt-0.5 text-[9.5px]">
+                          {(r.items ?? []).map((it) => (
+                            <span
+                              key={it.file}
+                              title={it.description || `${it.file} (${it.kind})`}
+                              className={`border px-1.5 py-0 ${it.file.startsWith("job-filter-") ? "border-sense-pale/50 bg-sense/10 text-sense-pale" : it.file === "super-weights.json" ? "border-[#ffd452]/50 bg-[#ffd452]/10 text-[#ffd452]" : "border-line bg-bg-2/60 text-faint"}`}
+                            >
+                              {it.file.replace(/\.json$/, "")}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {shown && (
+                        <div className="mono grid gap-1.5 border-l border-line-strong pl-2.5 text-[10.5px] leading-relaxed text-faint">
+                          {(r.items ?? []).length === 0 ? (
+                            <span className="text-quiet">No local maps installed for {r.role} yet. Download serving filters or full maps below.</span>
+                          ) : (
+                            (r.items ?? []).map((it) => {
+                              const delId = `map:${r.role}/${it.file}`;
+                              const isFilter = it.file.startsWith("job-filter-") && it.file.endsWith(".json");
+                              const delPath = isFilter ? "/api/surgery/job-filter" : "/api/parameter-maps/remove";
+                              const delBody = isFilter
+                                ? { role: r.role, job: it.file.slice("job-filter-".length, -".json".length), action: "delete" }
+                                : { role: r.role, file: it.file };
+                              return (
+                                <div key={it.file} className="grid gap-0.5">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <span className="min-w-0 truncate text-muted">
+                                      {it.file} <span className="text-quiet">· {it.kind} · {bytes(it.bytes)}</span>
+                                    </span>
+                                    {deleting !== delId && (
+                                      <button
+                                        type="button"
+                                        onClick={() => setDeleting(delId)}
+                                        className="press mono shrink-0 border-b border-line px-0.5 text-[9px] uppercase tracking-[0.1em] text-faint hover:border-error hover:text-error"
+                                        title="Preview and remove this file (two-step confirmation; serving files are protected)"
+                                      >
+                                        delete
+                                      </button>
+                                    )}
+                                  </div>
+                                  {it.description && <span className="text-faint">{it.description}</span>}
+                                  {deleting === delId && (
+                                    <div className="mt-1 border-l border-error/60 pl-2">
+                                      <DeleteFlow
+                                        autoStart
+                                        path={delPath}
+                                        body={delBody}
+                                        label="delete"
+                                        done={() => `Removed ${r.role}/${it.file}.`}
+                                        refresh={["/api/downloads", "/api/parameter-maps", "/api/surgery", "/api/cartridge-sources", "/api/cartridges"]}
+                                        onNote={onNote}
+                                        onClose={() => setDeleting(null)}
+                                      />
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <div className="mt-3 flex flex-wrap items-center gap-4">
+              {!(armed && armed.what === "parameter-maps" && armed.only === "serving") && (
+                <button
+                  type="button"
+                  disabled={busy || running || d.air_gap}
+                  onClick={() => setArmed({ what: "parameter-maps", only: "serving", label: "serving job filters & surgery baselines", files: null, bytes: null })}
+                  className={`${btn} border-sense-pale text-sense-pale hover:text-text`}
+                >
+                  download serving maps &amp; filters
+                </button>
+              )}
+              {!(armed && armed.what === "parameter-maps" && !armed.only) && (
+                <button
+                  type="button"
+                  disabled={busy || running || d.air_gap}
+                  onClick={() => setArmed({ what: "parameter-maps", label: "all official parameter maps", files: null, bytes: null })}
+                  className={`${btn} border-line text-muted hover:text-text`}
+                >
+                  download all official maps
+                </button>
+              )}
+            </div>
+            {confirmFor("parameter-maps", "serving")}
+            {confirmFor("parameter-maps")}
+          </section>
+          <section className="min-w-0">
+            <div className="mono flex flex-wrap items-baseline justify-between gap-2 text-[10px] uppercase tracking-[0.12em]">
+              <span className="flex items-center gap-1.5 text-muted" title="Verified non-base hardware and tuning stacks installed locally or available from Hugging Face.">
+                <i aria-hidden className="inline-block h-1.5 w-1.5 bg-verified" />
+                Shared stacks
+              </span>
+              <span className="normal-case tracking-normal text-quiet">{localStacks.length} installed</span>
+            </div>
+            <div className="mono mb-2 mt-0.5 text-[10px] text-faint">Hardware and tuning stacks imported on trial before activating.</div>
+            {localStacks.length === 0 && remoteStacks.length === 0 ? (
+              <div className="mono text-[10.5px] text-quiet">No shared stacks installed yet. Open the HF download window to browse stacks.</div>
+            ) : (
+              <ul className="grid">
+                {localStacks.map((st) => {
+                  const infoId = `stack:${st.key}`;
+                  const shown = openInfo === infoId;
+                  return (
+                    <li key={st.key} className="grid gap-1 border-b border-line/60 py-1.5">
+                      <div className="flex min-w-0 items-center justify-between gap-3">
+                        <span className="mono min-w-0 truncate text-[11.5px] text-text" title={st.use}>
+                          {st.key}
+                        </span>
+                        <span className="flex shrink-0 items-center gap-3">
+                          <span className="mono text-[10px] text-faint">{st.use}</span>
+                          <Pill tone="verified">installed</Pill>
+                          <button type="button" onClick={() => toggleInfo(infoId)} aria-expanded={shown} className={infoBtn}>
+                            {shown ? "hide" : "info"}
+                          </button>
+                        </span>
+                      </div>
+                      {shown && (
+                        <div className="mono border-l border-line-strong pl-2.5 text-[10.5px] leading-relaxed text-faint">
+                          {st.description || "Installed cartridge stack."}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+                {remoteStacks.map((rf) => {
+                  const name = rf.path.split("/").pop() ?? rf.path;
+                  const infoId = `rstack:${rf.path}`;
+                  const shown = openInfo === infoId;
+                  return (
+                    <li key={rf.path} className="grid gap-1 border-b border-line/60 py-1.5">
+                      <div className="flex min-w-0 items-center justify-between gap-3">
+                        <span className="mono min-w-0 truncate text-[11.5px] text-muted" title={rf.path}>
+                          {name}
+                        </span>
+                        <span className="flex shrink-0 items-center gap-3">
+                          <span className="mono text-[10px] text-faint">{bytes(rf.bytes)}</span>
+                          <Pill tone="muted">on HF</Pill>
+                          <button type="button" onClick={() => toggleInfo(infoId)} aria-expanded={shown} className={infoBtn}>
+                            {shown ? "hide" : "info"}
+                          </button>
+                        </span>
+                      </div>
+                      {shown && (
+                        <div className="mono border-l border-line-strong pl-2.5 text-[10.5px] leading-relaxed text-faint">
+                          {rf.description || "Verified non-base stack available on Hugging Face."}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </section>
           <section className="min-w-0">
             <div

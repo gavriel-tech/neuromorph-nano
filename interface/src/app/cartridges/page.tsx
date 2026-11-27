@@ -30,6 +30,8 @@ import { CartridgeCard, CompatMatrix, DeckBay, DeckSkeleton, KIND_SWATCH, Librar
 import { DeckDetail, KartDetail, useDecks, usePlug, type Decks } from "@/components/CartridgeDecks";
 import { AboutCartridges, BackupsLine, BasesTab, KINDS, KindsGuide, SpecSheets } from "@/components/CartridgeRail";
 import CartridgeSources from "@/components/CartridgeSources";
+import { DownloadsPanel } from "@/components/Downloads";
+import { HFDownloadButton } from "@/components/HFDownloadManager";
 import { NoteLine, StackSurface, wordForUse } from "@/components/Controls";
 import { LiveBadge } from "@/components/LivePanels";
 import { LibraryRack, Matrix, Rack, type Bay, type RackSocket } from "@/components/PagePlates";
@@ -51,22 +53,37 @@ type Plug = ReturnType<typeof usePlug>;
 const VIEWS = ["decks", "stacks", "layers"] as const;
 type View = (typeof VIEWS)[number];
 /** The addresses that open a tab of the side panel (old section addresses included). */
-const RAIL_FOR: Record<string, string> = { library: "library", compat: "library", bases: "bases", adapters: "adapters", learned: "adapters", units: "adapters", specs: "specs", flow: "flow", glossary: "flow", kinds: "flow", sources: "sources", libraries: "sources", about: "about" };
+const RAIL_FOR: Record<string, string> = { library: "library", compat: "library", bases: "bases", adapters: "adapters", learned: "adapters", units: "adapters", specs: "specs", flow: "flow", glossary: "flow", kinds: "flow", sources: "sources", libraries: "sources", downloads: "downloads", about: "about" };
 
 const markOf = (c: Cartridge) => c.library ?? c.book;
 const keyOf = (c: { id: string; version?: number }) => (c.version ? `${c.id}@${c.version}` : c.id);
 
 /** The address opens its tab of the side panel (`/cartridges/#flow` opens Components). */
-function AddressToRail() {
+function AddressToRail({ onReset }: { onReset?: () => void }) {
   const rail = useRail();
   const open = useRef(rail.open);
+  const clear = useRef(rail.clear);
+  const resetRef = useRef(onReset);
   useEffect(() => {
     open.current = rail.open;
+    clear.current = rail.clear;
+    resetRef.current = onReset;
   });
   const target = RAIL_FOR[useHash().replace(/^#/, "")];
   useEffect(() => {
     if (target) open.current(target);
   }, [target]);
+  useEffect(() => {
+    const handle = (e: Event) => {
+      const href = (e as CustomEvent<{ href?: string }>).detail?.href;
+      if (href !== "/cartridges/") return;
+      clear.current();
+      resetRef.current?.();
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener("nm:nav-reset", handle);
+    return () => window.removeEventListener("nm:nav-reset", handle);
+  }, []);
   return null;
 }
 
@@ -99,6 +116,7 @@ function StatusLine({ d }: { d: Decks }) {
 /** The decks: one per MicroModel, then the cartridges that set values for the whole engine. */
 function DecksView({ d, plug, dragging, setDragging }: { d: Decks; plug: Plug; dragging: Kart | null; setDragging: (k: Kart | null) => void }) {
   const { pickKey, openKart, openDeck } = useOpen();
+  const rail = useRail();
   const now = useNow();
   const ids = new Set(d.models.map((m) => m.id));
   const engine = d.karts.filter((k) => k.model === null || !ids.has(k.model));
@@ -120,8 +138,19 @@ function DecksView({ d, plug, dragging, setDragging }: { d: Decks; plug: Plug; d
           #/
         </span>
         <span title="One deck per MicroModel: its base cartridge seated in the base slot, its cartridges docked on it bottom up">{d.status.data ? `${d.models.length} ${d.models.length === 1 ? "deck" : "decks"}` : "reading"}</span>
-        <span className="ml-auto normal-case tracking-normal" title="Cartridges plugged into a MicroModel's deck, of every cartridge made for one">
-          {d.status.data ? `${onDecks.filter((k) => k.plugged).length} of ${onDecks.length} docked` : ""}
+        <span className="ml-auto flex flex-wrap items-center gap-x-2.5 gap-y-1 normal-case tracking-normal">
+          <span title="Cartridges plugged into a MicroModel's deck, of every cartridge made for one">
+            {d.status.data ? `${onDecks.filter((k) => k.plugged).length} of ${onDecks.length} docked` : ""}
+          </span>
+          <HFDownloadButton label="HF downloads" />
+          <button
+            type="button"
+            onClick={() => rail.open("sources")}
+            className="press mono border border-line-strong bg-bg-2/70 px-2 py-0.5 text-[9.5px] uppercase tracking-[0.1em] text-muted hover:border-sense-pale hover:text-text"
+            title="Open the Hugging Face library & publish side panel"
+          >
+            sources
+          </button>
         </span>
         {build && (
           <span className="flex min-w-0 basis-full items-center gap-x-3 normal-case tracking-normal text-muted" data-e2e="filter-build" title={`job filter ${build.role}/${build.job}${buildText ? `: ${buildText}` : ""}`}>
@@ -447,7 +476,12 @@ function CartridgeSystem({ d, plug, dragging, setDragging }: { d: Decks; plug: P
   const view: View = (VIEWS as readonly string[]).includes(h) ? (h as View) : (picked ?? "decks");
   return (
     <div className="grid min-w-0 gap-4">
-      <AddressToRail />
+      <AddressToRail
+        onReset={() => {
+          setPicked("decks");
+          window.history.pushState(null, "", "/cartridges/");
+        }}
+      />
       <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
         <Segmented
           label="Cartridges view"
@@ -513,12 +547,12 @@ function LibraryTab({ d, plug, setDragging }: { d: Decks; plug: Plug; setDraggin
           <button type="button" className="link" onClick={() => rail.open("sources")}>
             online cartridge libraries
           </button>
+          <button type="button" className="link" onClick={() => rail.open("downloads")}>
+            base &amp; map downloads
+          </button>
           <button type="button" className="link" onClick={() => rail.open("build")}>
             build one
           </button>
-          <Link href="/models/#downloads" className="link">
-            base cartridge downloads
-          </Link>
           <Link href="/parameters/#import" className="link">
             import a file
           </Link>
@@ -564,6 +598,7 @@ export default function Cartridges() {
         { id: "bases", label: "Bases", body: <BasesTab onNote={plug.setNote} /> },
         { id: "build", label: "Build", body: <CartridgeBuildTab /> },
         { id: "sources", label: "Sources", body: <CartridgeSources /> },
+        { id: "downloads", label: "Downloads", body: <DownloadsPanel onNote={plug.setNote} /> },
         {
           id: "adapters",
           label: "Learned",

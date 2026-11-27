@@ -241,10 +241,10 @@ export const APPLY_RECOMMENDED_BODY = Object.freeze({ confirm: true as const });
 
 /** A tier name in words, for the spectral band of tiers. Unknown names are kept as given. */
 export const TIER_BANDS: { id: string; label: string; match: RegExp; hue: string }[] = [
-  { id: "cpu", label: "processor only", match: /cpu|processor|none|no.?gpu/i, hue: "#ff6b9a" },
-  { id: "4gb", label: "4 GB card", match: /(^|\D)[2-6](\s*-\s*\d+)?\s*(gb|gib|g)\b|small|entry/i, hue: "#ffd36b" },
-  { id: "8-12gb", label: "8 to 12 GB card", match: /(^|\D)(8|10|11|12)(\s*-\s*1[0-2])?\s*(gb|gib|g)\b|mid/i, hue: "#7dffa0" },
-  { id: "16gb", label: "16 to 24+ GB card", match: /(^|\D)(1[3-9]|2\d|[3-9]\d)(\s*-\s*\d+)?\+?\s*(gb|gib|g)\b|large|high/i, hue: "#6bc8ff" },
+  { id: "cpu", label: "CPU only", match: /cpu|processor|none|no.?gpu/i, hue: "#ff6b9a" },
+  { id: "4gb", label: "4 GB+ GPU", match: /(^|\D)[2-6](\s*-\s*\d+)?\+?\s*(gb|gib|g)\b|small|entry/i, hue: "#ffd36b" },
+  { id: "8-12gb", label: "8-12 GB GPU", match: /(^|\D)(8|10|11|12)(\s*-\s*1[0-2])?\s*(gb|gib|g)\b|mid/i, hue: "#7dffa0" },
+  { id: "16gb", label: "16 GB+ GPU", match: /(^|\D)(1[3-9]|2\d|[3-9]\d)(\s*-\s*\d+)?\+?\s*(gb|gib|g)\b|large|high/i, hue: "#6bc8ff" },
 ];
 
 /** Which band of `TIER_BANDS` a tier names, or -1. */

@@ -202,14 +202,80 @@ fn cartridge_wants(home: &Path) -> Vec<Want> {
                 url: format!("https://huggingface.co/{CARTRIDGE_REPO}/resolve/main/base/{role}/{id}.cartridge"),
                 sha,
                 label: format!("{id}@{version}"),
-                auth: true,
+                auth: false,
                 then: Then::Keep,
             })
         })
         .collect()
 }
 
-/// What is on disk for each model and each base cartridge, and the download in progress.
+/// Summary of local parameter maps and serving job filters across the four MicroModel roles,
+/// including per-file descriptions for expandable UI info drawers.
+fn parameter_maps_view(home: &Path) -> Value {
+    let roles: Vec<Value> = ["reader", "writer", "embedder", "reranker"]
+        .iter()
+        .map(|role| {
+            let dir = home.join("library/parameter-maps").join(role);
+            let mut total: u64 = 0;
+            let mut job_filters: u64 = 0;
+            let mut bytes: u64 = 0;
+            let mut has_super = false;
+            let mut entries: Vec<(String, u64)> = std::fs::read_dir(&dir)
+                .ok()
+                .into_iter()
+                .flatten()
+                .flatten()
+                .filter_map(|entry| {
+                    let name = entry.file_name().to_string_lossy().into_owned();
+                    let md = entry.metadata().ok()?;
+                    if !md.is_file() || !name.ends_with(".json") || name == nmapi::lineage::FILE || name.starts_with('.') {
+                        return None;
+                    }
+                    Some((name, md.len()))
+                })
+                .collect();
+            entries.sort_by(|a, b| a.0.cmp(&b.0));
+            let mut items = Vec::with_capacity(entries.len());
+            for (name, len) in entries {
+                total += 1;
+                bytes += len;
+                if name.starts_with("job-filter-") {
+                    job_filters += 1;
+                }
+                if name == "super-weights.json" {
+                    has_super = true;
+                }
+                let kind = if name.starts_with("job-filter-") {
+                    "job filter"
+                } else if name == "super-weights.json" {
+                    "super-weights"
+                } else if name.starts_with("pmap-") {
+                    "parameter map"
+                } else {
+                    "map"
+                };
+                let desc = crate::sources::describe_file(&name, "parameter map", Some(role));
+                items.push(obj(vec![
+                    ("file", s(&name)),
+                    ("kind", s(kind)),
+                    ("bytes", n(len)),
+                    ("description", s(&desc)),
+                ]));
+            }
+            obj(vec![
+                ("role", s(role)),
+                ("files", n(total)),
+                ("job_filters", n(job_filters)),
+                ("super_weights", Value::Bool(has_super)),
+                ("on_disk", n(bytes)),
+                ("items", Value::Array(items)),
+            ])
+        })
+        .collect();
+    Value::Array(roles)
+}
+
+/// What is on disk for each model, each base cartridge and parameter maps, and the download in progress.
 pub fn view(home: &Path) -> Value {
     let models: Vec<Value> = nmtype::role_models::installed(home)
         .iter()
@@ -233,13 +299,24 @@ pub fn view(home: &Path) -> Value {
         .collect();
     let carts: Vec<Value> = cartridge_wants(home)
         .iter()
-        .map(|w| obj(vec![("key", s(&w.label)), ("present", Value::Bool(w.dest.is_file())), ("on_disk", n(size_of(&w.dest))), ("path", s(&w.dest.strip_prefix(home).unwrap_or(&w.dest).display().to_string()))]))
+        .map(|w| {
+            let rel = w.dest.strip_prefix(home).unwrap_or(&w.dest).display().to_string();
+            let desc = crate::sources::describe_file(&rel, "base cartridge", None);
+            obj(vec![
+                ("key", s(&w.label)),
+                ("present", Value::Bool(w.dest.is_file())),
+                ("on_disk", n(size_of(&w.dest))),
+                ("path", s(&rel)),
+                ("description", s(&desc)),
+            ])
+        })
         .collect();
     let job = current_job(home);
     let token = token().is_some();
     obj(vec![
         ("models", Value::Array(models)),
         ("cartridges", Value::Array(carts)),
+        ("parameter_maps", parameter_maps_view(home)),
         ("cartridge_repo", s(CARTRIDGE_REPO)),
         ("token", Value::Bool(token)),
         ("air_gap", Value::Bool(crate::controls::air_gap_on(home))),
@@ -280,14 +357,23 @@ fn runtime_config_wants(home: &Path) -> Vec<Want> {
         .collect()
 }
 
-/// Starts a download in the background: `models:<id>` (one model's files), or `cartridges` (the
-/// serving base cartridges plus the small tokenizer/config JSONs needed to run standalone). `only`
-/// keeps the files whose name ends with it (for example `.json`).
+/// Starts a download in the background: `models:<id>` (one model's files), `cartridges` (the
+/// serving base cartridges plus the small tokenizer/config JSONs needed to run standalone), or
+/// `parameter-maps` (official parameter maps and job filters from the public cartridge library;
+/// pass `only: "serving"` for job filters, super-weights and surgery probes only). `only` for
+/// models/cartridges keeps files whose name ends with it (for example `.json`).
 /// # Errors
 /// The air gap is on, a download is running, or there is nothing to fetch.
 pub fn start(home: &Path, what: &str, only: Option<&str>, by: &str) -> Result<String, String> {
     if crate::controls::air_gap_on(home) {
         return Err("the air gap is on: nothing is downloaded until it is turned off".into());
+    }
+    if what == "parameter-maps" {
+        let filter = match only.map(str::trim).filter(|s| !s.is_empty()) {
+            Some("serving") => Some("serving"),
+            _ => Some("parameter-maps"),
+        };
+        return crate::sources::fetch_all(home, crate::sources::OFFICIAL, filter, by);
     }
     let mut wants = if let Some(id) = what.strip_prefix("models:") {
         if !nmtype::role_models::installed(home).iter().any(|m| m == id) {
@@ -299,7 +385,7 @@ pub fn start(home: &Path, what: &str, only: Option<&str>, by: &str) -> Result<St
         all.extend(runtime_config_wants(home));
         all
     } else {
-        return Err(format!("{what}: download models:<id> or cartridges"));
+        return Err(format!("{what}: download models:<id>, cartridges or parameter-maps"));
     };
     if let Some(o) = only.filter(|o| !o.is_empty()) {
         wants.retain(|w| w.label.ends_with(o));

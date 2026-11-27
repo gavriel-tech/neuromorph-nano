@@ -1,7 +1,7 @@
 # User guide
 
-How to install Neuromorph Nano v0.1.0, connect it to a repository and a coding agent, and use the
-interface. v0.1.0 ships for Windows x64; the MicroModels run on an NVIDIA graphics card when one
+How to install Neuromorph Nano v0.1.01, connect it to a repository and a coding agent, and use the
+interface. v0.1.01 ships for Windows x64; the MicroModels run on an NVIDIA graphics card when one
 the kernels support is present, and on the processor otherwise.
 
 ## Install
@@ -14,16 +14,15 @@ irm https://raw.githubusercontent.com/gavriel-tech/neuromorph-nano/main/tools/in
 
 The installer downloads the release zip and `SHA256SUMS.txt` from GitHub Releases, checks the
 zip's SHA-256, installs into `%LOCALAPPDATA%\NeuromorphNano` and adds `bin\` to your user `PATH`.
-It then fetches the four upstream models from the Hugging Face revisions their weight cards pin,
-and the base cartridges from the official cartridge library
-(`gavriel-tech/neuromorph-nano-cartridges`). Every file is checked against its SHA-256 before it
+It then fetches the four serving base cartridges from the official public cartridge library
+(`gavriel-tech/neuromorph-nano-cartridges`) plus the small tokenizer and config JSONs (about 44 MB) so Neuromorph Nano runs standalone immediately. Pass `-WithOpenWeights` (or use **Models -> Downloads** in the interface) if you also want the optional upstream Qwen3 open weights (about 8 GB) for fallback, reference checks, parameter mapping, or surgery. Every file is checked against its SHA-256 before it
 is placed, a file already present with the right hash is kept, and a partial download resumes.
 
 On a machine without network access, copy the release zip, `SHA256SUMS.txt`, the models and the
 cartridges over once, then run:
 
 ```powershell
-.\tools\install.ps1 -LocalZip .\neuromorph-nano-v0.1.0-win-x64.zip -ModelsFrom E:\nano\weights -CartridgesFrom E:\nano\library
+.\tools\install.ps1 -LocalZip .\neuromorph-nano-v0.1.01-win-x64.zip -ModelsFrom E:\nano\weights -CartridgesFrom E:\nano\library
 ```
 
 An upgrade keeps `weights\` and `library\` (your models, cartridges and learned cartridges). New
@@ -854,24 +853,40 @@ neuromorph-nano library overlay filter:reranker/code-slice freeze --path L2
 neuromorph-nano library overlay filter:reranker/code-slice undo
 ```
 
-#### The whole-set overview
+#### The whole-set overview and floating Parameter Inspector
 
 An object opened in the parameter editor can be seen whole: every tensor of the set, grouped by
-layer and then by block (attention, mlp, norm, the token table), each drawn as a heatmap. Nothing is
-read until the object is opened, a tensor's heatmap is read only when it scrolls into view, and
-nothing polls. The weights are only read.
+layer and then by block (attention, mlp, norm, the token table), each drawn as a heatmap. You can
+switch directly to any parameter object (job filters, compensation/socket cartridges, adapters/lenses/units,
+preference cartridges, base cartridges, and optional open weights) from the grouped selector on the
+Parameters page or inside the viewer header, or click any `base cartridge`, `open weights`, job filter,
+`feeds` badge, or per-layer heat bar on `/parameters/` to jump straight into the editor (with an
+in-viewer `layer: all / L0..Ln` filter bar). On the **Models** page (`/models/`), each MicroModel
+also includes **Layers on/off** switches to mask or unmask individual layers through the reversible
+overlay (audited with Undo). Nothing is read until an object is opened, a tensor's heatmap is read
+only when it scrolls into view, and nothing polls. The weights are only read.
 
 - Each cell of a heatmap summarises the weights it covers; choose the statistic drawn: mean, min,
-  max or RMS. Colour is diverging around 0 (blue below, violet above), scaled to the 99th
-  percentile of the cells' magnitude; the scale is printed under the heatmap with the cell size in
-  weights, the bytes read and the time taken.
-- Drag on a heatmap to zoom into that region; it is read again at the heatmap's resolution. Zoom
-  again until a cell is one weight: hovering then shows its exact value, row, column and index.
-  The zoom trail returns to any earlier level; **reset** returns to the whole tensor; **wide**
-  gives the tensor the full width.
-- **select** (and every zoom) hands the region to the edit, freeze and mask controls as a path
-  (`name[r0:r1, c0:c1]`, or `name[c0:c1]` for a vector).
+  max or RMS, and signed (`diverging`) or magnitude (`sequential`) scale. Paired parameter maps can
+  be overlaid directly on the heatmap (coordinate maps such as `super-weights.json` draw gold weight
+  pins; layer/filter maps highlight covered layers and tensors), with `on / emphasize / hide` toggles
+  for both `masks` and `map`.
+- Use the mouse wheel to zoom at the cursor, drag to pan, Shift+drag (or switch to **box zoom**) to
+  zoom into a box, or click `-`, `+`, **1:1 exact**, and **fit** in the toolbar. Zooming in to one
+  weight per cell shows exact values printed in cells and under the cursor.
+- **Floating Parameter Inspector:** Clicking any weight or multi-weight block opens a movable,
+  resizable, scrollable floating **Inspector** popup (drag its title bar to move, drag edges or the
+  bottom-right corner to resize, double-click the title bar to collapse, or click **inspector** in
+  the toolbar to toggle). Single-clicking inspects values, coordinates, tensor percentile, and
+  parameter maps at that place; double-clicking any weight or block opens the popup and focuses the
+  inline **edit manually (overlay)** input (`set`, `add`, `mul`, `scale`, `mask`, `freeze`, `unmask`),
+  where every edit is reversible and audited.
+- **select view** (and the Inspector's weight/row/column/head/block buttons) hands the region to the
+  edit, freeze and mask controls below as a path (`name[r0:r1, c0:c1]`, or `name[c0:c1]` for a vector).
 - **values** lists every value of the zoomed region with its index, row and column, page by page.
+- **Parameters -> Build** walks through creating a new job filter, parameter map, or pruned base
+  cartridge copy in four steps, with a collapsible `how it works` guide, layer range presets
+  (`all`, `first half`, `second half`, `last 8`), and a `share mapped out` slider for parameter maps.
 
 A tensor is read from its file in chunks of at most 4 MiB and folded into the cells as it is read,
 so even the 151,669 by 1,024 token table is never loaded whole. MCP: `nm_cartridges` `op:
@@ -882,11 +897,20 @@ JSON (an `error` the route answers with is the command's error).
 
 ### Cartridge libraries
 
-Cartridges come from the official library on Hugging Face,
-[`gavriel-tech/neuromorph-nano-cartridges`](https://huggingface.co/gavriel-tech/neuromorph-nano-cartridges),
-and from any third-party Hugging Face library you add (Models page, side panel, Libraries).
-Nothing is fetched until you ask, everything fetched goes through the checks of the cartridge library on this machine, and the
-air gap blocks it all. Details: `docs/cartridges-and-parameters.md`, Cartridge libraries.
+Base cartridges, active parameter maps, job filters and shared hardware stacks come from the
+official public library on Hugging Face,
+[`gavriel-tech/neuromorph-nano-cartridges`](https://huggingface.co/gavriel-tech/neuromorph-nano-cartridges)
+(no token required), and from any third-party Hugging Face library you add (**Cartridges -> Sources / Downloads**,
+**Models -> Libraries / Downloads**, or the floating movable/resizable **HF downloads** window on
+**Cartridges**, **Models**, and **Parameters**). In the floating **HF downloads** window (or the side
+panel) you can view everything the repository offers across `base cartridges`, `job filters`, `maps`,
+`stacks`, and optional `open weights`, filter by category, MicroModel role, or search text, expand
+`info` on any file to see what it does, check the exact files you want and click **download selected**
+(with confirmation and live queue progress), pull everything with **fetch all**, or share your own
+local parameter maps and non-base stacks via **Publish to Hugging Face** (`source_publish`,
+confirmation-gated and audited). Nothing is fetched or uploaded until you ask, everything fetched
+goes through the checks of the cartridge library on this machine, and the air gap blocks it all.
+Details: `docs/cartridges-and-parameters.md`, Cartridge libraries.
 
 ### From the command line
 

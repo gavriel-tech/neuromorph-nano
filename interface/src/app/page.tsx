@@ -13,6 +13,7 @@
 // events, the MicroModels, the cartridges, the set up and what the page is.
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import AgentCalls from "@/components/AgentCalls";
 import { LiveNow, SystemPanel } from "@/components/LivePanels";
@@ -159,6 +160,7 @@ function learningText(e: AuditRow, roleOf: (m: string) => string): string {
 }
 
 function ActivityRail() {
+  const router = useRouter();
   const recent = useApi<Audit>("/api/audit?limit=24", 2000);
   const learn = useApi<Audit>(`/api/audit?kind=${LEARNING_KINDS}&limit=24`, 10000);
   const roles = useRoleMap();
@@ -168,6 +170,7 @@ function ActivityRail() {
     .filter((e) => e.kind !== "setting" || /learn|cartridge|library|lens|filter/i.test(String(e.key ?? "")))
     .reverse()
     .slice(0, 10);
+  const goAudit = (id: string) => router.push(`/audit/?id=${encodeURIComponent(id)}`);
   // Rows present when the page opened are history; later ones are marked new.
   const [firstMark, setFirstMark] = useState<string | null>(null);
   if (firstMark === null && rows[0]) setFirstMark(mark(rows[0]));
@@ -189,11 +192,16 @@ function ActivityRail() {
           {rows.map((e) => {
             const fresh = firstMark !== null && mark(e) > firstMark;
             return (
-              <li key={e.id} className={`flex items-start gap-3 border-b border-line/60 py-2 ${fresh ? "row-new" : ""}`}>
+              <li
+                key={e.id}
+                onClick={() => goAudit(e.id)}
+                title="Open this event in Audit"
+                className={`group flex cursor-pointer items-start gap-3 border-b border-line/60 py-2 transition-colors hover:bg-bg-2/50 ${fresh ? "row-new" : ""}`}
+              >
                 <Dot tone={e.ok === false ? "error" : e.state === "running" ? "signal" : "muted"} className="mt-1.5" />
                 <div className="min-w-0 flex-1">
-                  <div className="mono truncate text-[12px] text-muted">
-                    <span>{e.kind === "tool" ? <CallText id={e.id} label={e.label} tool={e.tool} /> : rowText(e)}</span>
+                  <div className="mono truncate text-[12px] text-muted group-hover:text-text">
+                    <span>{e.kind === "tool" ? <CallText id={e.id} label={e.label} tool={e.tool} onDetail={() => goAudit(e.id)} /> : rowText(e)}</span>
                   </div>
                   <div className="mono truncate text-[10.5px] text-faint">
                     {e.kind === "setting"
@@ -201,7 +209,9 @@ function ActivityRail() {
                       : [e.kind, e.mode, e.state === "running" ? "running" : e.state === "stale" ? "never ended" : e.kind === "tool" || typeof e.ms === "number" ? msText(e.ms) : null, typeof e.reply_tokens === "number" ? `${e.reply_tokens} tokens` : null].filter(Boolean).join(" · ")}
                   </div>
                 </div>
-                {now > 0 && <span className="mono shrink-0 pt-0.5 text-[10.5px] text-faint">{ago(e.time_ms, now)}</span>}
+                <span className="mono shrink-0 pt-0.5 text-[10.5px] text-faint group-hover:text-text">
+                  {now > 0 ? ago(e.time_ms, now) : ""} ›
+                </span>
               </li>
             );
           })}
@@ -220,15 +230,23 @@ function ActivityRail() {
         {learn.data && learning.length === 0 && <div className="py-3 text-xs text-faint">No learning event recorded yet: cycles, cartridges seated and learned units switched show here.</div>}
         <ol>
           {learning.map((e) => (
-            <li key={e.id} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 border-b border-line/60 py-2">
-              <i aria-hidden className={`mt-1.5 inline-block h-1.5 w-1.5 ${e.kind === "library-seat" ? "bg-learned" : e.kind === "learning-cycle" ? "bg-sense-pale" : "border border-line-3"}`} />
-              <div className="min-w-0">
-                <div className="mono line-clamp-2 text-[11.5px] text-muted" title={learningText(e, roles.roleOf)}>
-                  {learningText(e, roles.roleOf)}
+            <li key={e.id} className="border-b border-line/60">
+              <Link
+                href={`/audit/?id=${encodeURIComponent(e.id)}`}
+                title="Open this event in Audit"
+                className="group grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 py-2 transition-colors hover:bg-bg-2/50"
+              >
+                <i aria-hidden className={`mt-1.5 inline-block h-1.5 w-1.5 ${e.kind === "library-seat" ? "bg-learned" : e.kind === "learning-cycle" ? "bg-sense-pale" : "border border-line-3"}`} />
+                <div className="min-w-0">
+                  <div className="mono line-clamp-2 text-[11.5px] text-muted group-hover:text-text" title={learningText(e, roles.roleOf)}>
+                    {learningText(e, roles.roleOf)}
+                  </div>
+                  <div className="mono text-[10px] text-faint">{e.kind.replace(/-/g, " ")}</div>
                 </div>
-                <div className="mono text-[10px] text-faint">{e.kind.replace(/-/g, " ")}</div>
-              </div>
-              {now > 0 && <span className="mono shrink-0 pt-0.5 text-[10.5px] text-faint">{ago(e.time_ms, now)}</span>}
+                <span className="mono shrink-0 pt-0.5 text-[10.5px] text-faint group-hover:text-text">
+                  {now > 0 ? ago(e.time_ms, now) : ""} ›
+                </span>
+              </Link>
             </li>
           ))}
         </ol>

@@ -25,7 +25,7 @@
 #>
 [CmdletBinding()]
 param(
-  [string]$Version = 'v0.1.0',
+  [string]$Version = 'v0.1.01',
   [string]$Repo = 'gavriel-tech/neuromorph-nano',
   [string]$InstallDir = (Join-Path $env:LOCALAPPDATA 'NeuromorphNano'),
   [string]$LocalZip = '',
@@ -177,18 +177,20 @@ function Install-Cartridges([string]$Root, [string]$Repo, [string]$Revision, [st
     }
   }
   Write-Host ("Base cartridges: {0} files from {1}, each checked against its SHA-256" -f @($list).Count, $Repo)
-  # The official library is public; a private cartridge repository (-CartridgeRepo) needs the user's
-  # own Hugging Face token: HF_TOKEN, else the file
-  # the hf command line writes at login. It is sent only to huggingface.co, from a header file in
-  # the installer's temporary folder (not on a command line), and the file is removed afterwards.
+  # The official library is public; only a custom/private cartridge repository (-CartridgeRepo)
+  # needs a Hugging Face token (HF_TOKEN or hf login file), so an expired local token never causes
+  # a 401 against the public official library.
   $headerFile = ''
-  $token = $env:HF_TOKEN
-  if (-not $token) { $token = $env:HUGGING_FACE_HUB_TOKEN }
-  $tokenFile = Join-Path $env:USERPROFILE '.cache\huggingface\token'
-  if (-not $token -and (Test-Path -LiteralPath $tokenFile)) { $token = (Get-Content -Raw -LiteralPath $tokenFile).Trim() }
-  if ($token -and -not $From) {
-    $headerFile = Join-Path $stageDir 'hf-auth.txt'
-    [IO.File]::WriteAllText($headerFile, "Authorization: Bearer $token", (New-Object System.Text.UTF8Encoding($false)))
+  $token = ''
+  if ($Repo -ne 'gavriel-tech/neuromorph-nano-cartridges') {
+    $token = $env:HF_TOKEN
+    if (-not $token) { $token = $env:HUGGING_FACE_HUB_TOKEN }
+    $tokenFile = Join-Path $env:USERPROFILE '.cache\huggingface\token'
+    if (-not $token -and (Test-Path -LiteralPath $tokenFile)) { $token = (Get-Content -Raw -LiteralPath $tokenFile).Trim() }
+    if ($token -and -not $From) {
+      $headerFile = Join-Path $stageDir 'hf-auth.txt'
+      [IO.File]::WriteAllText($headerFile, "Authorization: Bearer $token", (New-Object System.Text.UTF8Encoding($false)))
+    }
   }
   $missing = @()
   foreach ($f in $list) {

@@ -83,7 +83,7 @@ type Page = { values?: (number | null)[]; offset?: number; size?: number; error?
 type EditReply = { changed?: boolean; key?: string; audit_id?: string | null; state?: string; compat?: { fits?: string[]; not?: Record<string, string>; shapes?: string; base_compatible?: boolean | null } | null };
 
 const ROLE_ORDER = ["reader", "writer", "embedder", "reranker"];
-const KIND_WORD: Record<string, string> = { filter: "filter", adapter: "adapter", lens: "lens", readout: "read-out", unit: "unit", preference: "preference", base: "base", open: "open weights" };
+export const KIND_WORD: Record<string, string> = { filter: "filter cartridge", adapter: "adapter cartridge", lens: "lens adapter", readout: "read-out adapter", unit: "learning unit", preference: "preference cartridge", base: "base cartridge", open: "open weights (upstream)" };
 const KIND_BG: Record<string, string> = { filter: "bg-signal", adapter: "bg-learned", lens: "bg-learned", readout: "bg-learned", unit: "bg-sense-pale", preference: "bg-attention", base: "bg-verified", open: "bg-quiet" };
 const PAGE = 64;
 
@@ -404,6 +404,81 @@ export function ParamDetail({ k, total }: { k: string; total: number | null }) {
   );
 }
 
+const PICKER_GROUPS: { id: string; label: string; match: (o: ParamObject) => boolean }[] = [
+  { id: "job-filter", label: "Job filters", match: (o) => o.source === "job-filter" },
+  { id: "socket", label: "Compensation & socket cartridges", match: (o) => o.source === "library" && (o.kind === "filter" || o.kind === "adapter") },
+  { id: "learned", label: "Adapters, lenses & learning units", match: (o) => o.kind === "lens" || o.kind === "readout" || o.kind === "unit" || o.source === "adapter" },
+  { id: "preference", label: "Preference cartridges", match: (o) => o.kind === "preference" },
+  { id: "base", label: "Base cartridges", match: (o) => o.kind === "base" },
+  { id: "open", label: "Open weights (optional)", match: (o) => o.kind === "open" },
+];
+
+/** Universal picker for any parameter object on this machine (cartridges, job filters, adapters,
+ *  units, preference counts, base cartridges, and optional open weights). */
+export function ParamObjectPicker({
+  value = "",
+  onPick,
+  placeholder = "open any cartridge or parameter object...",
+  className = "",
+  ariaLabel = "Select parameter object",
+}: {
+  value?: string;
+  onPick: (key: string) => void;
+  placeholder?: string;
+  className?: string;
+  ariaLabel?: string;
+}) {
+  const q = useApi<ParamList>("/api/cartridges/parameters");
+  const objects = useMemo(() => q.data?.objects ?? [], [q.data]);
+  const grouped = useMemo(() => {
+    const used = new Set<string>();
+    const out: { id: string; label: string; items: ParamObject[] }[] = [];
+    for (const g of PICKER_GROUPS) {
+      const items = objects.filter((o) => !used.has(o.key) && g.match(o));
+      for (const o of items) used.add(o.key);
+      if (items.length > 0) out.push({ id: g.id, label: g.label, items });
+    }
+    const rest = objects.filter((o) => !used.has(o.key));
+    if (rest.length > 0) out.push({ id: "other", label: "Other objects", items: rest });
+    return out;
+  }, [objects]);
+  const known = value !== "" && objects.some((o) => o.key === value);
+  return (
+    <select
+      value={value}
+      onChange={(e) => {
+        if (e.target.value) onPick(e.target.value);
+      }}
+      aria-label={ariaLabel}
+      data-e2e="param-object-picker"
+      className={`mono h-7 min-w-[16rem] max-w-full border border-line-strong bg-bg-2 px-2 text-[10.5px] text-text outline-none focus-visible:border-sense-pale ${className}`}
+    >
+      {!value && (
+        <option value="" className="bg-bg-1 text-faint">
+          {q.data ? `${placeholder} (${objects.length})` : "loading parameter objects..."}
+        </option>
+      )}
+      {value && !known && (
+        <option value={value} className="bg-bg-1 text-text">
+          {value}
+        </option>
+      )}
+      {grouped.map((g) => (
+        <optgroup key={g.id} label={g.label} className="bg-bg-1 text-faint">
+          {g.items.map((o) => {
+            const tag = o.source === "job-filter" ? "job filter" : (KIND_WORD[o.kind] ?? o.kind);
+            return (
+              <option key={o.key} value={o.key} className="bg-bg-1 text-text">
+                {o.key} [{tag}] · {roleTitle(o.role || "") || o.model} ({o.state})
+              </option>
+            );
+          })}
+        </optgroup>
+      ))}
+    </select>
+  );
+}
+
 /** Every object holding parameters, per MicroModel, against the layer strip; one picked opens in the
  *  rail. */
 export default function CartridgeParams({ layerCount, onFocus, role: onlyRole = "all", text = "" }: { layerCount: (model: string) => number | null; onFocus?: (key: string) => void; /** The page filter: one MicroModel by its role, or "all"; and the words in its find field. */ role?: string; text?: string }) {
@@ -496,9 +571,9 @@ export default function CartridgeParams({ layerCount, onFocus, role: onlyRole = 
                           <div key={o.key} className="flex min-w-0 items-start gap-1">
                             <button
                               type="button"
-                              onClick={() => (on ? rail.clear() : open(o.key))}
+                              onClick={() => (onFocus ? open(o.key) : on ? rail.clear() : open(o.key))}
                               aria-pressed={on}
-                              title={`${o.name || o.key} · ${KIND_WORD[o.kind] ?? o.kind} · ${o.state} · ${bytes(o.bytes)}${ov ? ` · overlay: ${ov}` : ""} · open to read its parameters`}
+                              title={`${o.name || o.key} · ${KIND_WORD[o.kind] ?? o.kind} · ${o.state} · ${bytes(o.bytes)}${ov ? ` · overlay: ${ov}` : ""} · click to open in the full Parameter Viewer`}
                               className={`press grid w-[11.5rem] min-w-0 content-start gap-0.5 border border-t-2 px-2 pb-1.5 pt-1 text-left ${KIND_TOP[o.kind] ?? "border-t-quiet"} ${on ? "border-x-sense-pale border-b-sense-pale bg-bg-2" : "border-x-line border-b-line bg-bg-1/40 hover:border-x-line-3 hover:border-b-line-3 hover:bg-bg-2"}`}
                               data-e2e="cparam-row"
                               data-key={o.key}
@@ -519,7 +594,7 @@ export default function CartridgeParams({ layerCount, onFocus, role: onlyRole = 
                                 </span>
                               ) : (
                                 <span className="mono mt-0.5 truncate text-[9px] text-quiet" data-e2e="cparam-unread">
-                                  not read until opened
+                                  click to open in viewer
                                 </span>
                               )}
                             </button>
@@ -529,9 +604,9 @@ export default function CartridgeParams({ layerCount, onFocus, role: onlyRole = 
                                   <button
                                     key={e.key}
                                     type="button"
-                                    onClick={() => (selected === e.key ? rail.clear() : open(e.key))}
+                                    onClick={() => (onFocus ? open(e.key) : selected === e.key ? rail.clear() : open(e.key))}
                                     aria-pressed={selected === e.key}
-                                    title={`${e.key} · ${KIND_WORD[e.kind] ?? e.kind} · ${e.state} · ${bytes(e.bytes)} · not read until opened`}
+                                    title={`${e.key} · ${KIND_WORD[e.kind] ?? e.kind} · ${e.state} · ${bytes(e.bytes)} · click to open in the full Parameter Viewer`}
                                     className={`press mono grid h-7 w-8 place-items-center border text-[9.5px] ${selected === e.key ? "border-sense-pale bg-bg-2 text-text" : "border-line text-faint hover:border-line-3 hover:bg-bg-2 hover:text-text"}`}
                                     data-e2e="cparam-row"
                                     data-key={e.key}

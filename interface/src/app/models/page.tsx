@@ -23,6 +23,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { NoteLine } from "@/components/Controls";
 import CartridgeSources from "@/components/CartridgeSources";
 import { DownloadsPanel } from "@/components/Downloads";
+import { HFDownloadButton } from "@/components/HFDownloadManager";
 import { LiveBadge, SystemPanel } from "@/components/LivePanels";
 import { roleTitle } from "@/components/MicroModel";
 import { FRESH_MS, ModelDetail, ModelMachine, liveFor, stateWord, type BaseModel, type Note, type Pulse, type StatusModel } from "@/components/ModelMachine";
@@ -297,6 +298,7 @@ export default function Models() {
           )}
           {running ? <span className="text-signal">{running} executing</span> : null}
           {data && <span title="The model files are only read, never written">{bytes(total)} read only</span>}
+          <HFDownloadButton label="HF downloads" />
         </>
       }
     >

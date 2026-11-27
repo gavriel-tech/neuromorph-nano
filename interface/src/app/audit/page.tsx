@@ -15,7 +15,7 @@
 // "undoable" is a filter of its own, and an undoable row carries its Undo beside it, so undo is
 // one press from the timeline as well as from the event's detail.
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ControlRow, NoteLine } from "@/components/Controls";
 import DeleteFlow, { type DeleteNote } from "@/components/DeleteFlow";
 import { Tape } from "@/components/PagePlates";
@@ -25,7 +25,7 @@ import { CallText, Dot, Empty, Failed, Masked, Pill, Placeholder, Segmented, typ
 import { msText } from "@/lib/activity";
 import { ago, bytes, post, refreshAll, useApi, type Audit, type AuditRow, type Control, type Projects } from "@/lib/api";
 import { useNow } from "@/lib/clock";
-import { callLabel, maskName, maskPathsIn, useRevealed } from "@/lib/privacy";
+import { callLabel, captureMask, hide, maskName, maskPathsIn, reveal, useRevealed } from "@/lib/privacy";
 
 type Note = { text: string; tone: "verified" | "error" };
 
@@ -156,6 +156,23 @@ function CallWords({ e }: { e: AuditRow }) {
 function EpisodeWords({ id, e }: { id: string; e: unknown }) {
   const on = useRevealed(id);
   return <>{on ? episodeTitle(e) : "Episode · question hidden"}</>;
+}
+
+/** Inline show/hide button beside a row in the center timeline, synced with the side panel's Masked control. */
+function RevealToggle({ id }: { id: string }) {
+  const on = useRevealed(id);
+  if (captureMask()) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => (on ? hide(id) : reveal(id))}
+      aria-label={on ? "Hide question" : "Show question"}
+      data-e2e="audit-row-reveal"
+      className="press mono ml-2 min-h-10 shrink-0 self-center border-b border-line-strong px-1.5 text-[10px] uppercase tracking-[0.12em] text-faint hover:border-sense-pale hover:text-text"
+    >
+      {on ? "hide" : "show"}
+    </button>
+  );
 }
 
 /** Undo one row through the engine, then read again everything an undo can change. */
@@ -395,6 +412,8 @@ function AuditWork() {
     else days.push({ day: d, rows: [e] });
   }
 
+  const openedFromUrl = useRef<string | null>(null);
+
   const open = (e: AuditRow) =>
     rail.show({
       key: `audit:${e.id}`,
@@ -406,6 +425,35 @@ function AuditWork() {
       ),
       body: <EventDetail path={path} row={e} onNote={setMsg} />,
     });
+
+  useEffect(() => {
+    const onReset = (e: Event) => {
+      const href = (e as CustomEvent<{ href?: string }>).detail?.href;
+      if (href !== "/audit/") return;
+      window.history.pushState(null, "", "/audit/");
+      rail.clear();
+      setKind("all");
+      setProject("");
+      setState("all");
+      setView("log");
+      window.scrollTo({ top: 0 });
+    };
+    window.addEventListener("nm:nav-reset", onReset);
+    return () => window.removeEventListener("nm:nav-reset", onReset);
+  }, [rail]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || all.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const targetId = params.get("id");
+    if (!targetId || openedFromUrl.current === targetId) return;
+    const hit = all.find((e) => e.id === targetId);
+    if (!hit) return;
+    openedFromUrl.current = targetId;
+    open(hit);
+    const el = document.querySelector(`[data-audit-id="${CSS.escape(targetId)}"]`);
+    el?.scrollIntoView({ block: "center", behavior: "smooth" });
+  });
 
   return (
     <div className="grid min-w-0 gap-6">
@@ -469,8 +517,9 @@ function AuditWork() {
                     const tone = toneOf(e);
                     const on = shownKey === `audit:${e.id}`;
                     const ms = typeof e.ms === "number" ? e.ms : null;
+                    const hasHidden = !(undoable(e) || e.kind !== "tool") && Boolean(callLabel(e.label, e.tool).hidden);
                     return (
-                      <li key={e.id} className={`flex min-w-0 items-stretch ${on ? "bg-bg-2/50 shadow-[inset_2px_0_0_var(--sense-pale)]" : "hover:bg-bg-1/50"}`}>
+                      <li key={e.id} data-audit-id={e.id} className={`flex min-w-0 items-stretch ${on ? "bg-bg-2/50 shadow-[inset_2px_0_0_var(--sense-pale)]" : "hover:bg-bg-1/50"}`}>
                         <button
                           type="button"
                           onClick={() => open(e)}
@@ -504,6 +553,7 @@ function AuditWork() {
                             <span className="mono w-14 text-right text-[10.5px] text-faint">{now > 0 ? ago(e.time_ms, now) : ""}</span>
                           </span>
                         </button>
+                        {hasHidden && <RevealToggle id={`call:${e.id}`} />}
                         {canUndo(e) && (
                           <button
                             type="button"
@@ -538,18 +588,19 @@ function AuditWork() {
               const id = `ep:${i}`;
               const on = shownKey === id;
               return (
-                <li key={id} className="border-b border-line/60">
+                <li key={id} className="flex min-w-0 items-stretch border-b border-line/60">
                   <button
                     type="button"
                     onClick={() => rail.show({ key: id, title: <Masked id={id} shown="Episode · question hidden" full={episodeTitle(e)} />, body: <RecordView id={id} value={e} /> })}
                     aria-pressed={on}
-                    className={`press flex min-h-10 w-full items-center gap-3 px-1 py-1.5 text-left ${on ? "bg-bg-1/80 text-text" : "hover:bg-bg-1/50 hover:text-text"}`}
+                    className={`press flex min-h-10 min-w-0 flex-1 items-center gap-3 px-1 py-1.5 text-left ${on ? "bg-bg-1/80 text-text" : "hover:bg-bg-1/50 hover:text-text"}`}
                   >
                     <Dot />
                     <span className="mono min-w-0 flex-1 truncate text-[12px] text-muted">
                       <EpisodeWords id={id} e={e} />
                     </span>
                   </button>
+                  <RevealToggle id={id} />
                 </li>
               );
             })}

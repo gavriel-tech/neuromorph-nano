@@ -37,7 +37,8 @@
 // - target (optional): a path to show; each new `n` makes its tensor primary and zooms to it.
 
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { apiBase } from "@/lib/api";
+import { createPortal } from "react-dom";
+import { apiBase, post, refreshAll } from "@/lib/api";
 import { diverging, indexOf, niceStep, overlaps, parseHex, percentileOf, rectsOf, sequential, shortFmt, ticks, toLab, type Palette, type Rect, type Rgb } from "@/lib/paramgeom";
 
 /** One tensor of the set, as the set-level read returns it (no values). */
@@ -76,6 +77,18 @@ type Scale = "diverging" | "sequential";
 export type OverviewMark = { id: string; action: "edit" | "mask" | "freeze"; op: string | null; whole: boolean; regions: { path: string; tensor: string }[] };
 /** A related parameter map and its per-layer values. */
 export type OverviewMap = { file: string; layers: { layer: number; value: number | null }[] };
+/** An active parameter map overlaid directly onto the Parameter Viewer (e.g. super-weights coordinates, job filter layers, or profile map coverage). */
+export type ActiveMapOverlay = {
+  id: string;
+  file: string;
+  role: string;
+  kind: string;
+  about?: string;
+  pointsByTensor: Record<string, [number, number][]>;
+  layers: number[];
+  layerValues: Record<number, number>;
+  targets: string[];
+};
 type Region = Rect;
 
 const STATS: Stat[] = ["mean", "min", "max", "rms"];
@@ -88,18 +101,49 @@ const THUMB = 150;
 const PAGE = 256;
 /** Overview reads in flight at once. */
 const PARALLEL = 3;
-/** Ruler, legend and inspector sizes (CSS pixels). */
+/** Ruler and legend sizes (CSS pixels). */
 const RULER_L = 46;
 const RULER_T = 18;
-const LEGEND = 76;
-const INSPECTOR = 280;
+const LEGEND = 104;
+const LEGEND_GAP = 8;
+/** Floating inspector window bounds (CSS pixels). */
+type WinRect = { x: number; y: number; w: number; h: number };
+const WIN_MIN_W = 290;
+const WIN_MIN_H = 240;
+const WIN_DEF_W = 360;
+const WIN_DEF_H = 480;
+const WIN_PAD = 12;
+
+function clampWin(r: WinRect, minimized = false): WinRect {
+  const vw = typeof window === "undefined" ? 1280 : window.innerWidth;
+  const vh = typeof window === "undefined" ? 800 : window.innerHeight;
+  const maxW = Math.max(WIN_MIN_W, Math.min(680, vw - WIN_PAD * 2));
+  const maxH = Math.max(WIN_MIN_H, vh - WIN_PAD * 2);
+  const w = Math.max(WIN_MIN_W, Math.min(maxW, Math.round(r.w)));
+  const h = Math.max(WIN_MIN_H, Math.min(maxH, Math.round(r.h)));
+  const effH = minimized ? 36 : h;
+  const x = Math.max(WIN_PAD, Math.min(vw - w - WIN_PAD, Math.round(r.x)));
+  const y = Math.max(WIN_PAD, Math.min(vh - effH - WIN_PAD, Math.round(r.y)));
+  return { x, y, w, h };
+}
+
+function defaultWin(): WinRect {
+  const vw = typeof window === "undefined" ? 1280 : window.innerWidth;
+  const vh = typeof window === "undefined" ? 800 : window.innerHeight;
+  return clampWin({
+    w: WIN_DEF_W,
+    h: Math.min(WIN_DEF_H, Math.max(WIN_MIN_H, vh - 120)),
+    x: vw - WIN_DEF_W - 24,
+    y: Math.max(72, Math.min(116, vh - WIN_DEF_H - 24)),
+  });
+}
 /** A cell is drawn at most this wide when zoomed in all the way. */
 const CELL_PX_MAX = 96;
 /** From this cell size its edges are drawn; from the next its value is printed in it. */
 const EDGE_PX = 6;
 const TEXT_PX = 14;
 /** The pause after the last zoom or pan before the view is read. */
-const DEBOUNCE_MS = 140;
+const DEBOUNCE_MS = 70;
 
 const enc = encodeURIComponent;
 const btn = "press mono border-b border-line-strong px-1 text-[10px] uppercase tracking-[0.1em] text-muted hover:text-text disabled:opacity-40";
@@ -619,146 +663,562 @@ function Values({ k, t, g }: { k: string; t: OverviewTensor; g: Region }) {
 
 /** What a click picked: one weight, or a cell of many with its summary as read. */
 type Pick = { reg: Region; value?: number | null; cell?: { min: number | null; max: number | null; mean: number | null; rms: number | null } };
-type PointRead = { error?: string; values?: (number | null)[]; maps?: { map: string; at: string; values?: (number | null)[]; value?: number | null }[] };
+type PointRead = { error?: string; values?: (number | null)[]; overlay?: [number | null, boolean, boolean][] | null; maps?: { map: string; at: string; values?: (number | null)[]; value?: number | null }[] };
 
-function Inspector({ k, t, pick, whole, maps, onSelect, onZoom }: { k: string; t: OverviewTensor; pick: Pick | null; whole: OverviewGrid | null; maps: OverviewMap[]; onSelect?: (path: string) => void; onZoom: (r: Region) => void }) {
+type DragKind = "move" | "e" | "s" | "se";
+type DragState = { kind: DragKind; sx: number; sy: number; start: WinRect };
+
+const pillBtn = "press mono border border-line-strong bg-bg-2/70 px-1.5 py-0.5 text-[9.5px] uppercase tracking-[0.08em] text-muted hover:border-sense-pale hover:text-text disabled:opacity-40";
+
+function Inspector({
+  k,
+  t,
+  pick,
+  whole,
+  maps,
+  mapOverlay,
+  editFocusTick = 0,
+  open,
+  minimized,
+  win,
+  onWinChange,
+  onResetWin,
+  onToggleMin,
+  onClose,
+  onSelect,
+  onZoomToBlock,
+}: {
+  k: string;
+  t: OverviewTensor;
+  pick: Pick | null;
+  whole: OverviewGrid | null;
+  maps: OverviewMap[];
+  mapOverlay?: ActiveMapOverlay | null;
+  editFocusTick?: number;
+  open: boolean;
+  minimized: boolean;
+  win: WinRect;
+  onWinChange: (next: WinRect) => void;
+  onResetWin: () => void;
+  onToggleMin: () => void;
+  onClose: () => void;
+  onSelect?: (path: string) => void;
+  onZoomToBlock?: (reg: Region) => void;
+}) {
   const [headDim, setHeadDim] = useState(128);
+  const [editOp, setEditOp] = useState<"set" | "add" | "mul" | "scale">("set");
+  const [draftVal, setDraftVal] = useState("");
+  const [draftFor, setDraftFor] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [editNote, setEditNote] = useState<{ text: string; tone: "ok" | "err" } | null>(null);
+  const [refreshNonce, setRefreshNonce] = useState(0);
+  const [dragging, setDragging] = useState<DragKind | null>(null);
+  const dragRef = useRef<DragState | null>(null);
+  const editInputRef = useRef<HTMLInputElement>(null);
   const one = pick !== null && pick.reg.r1 - pick.reg.r0 === 1 && pick.reg.c1 - pick.reg.c0 === 1;
   const wPath = pick ? pathOf(t, pick.reg) : null;
-  // The weight's own read: its exact value and the maps' values at its place.
-  const pr = useRead<PointRead>(one && wPath ? `/api/cartridges/parameters?key=${enc(k)}&path=${enc(wPath)}` : null);
+  // The weight's own read: its exact value, overlay state, and the maps' values at its place.
+  const pr = useRead<PointRead>(open && one && wPath ? `/api/cartridges/parameters?key=${enc(k)}&path=${enc(wPath)}&_r=${refreshNonce}` : null);
   const point = pr.stale ? null : pr.data;
   const h = whole?.hist;
   const value = pick?.value ?? point?.values?.[0] ?? null;
+  const overlaid = point?.overlay?.[0] ?? null;
+  const defaultDraft = one
+    ? overlaid && overlaid[0] !== null
+      ? String(overlaid[0])
+      : value !== null
+        ? String(value)
+        : ""
+    : pick?.cell?.mean !== null && pick?.cell?.mean !== undefined
+      ? String(Number(pick.cell.mean.toPrecision(4)))
+      : "0";
+  if (wPath !== draftFor) {
+    setDraftFor(wPath);
+    setDraftVal(defaultDraft);
+    setEditNote(null);
+  }
+  useEffect(() => {
+    if (open && !minimized && editFocusTick > 0 && wPath) {
+      window.setTimeout(() => {
+        editInputRef.current?.focus();
+        editInputRef.current?.select();
+      }, 24);
+    }
+  }, [open, minimized, editFocusTick, wPath]);
+  useEffect(() => {
+    if (!open) return;
+    const onResize = () => onWinChange(clampWin(win, minimized));
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const tag = (e.target as HTMLElement | null)?.tagName;
+      if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
+      onClose();
+    };
+    window.addEventListener("resize", onResize);
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, win, minimized, onWinChange, onClose]);
+
+  const beginDrag = (kind: DragKind, e: ReactPointerEvent<HTMLElement>) => {
+    if (e.button !== 0) return;
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current = { kind, sx: e.clientX, sy: e.clientY, start: win };
+    setDragging(kind);
+  };
+  const moveDrag = (e: ReactPointerEvent<HTMLElement>) => {
+    const d = dragRef.current;
+    if (!d) return;
+    const dx = e.clientX - d.sx;
+    const dy = e.clientY - d.sy;
+    if (d.kind === "move") {
+      onWinChange(clampWin({ ...d.start, x: d.start.x + dx, y: d.start.y + dy }, minimized));
+    } else if (d.kind === "e") {
+      onWinChange(clampWin({ ...d.start, w: d.start.w + dx }, minimized));
+    } else if (d.kind === "s") {
+      onWinChange(clampWin({ ...d.start, h: d.start.h + dy }, minimized));
+    } else {
+      onWinChange(clampWin({ ...d.start, w: d.start.w + dx, h: d.start.h + dy }, minimized));
+    }
+  };
+  const endDrag = () => {
+    dragRef.current = null;
+    setDragging(null);
+  };
+
+  const applyOverlay = async (body: Record<string, unknown>, okLabel: string) => {
+    if (!wPath) return;
+    setBusy(true);
+    setEditNote(null);
+    try {
+      const r = await post<{ audit_id?: string; takes_effect?: { when?: string } }>("/api/parameters/overlay", { key: k, path: wPath, ...body });
+      setEditNote({ text: `${okLabel}${r.takes_effect?.when ? ` (${r.takes_effect.when})` : ""}${r.audit_id ? ` · Audit ${r.audit_id}` : ""}`, tone: "ok" });
+      setRefreshNonce((n) => n + 1);
+      for (const p of ["/api/cartridges/parameters", "/api/parameters/overlay", "/api/audit"]) void refreshAll(p);
+    } catch (e) {
+      setEditNote({ text: e instanceof Error ? e.message : String(e), tone: "err" });
+    }
+    setBusy(false);
+  };
+  const applyValue = () => {
+    const num = Number(draftVal.trim());
+    if (!Number.isFinite(num)) {
+      setEditNote({ text: "Enter a finite number.", tone: "err" });
+      return;
+    }
+    void applyOverlay({ action: "edit", op: editOp, value: num }, `${editOp} ${num}`);
+  };
   const q = (h?.q ?? []).filter((x): x is number => x !== null);
   const pct = one && value !== null && q.length === 101 ? percentileOf(value, q) : null;
   const layerMaps = t.layer === null ? [] : maps.map((m) => ({ file: m.file, v: m.layers.find((x) => x.layer === t.layer)?.value })).filter((m) => m.v !== undefined && m.v !== null);
   const pointMaps = (point?.maps ?? []).filter((m) => m.values || m.value !== undefined);
   const two = t.shape.length === 2;
   const heads = two && headDim > 0 && t.rows % headDim === 0 ? t.rows / headDim : 0;
-  const row = (kk: string, v: React.ReactNode) => (
+  const detailRow = (kk: string, v: React.ReactNode) => (
     <div className="contents">
-      <dt className="text-quiet">{kk}</dt>
-      <dd className="min-w-0 truncate text-text">{v}</dd>
+      <dt className="shrink-0 text-quiet">{kk}</dt>
+      <dd className="min-w-0 break-all text-text">{v}</dd>
     </div>
   );
   const sel = (what: string, path: string) => (
-    <button type="button" className={btn} disabled={!onSelect} onClick={() => onSelect?.(path)} title={path} data-e2e="param-inspector-select" data-what={what}>
+    <button type="button" className={pillBtn} disabled={!onSelect} onClick={() => onSelect?.(path)} title={path} data-e2e="param-inspector-select" data-what={what}>
       {what}
     </button>
   );
-  return (
-    <aside className="mono grid content-start gap-2 border border-line bg-bg-1 p-2 text-[10px]" data-e2e="param-inspector" aria-label="Inspected parameter">
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="text-[9.5px] uppercase tracking-[0.12em] text-quiet">inspector</span>
-        <span className="text-[9px] text-quiet">{one ? "one weight" : pick ? "one cell" : ""}</span>
+
+  if (!open || typeof document === "undefined") return null;
+
+  const badge = one
+    ? two || t.rows > 1
+      ? `r${pick.reg.r0} · c${pick.reg.c0}`
+      : `idx ${pick.reg.c0}`
+    : pick
+      ? `${((pick.reg.r1 - pick.reg.r0) * (pick.reg.c1 - pick.reg.c0)).toLocaleString()} wts`
+      : "ready";
+
+  const panel = (
+    <aside
+      role="dialog"
+      aria-label="Parameter Inspector"
+      data-e2e="param-inspector"
+      className="mono fixed z-50 flex flex-col overflow-hidden border border-line-3 bg-bg-1/96 text-[10.5px] text-text shadow-[0_18px_48px_rgba(2,3,10,0.88)] backdrop-blur-md"
+      style={{
+        left: win.x,
+        top: win.y,
+        width: win.w,
+        height: minimized ? "auto" : win.h,
+        maxWidth: "calc(100vw - 24px)",
+        maxHeight: "calc(100vh - 24px)",
+      }}
+    >
+      {/* Draggable title bar */}
+      <div
+        onPointerDown={(e) => beginDrag("move", e)}
+        onPointerMove={moveDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        onDoubleClick={onToggleMin}
+        className={`flex h-9 shrink-0 select-none items-center justify-between gap-2 border-b border-line-strong bg-bg-2 px-2.5 ${dragging === "move" ? "cursor-grabbing" : "cursor-grab"}`}
+        title="Drag to move · Double-click to collapse"
+      >
+        <div className="flex min-w-0 items-center gap-2">
+          <svg width="8" height="12" viewBox="0 0 8 12" aria-hidden className="shrink-0 text-quiet">
+            <circle cx="2" cy="2.5" r="1" fill="currentColor" />
+            <circle cx="6" cy="2.5" r="1" fill="currentColor" />
+            <circle cx="2" cy="6" r="1" fill="currentColor" />
+            <circle cx="6" cy="6" r="1" fill="currentColor" />
+            <circle cx="2" cy="9.5" r="1" fill="currentColor" />
+            <circle cx="6" cy="9.5" r="1" fill="currentColor" />
+          </svg>
+          <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-text">inspector</span>
+          <span className="truncate border border-line-strong bg-bg-1 px-1.5 py-0.5 text-[9px] text-sense-pale">{badge}</span>
+        </div>
+        <div className="flex shrink-0 items-center gap-1" onPointerDown={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={onResetWin}
+            title="Reset popup position and size"
+            className="press h-6 border border-line px-1.5 text-[9px] uppercase tracking-[0.08em] text-faint hover:border-line-3 hover:text-text"
+          >
+            fit
+          </button>
+          <button
+            type="button"
+            onClick={onToggleMin}
+            title={minimized ? "Expand inspector" : "Collapse inspector"}
+            aria-label={minimized ? "Expand inspector" : "Collapse inspector"}
+            className="press flex h-6 w-6 items-center justify-center border border-line text-[12px] leading-none text-faint hover:border-line-3 hover:text-text"
+          >
+            {minimized ? "+" : "-"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            title="Close inspector (Esc)"
+            aria-label="Close inspector"
+            className="press flex h-6 w-6 items-center justify-center border border-line text-[12px] leading-none text-faint hover:border-error/70 hover:text-error"
+          >
+            x
+          </button>
+        </div>
       </div>
-      {!pick ? (
-        <p className="text-[10px] leading-relaxed text-faint">
-          Click a weight or a cell to inspect it. The wheel zooms at the cursor, a drag pans, shift and a drag zooms into a box, a double click shows the whole tensor.
-        </p>
-      ) : one ? (
+
+      {/* Scrollable body */}
+      {!minimized && (
         <>
-          <div className="grid gap-0.5">
-            <span className="text-[9px] text-quiet">value</span>
-            <span className="text-[16px] leading-tight text-text" data-e2e="param-inspector-value">
-              {value === null ? (pr.error ? "-" : "reading") : String(value)}
-            </span>
-          </div>
-          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5">
-            {two || t.rows > 1 ? row("row", pick.reg.r0) : null}
-            {row(two || t.rows > 1 ? "column" : "index", pick.reg.c0)}
-            {row("flat index", (pick.reg.r0 * t.cols + pick.reg.c0).toLocaleString())}
-            {row("tensor", <span title={t.name}>{t.name}</span>)}
-            {row("layer", t.layer === null ? "outside layers" : t.layer)}
-            {row("block", t.part)}
-            {heads > 0 && row("head", `${Math.floor(pick.reg.r0 / headDim)} of ${heads} (${headDim} rows each)`)}
-          </dl>
-          <div className="grid gap-0.5 border-t border-line pt-1.5">
-            <div className="flex justify-between">
-              <span className="text-quiet">percentile in the tensor</span>
-              <span className="text-text" data-e2e="param-inspector-percentile">
-                {pct === null ? (h ? "-" : "reading") : `${pct.toFixed(pct >= 99 || pct <= 1 ? 2 : 1)}`}
-              </span>
-            </div>
-            {h && <HistBars h={h} mark={value} height={34} />}
-            {h && (
-              <div className="flex justify-between text-[9px] text-quiet">
-                <span>{fmt(h.lo)}</span>
-                <span>{h.precision} buckets</span>
-                <span>{fmt(h.hi)}</span>
+          <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overflow-x-hidden p-3">
+            {!pick ? (
+              <div className="space-y-2 border border-line bg-bg-2/50 p-3 text-[10.5px] leading-relaxed text-faint">
+                <p className="text-text">Nothing picked yet.</p>
+                <p>Click any weight or cell on the heatmap to inspect it here, or double-click any cell/block to jump straight into manual editing.</p>
+                <p className="text-[9.5px] text-quiet">Wheel zooms at cursor · drag pans · Shift+drag box-zooms.</p>
               </div>
-            )}
-          </div>
-          <div className="grid gap-0.5 border-t border-line pt-1.5" data-e2e="param-inspector-maps">
-            <span className="text-quiet">parameter maps at this place</span>
-            {pointMaps.map((m) => (
-              <div key={m.map} className="flex justify-between gap-2" title={`${m.map}: ${m.at}`}>
-                <span className="min-w-0 truncate text-faint">{m.map.replace(/\.json$/, "")}</span>
-                <span className="text-text">{fmt(m.values ? m.values[0] : m.value)}</span>
-              </div>
-            ))}
-            {layerMaps
-              .filter((m) => !pointMaps.some((p) => p.map === m.file))
-              .map((m) => (
-                <div key={m.file} className="flex justify-between gap-2" title={`${m.file}: per layer only; its value at layer ${t.layer}`}>
-                  <span className="min-w-0 truncate text-faint">{m.file.replace(/\.json$/, "")}</span>
-                  <span className="text-muted">
-                    {fmt(m.v)} <span className="text-quiet">layer {t.layer}</span>
-                  </span>
+            ) : one ? (
+              <>
+                <div className="space-y-1 border border-line bg-bg-2/70 p-2.5">
+                  <div className="flex items-center justify-between gap-2 text-[9px] uppercase tracking-[0.12em] text-quiet">
+                    <span>weight value</span>
+                    <span className="text-faint">{two || t.rows > 1 ? `row ${pick.reg.r0}, col ${pick.reg.c0}` : `index ${pick.reg.c0}`}</span>
+                  </div>
+                  <div className="break-all text-[18px] leading-snug text-text" data-e2e="param-inspector-value">
+                    {value === null ? (pr.error ? "-" : "reading...") : String(value)}
+                  </div>
+                  {overlaid && (
+                    <div className="border-t border-line/60 pt-1 text-[10px] text-verified">
+                      overlaid: {overlaid[0] === null ? "-" : String(overlaid[0])}
+                      {overlaid[1] ? " · masked" : ""}
+                      {overlaid[2] ? " · frozen" : ""}
+                    </div>
+                  )}
                 </div>
-              ))}
-            {layerMaps.length > 0 && pointMaps.length === 0 && <span className="text-[9px] text-quiet">these maps hold one value per layer, not per weight</span>}
-            {pointMaps.length === 0 && layerMaps.length === 0 && <span className="text-[9px] text-quiet">{pr.stale || (!point && !pr.error) ? "reading" : "no parameter map holds a value here"}</span>}
-          </div>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-line pt-1.5">
-            <span className="text-quiet">select</span>
-            {sel("weight", pathOf(t, pick.reg))}
-            {two && sel("row", `${t.name}[${pick.reg.r0}:${pick.reg.r0 + 1}, :]`)}
-            {two && sel("column", `${t.name}[:, ${pick.reg.c0}:${pick.reg.c0 + 1}]`)}
-            {two && (
-              <span className="flex items-center gap-1">
-                <button
-                  type="button"
-                  className={btn}
-                  disabled={!onSelect || heads === 0}
-                  title={heads ? `rows of one head of ${headDim}` : `${t.rows} rows do not split into heads of ${headDim}`}
-                  onClick={() => {
-                    const hd = Math.floor(pick.reg.r0 / headDim);
-                    onSelect?.(`${t.name}[${hd * headDim}:${(hd + 1) * headDim}, :]`);
-                  }}
-                  data-e2e="param-inspector-select"
-                  data-what="head"
-                >
-                  head
-                </button>
-                <input value={headDim} onChange={(e) => setHeadDim(Math.max(1, Math.floor(Number(e.target.value) || 0)))} aria-label="Head size in rows" className="mono h-5 w-10 border-b border-line-strong bg-transparent text-[10px] text-text outline-none" inputMode="numeric" />
-              </span>
+
+                <div className="space-y-2 border border-line bg-bg-2/40 p-2.5" data-e2e="param-inspector-edit">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[9.5px] uppercase tracking-[0.12em] text-muted">edit manually (overlay)</span>
+                    <span className="text-[9px] text-quiet">reversible</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      value={editOp}
+                      onChange={(e) => setEditOp(e.target.value as "set" | "add" | "mul" | "scale")}
+                      aria-label="Edit operation"
+                      className="mono h-7 shrink-0 border border-line-strong bg-bg-1 px-1.5 text-[10px] text-text outline-none focus-visible:border-sense-pale"
+                    >
+                      <option value="set" className="bg-bg-1">set</option>
+                      <option value="add" className="bg-bg-1">add</option>
+                      <option value="mul" className="bg-bg-1">mul</option>
+                      <option value="scale" className="bg-bg-1">scale</option>
+                    </select>
+                    <input
+                      ref={editInputRef}
+                      value={draftVal}
+                      onChange={(e) => setDraftVal(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          applyValue();
+                        }
+                      }}
+                      aria-label="New parameter value"
+                      className="mono h-7 min-w-0 flex-1 border border-line-strong bg-bg px-2 text-[11px] text-text outline-none focus-visible:border-sense-pale"
+                    />
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={applyValue}
+                      className="press mono h-7 shrink-0 border border-sense-pale bg-sense/20 px-2.5 text-[9.5px] uppercase tracking-[0.1em] text-sense-pale hover:bg-sense/30 hover:text-text disabled:opacity-40"
+                    >
+                      {busy ? "..." : "apply"}
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <button type="button" disabled={busy} className={pillBtn} onClick={() => void applyOverlay({ action: "mask" }, "masked")}>
+                      mask
+                    </button>
+                    <button type="button" disabled={busy} className={pillBtn} onClick={() => void applyOverlay({ action: "freeze" }, "frozen")}>
+                      freeze
+                    </button>
+                    <button type="button" disabled={busy} className={pillBtn} onClick={() => void applyOverlay({ action: "unmask" }, "unmasked")}>
+                      unmask
+                    </button>
+                  </div>
+                  {editNote && <p className={`break-words text-[9.5px] leading-snug ${editNote.tone === "err" ? "text-error" : "text-verified"}`}>{editNote.text}</p>}
+                </div>
+
+                <dl className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-2 gap-y-1 border-t border-line pt-2 text-[10px]">
+                  {detailRow("flat index", (pick.reg.r0 * t.cols + pick.reg.c0).toLocaleString())}
+                  {detailRow("tensor", t.name)}
+                  {detailRow("layer", t.layer === null ? "outside layers" : `layer ${t.layer}`)}
+                  {detailRow("block", t.part)}
+                  {heads > 0 && detailRow("head", `${Math.floor(pick.reg.r0 / headDim)} of ${heads} (${headDim} rows each)`)}
+                </dl>
+
+                <div className="space-y-1 border-t border-line pt-2">
+                  <div className="flex items-center justify-between gap-2 text-[10px]">
+                    <span className="text-quiet">percentile in tensor</span>
+                    <span className="text-text" data-e2e="param-inspector-percentile">
+                      {pct === null ? (h ? "-" : "reading") : `${pct.toFixed(pct >= 99 || pct <= 1 ? 2 : 1)}%`}
+                    </span>
+                  </div>
+                  {h && <HistBars h={h} mark={value} height={36} />}
+                  {h && (
+                    <div className="flex justify-between gap-2 text-[9px] text-quiet">
+                      <span>{fmt(h.lo)}</span>
+                      <span>{h.precision} buckets</span>
+                      <span>{fmt(h.hi)}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-1 border-t border-line pt-2 text-[10px]" data-e2e="param-inspector-maps">
+                  <div className="text-[9.5px] uppercase tracking-[0.12em] text-quiet">parameter maps here</div>
+                  {mapOverlay && (mapOverlay.pointsByTensor[t.name] ?? []).some(([r, c]) => r === pick.reg.r0 && c === pick.reg.c0) && (
+                    <div className="flex items-center justify-between gap-2 border border-[#ffd452]/40 bg-[#ffd452]/10 px-2 py-1 text-[#ffd452]">
+                      <span className="min-w-0 truncate">★ {mapOverlay.file.replace(/\.json$/, "")}</span>
+                      <span className="shrink-0 text-[9px] uppercase">pinned</span>
+                    </div>
+                  )}
+                  {pointMaps.map((m) => (
+                    <div key={m.map} className="flex items-center justify-between gap-2" title={`${m.map}: ${m.at}`}>
+                      <span className="min-w-0 truncate text-faint">{m.map.replace(/\.json$/, "")}</span>
+                      <span className="shrink-0 text-text">{fmt(m.values ? m.values[0] : m.value)}</span>
+                    </div>
+                  ))}
+                  {layerMaps
+                    .filter((m) => !pointMaps.some((p) => p.map === m.file))
+                    .map((m) => (
+                      <div key={m.file} className="flex items-center justify-between gap-2" title={`${m.file}: per layer only; its value at layer ${t.layer}`}>
+                        <span className="min-w-0 truncate text-faint">{m.file.replace(/\.json$/, "")}</span>
+                        <span className="shrink-0 text-muted">
+                          {fmt(m.v)} <span className="text-quiet">L{t.layer}</span>
+                        </span>
+                      </div>
+                    ))}
+                  {layerMaps.length > 0 && pointMaps.length === 0 && <p className="text-[9px] text-quiet">Per-layer values only (not per-weight).</p>}
+                  {pointMaps.length === 0 && layerMaps.length === 0 && <p className="text-[9px] text-quiet">{pr.stale || (!point && !pr.error) ? "reading..." : "No parameter map holds a value here."}</p>}
+                </div>
+
+                <div className="space-y-1.5 border-t border-line pt-2">
+                  <div className="text-[9.5px] uppercase tracking-[0.12em] text-quiet">send selection to controls</div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {sel("weight", pathOf(t, pick.reg))}
+                    {two && sel("row", `${t.name}[${pick.reg.r0}:${pick.reg.r0 + 1}, :]`)}
+                    {two && sel("column", `${t.name}[:, ${pick.reg.c0}:${pick.reg.c0 + 1}]`)}
+                    {two && (
+                      <span className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          className={pillBtn}
+                          disabled={!onSelect || heads === 0}
+                          title={heads ? `rows of one head of ${headDim}` : `${t.rows} rows do not split into heads of ${headDim}`}
+                          onClick={() => {
+                            const hd = Math.floor(pick.reg.r0 / headDim);
+                            onSelect?.(`${t.name}[${hd * headDim}:${(hd + 1) * headDim}, :]`);
+                          }}
+                          data-e2e="param-inspector-select"
+                          data-what="head"
+                        >
+                          head
+                        </button>
+                        <input
+                          value={headDim}
+                          onChange={(e) => setHeadDim(Math.max(1, Math.floor(Number(e.target.value) || 0)))}
+                          aria-label="Head size in rows"
+                          className="mono h-6 w-12 border border-line-strong bg-bg px-1 text-[10px] text-text outline-none focus-visible:border-sense-pale"
+                          inputMode="numeric"
+                        />
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2 border border-line bg-bg-2/70 p-2.5">
+                  <div className="flex items-center justify-between gap-2 text-[9px] uppercase tracking-[0.12em] text-quiet">
+                    <span>selected block</span>
+                    <span className="text-sense-pale">{((pick.reg.r1 - pick.reg.r0) * (pick.reg.c1 - pick.reg.c0)).toLocaleString()} weights</span>
+                  </div>
+                  <div className="break-words text-[11px] text-text">{label(pick.reg, t)}</div>
+                  <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+                    <div className="border border-line/70 bg-bg-1 px-2 py-1">
+                      <span className="block text-[8.5px] uppercase text-quiet">min</span>
+                      <span className="text-text">{fmt(pick.cell?.min)}</span>
+                    </div>
+                    <div className="border border-line/70 bg-bg-1 px-2 py-1">
+                      <span className="block text-[8.5px] uppercase text-quiet">max</span>
+                      <span className="text-text">{fmt(pick.cell?.max)}</span>
+                    </div>
+                    <div className="border border-line/70 bg-bg-1 px-2 py-1">
+                      <span className="block text-[8.5px] uppercase text-quiet">mean</span>
+                      <span className="text-text">{fmt(pick.cell?.mean)}</span>
+                    </div>
+                    <div className="border border-line/70 bg-bg-1 px-2 py-1">
+                      <span className="block text-[8.5px] uppercase text-quiet">RMS</span>
+                      <span className="text-text">{fmt(pick.cell?.rms)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2 border border-line bg-bg-2/40 p-2.5" data-e2e="param-inspector-edit">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[9.5px] uppercase tracking-[0.12em] text-muted">edit block manually (overlay)</span>
+                    <span className="text-[9px] text-quiet">reversible</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <select
+                      value={editOp}
+                      onChange={(e) => setEditOp(e.target.value as "set" | "add" | "mul" | "scale")}
+                      aria-label="Block edit operation"
+                      className="mono h-7 shrink-0 border border-line-strong bg-bg-1 px-1.5 text-[10px] text-text outline-none focus-visible:border-sense-pale"
+                    >
+                      <option value="set" className="bg-bg-1">set</option>
+                      <option value="add" className="bg-bg-1">add</option>
+                      <option value="mul" className="bg-bg-1">mul</option>
+                      <option value="scale" className="bg-bg-1">scale</option>
+                    </select>
+                    <input
+                      ref={editInputRef}
+                      value={draftVal}
+                      onChange={(e) => setDraftVal(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          applyValue();
+                        }
+                      }}
+                      aria-label="New block value"
+                      className="mono h-7 min-w-0 flex-1 border border-line-strong bg-bg px-2 text-[11px] text-text outline-none focus-visible:border-sense-pale"
+                    />
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={applyValue}
+                      className="press mono h-7 shrink-0 border border-sense-pale bg-sense/20 px-2.5 text-[9.5px] uppercase tracking-[0.1em] text-sense-pale hover:bg-sense/30 hover:text-text disabled:opacity-40"
+                    >
+                      {busy ? "..." : "apply"}
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <button type="button" disabled={busy} className={pillBtn} onClick={() => void applyOverlay({ action: "mask" }, "block masked")}>
+                      mask block
+                    </button>
+                    <button type="button" disabled={busy} className={pillBtn} onClick={() => void applyOverlay({ action: "freeze" }, "block frozen")}>
+                      freeze block
+                    </button>
+                    <button type="button" disabled={busy} className={pillBtn} onClick={() => void applyOverlay({ action: "unmask" }, "block unmasked")}>
+                      unmask
+                    </button>
+                  </div>
+                  {editNote && <p className={`break-words text-[9.5px] leading-snug ${editNote.tone === "err" ? "text-error" : "text-verified"}`}>{editNote.text}</p>}
+                </div>
+
+                <dl className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-2 gap-y-1 border-t border-line pt-2 text-[10px]">
+                  {detailRow("tensor", t.name)}
+                  {detailRow("layer", t.layer === null ? "outside layers" : `layer ${t.layer}`)}
+                  {detailRow("block", t.part)}
+                </dl>
+
+                <div className="space-y-1.5 border-t border-line pt-2">
+                  <div className="text-[9.5px] uppercase tracking-[0.12em] text-quiet">block actions</div>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {sel("select in controls", pathOf(t, pick.reg))}
+                    {onZoomToBlock && (
+                      <button type="button" className={pillBtn} onClick={() => onZoomToBlock(pick.reg)} title="Zoom into this block to inspect and edit individual weights">
+                        zoom to weights
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
           </div>
-        </>
-      ) : (
-        <>
-          <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-0.5">
-            {row("covers", label(pick.reg, t))}
-            {row("weights", ((pick.reg.r1 - pick.reg.r0) * (pick.reg.c1 - pick.reg.c0)).toLocaleString())}
-            {row("min", fmt(pick.cell?.min))}
-            {row("max", fmt(pick.cell?.max))}
-            {row("mean", fmt(pick.cell?.mean))}
-            {row("RMS", fmt(pick.cell?.rms))}
-            {row("layer", t.layer === null ? "outside layers" : t.layer)}
-            {row("block", t.part)}
-          </dl>
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-line pt-1.5">
-            <button type="button" className={btn} onClick={() => onZoom(pick.reg)}>
-              zoom in
-            </button>
-            {sel("cell", pathOf(t, pick.reg))}
+
+          {/* Slim footer with dedicated bottom-right resize handle (never overlaps content) */}
+          <div className="flex h-5 shrink-0 select-none items-center justify-between border-t border-line bg-bg-2/85 pl-2.5 pr-0.5 text-[8.5px] text-quiet">
+            <span className="truncate">drag title to move · drag edge or corner to resize</span>
+            <div
+              role="separator"
+              aria-label="Resize inspector"
+              onPointerDown={(e) => beginDrag("se", e)}
+              onPointerMove={moveDrag}
+              onPointerUp={endDrag}
+              onPointerCancel={endDrag}
+              className="flex h-5 w-6 shrink-0 cursor-nwse-resize items-center justify-center text-faint hover:text-sense-pale"
+              title="Drag to resize"
+            >
+              <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden>
+                <path d="M9 1L1 9M9 5L5 9M9 8.5L8.5 9" stroke="currentColor" strokeWidth="1.2" strokeLinecap="square" />
+              </svg>
+            </div>
           </div>
+
+          {/* Edge resize strips */}
+          <div
+            aria-hidden
+            onPointerDown={(e) => beginDrag("e", e)}
+            onPointerMove={moveDrag}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            className="absolute top-9 right-0 bottom-5 w-1.5 cursor-ew-resize"
+          />
+          <div
+            aria-hidden
+            onPointerDown={(e) => beginDrag("s", e)}
+            onPointerMove={moveDrag}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            className="absolute right-6 bottom-0 left-0 h-1.5 cursor-ns-resize"
+          />
         </>
       )}
     </aside>
   );
+
+  return createPortal(panel, document.body);
 }
 
 /* ---------- the primary view ---------- */
@@ -766,12 +1226,55 @@ function Inspector({ k, t, pick, whole, maps, onSelect, onZoom }: { k: string; t
 type Press = { x: number; y: number; view: Region; shift: boolean; moved: boolean; id: number };
 type MarkRect = { action: OverviewMark["action"]; rect: Rect; id: string };
 
-function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focus, onSelect }: { k: string; t: OverviewTensor; stat: Stat; scale: Scale; theme: Theme; avail: number; whole: OverviewGrid | null; marks: MarkRect[]; maps: OverviewMap[]; focus: { rect: Rect; n: number } | null; onSelect?: (path: string) => void }) {
+function PrimaryView({
+  k,
+  t,
+  stat,
+  scale,
+  theme,
+  avail,
+  whole,
+  marks,
+  maps,
+  mapOverlay,
+  focus,
+  inspectorOpen,
+  inspectorMin,
+  inspectorWin,
+  onInspectorWinChange,
+  onResetInspectorWin,
+  onOpenInspector,
+  onToggleInspector,
+  onToggleInspectorMin,
+  onCloseInspector,
+  onSelect,
+}: {
+  k: string;
+  t: OverviewTensor;
+  stat: Stat;
+  scale: Scale;
+  theme: Theme;
+  avail: number;
+  whole: OverviewGrid | null;
+  marks: MarkRect[];
+  maps: OverviewMap[];
+  mapOverlay?: ActiveMapOverlay | null;
+  focus: { rect: Rect; n: number } | null;
+  inspectorOpen: boolean;
+  inspectorMin: boolean;
+  inspectorWin: WinRect;
+  onInspectorWinChange: (next: WinRect) => void;
+  onResetInspectorWin: () => void;
+  onOpenInspector: () => void;
+  onToggleInspector: () => void;
+  onToggleInspectorMin: () => void;
+  onCloseInspector: () => void;
+  onSelect?: (path: string) => void;
+}) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const press = useRef<Press | null>(null);
-  const side = avail >= 820;
-  const cw = Math.max(160, Math.floor((side ? avail - INSPECTOR - 16 : avail) - RULER_L - LEGEND - 12));
-  const ch = t.rows === 1 ? 44 : Math.max(160, Math.min(460, Math.round((cw * t.rows) / t.cols)));
+  const cw = Math.max(160, Math.floor(avail - RULER_L - LEGEND - LEGEND_GAP - 6));
+  const ch = t.rows === 1 ? 84 : Math.max(160, Math.min(460, Math.round((cw * t.rows) / t.cols)));
   const full = wholeOf(t);
   const [view, setView] = useState<Region>(() => (focus ? around(focus.rect, t, cw, ch) : full));
   const [stack, setStack] = useState<Region[]>(() => (focus ? [full, around(focus.rect, t, cw, ch)] : [full]));
@@ -781,6 +1284,13 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
   const [pick, setPick] = useState<Pick | null>(() => (focus && focus.rect.r1 - focus.rect.r0 === 1 && focus.rect.c1 - focus.rect.c0 === 1 ? { reg: focus.rect } : null));
   const [list, setList] = useState(false);
   const [grabbing, setGrabbing] = useState(false);
+  const [tool, setTool] = useState<"pan" | "box">("pan");
+  const [overlayMode, setOverlayMode] = useState<"show" | "boost" | "off">("show");
+  const [mapMode, setMapMode] = useState<"show" | "boost" | "off">("show");
+  const [editFocusTick, setEditFocusTick] = useState(0);
+  const mapPoints = useMemo(() => (mapOverlay ? (mapOverlay.pointsByTensor[t.name] ?? []) : []), [mapOverlay, t.name]);
+  const mapLayerHit = Boolean(mapOverlay && t.layer !== null && mapOverlay.layers.includes(t.layer));
+  const hasMapVisual = mapPoints.length > 0 || mapLayerHit;
   const luts = useLuts(theme);
   const lut = luts[scale];
 
@@ -839,7 +1349,10 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
     const Y = (r: number) => (t.rows === 1 ? (r === 0 ? 0 : ch) : (r - v.r0) * ky);
     if (g && img) {
       ctx.imageSmoothingEnabled = false;
+      ctx.save();
+      if ((overlayMode === "boost" && marks.length > 0) || (mapMode === "boost" && hasMapVisual)) ctx.globalAlpha = 0.42;
       ctx.drawImage(img, X(g.region.c0), Y(g.region.r0), (g.region.c1 - g.region.c0) * kx, t.rows === 1 ? ch : (g.region.r1 - g.region.r0) * ky);
+      ctx.restore();
       const ry = t.rows === 1 ? ch : ky;
       if (g.exact && kx >= EDGE_PX && ry >= EDGE_PX) {
         ctx.strokeStyle = rgba(theme.bg0, 0.85);
@@ -879,35 +1392,155 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
         }
       }
     }
-    // The overlay's marks: read-only, always drawn.
-    for (const m of marks) {
-      if (!overlaps(m.rect, reg)) continue;
-      const x0 = Math.max(0, X(m.rect.c0));
-      const y0 = Math.max(0, Y(m.rect.r0));
-      const x1 = Math.min(cw, X(m.rect.c1));
-      const y1 = Math.min(ch, Y(m.rect.r1));
-      if (x1 <= x0 || y1 <= y0) continue;
-      if (m.action === "mask") {
-        ctx.fillStyle = rgba(theme.bg0, 0.6);
-        ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
-      } else if (m.action === "freeze") {
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(x0, y0, x1 - x0, y1 - y0);
-        ctx.clip();
-        ctx.strokeStyle = rgba(theme.text3, 0.5);
-        ctx.lineWidth = 1 / dpr;
-        ctx.beginPath();
-        for (let d = x0 - (y1 - y0); d < x1; d += 6) {
-          ctx.moveTo(d, y1);
-          ctx.lineTo(d + (y1 - y0), y0);
+    // The overlay's marks: high-contrast so masks, freezes and edits read clearly over dark heatmaps.
+    if (overlayMode !== "off") {
+      for (const m of marks) {
+        if (!overlaps(m.rect, reg)) continue;
+        const x0 = Math.max(0, X(m.rect.c0));
+        const y0 = Math.max(0, Y(m.rect.r0));
+        const x1 = Math.min(cw, X(m.rect.c1));
+        const y1 = Math.min(ch, Y(m.rect.r1));
+        const mw = x1 - x0;
+        const mh = y1 - y0;
+        if (mw <= 0 || mh <= 0) continue;
+        if (m.action === "mask") {
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(x0, y0, mw, mh);
+          ctx.clip();
+          ctx.fillStyle = rgba(theme.bg0, overlayMode === "boost" ? 0.82 : 0.68);
+          ctx.fillRect(x0, y0, mw, mh);
+          ctx.strokeStyle = "rgba(255, 184, 84, 0.72)";
+          ctx.lineWidth = 1.25 / dpr;
+          ctx.beginPath();
+          for (let d = x0 - mh; d < x1 + mh; d += 8) {
+            ctx.moveTo(d, y1);
+            ctx.lineTo(d + mh, y0);
+            ctx.moveTo(d, y0);
+            ctx.lineTo(d + mh, y1);
+          }
+          ctx.stroke();
+          ctx.restore();
+          ctx.strokeStyle = "rgba(255, 196, 102, 0.96)";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(x0 + 0.75, y0 + 0.75, Math.max(0, mw - 1.5), Math.max(0, mh - 1.5));
+          if (mw >= 46 && mh >= 16) {
+            ctx.fillStyle = "rgba(18, 12, 4, 0.86)";
+            ctx.fillRect(x0 + 2, y0 + 2, 42, 12);
+            ctx.font = `9px ${theme.mono}`;
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+            ctx.fillStyle = "rgba(255, 206, 120, 1)";
+            ctx.fillText("MASKED", x0 + 5, y0 + 4);
+          }
+        } else if (m.action === "freeze") {
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(x0, y0, mw, mh);
+          ctx.clip();
+          ctx.fillStyle = "rgba(110, 190, 255, 0.22)";
+          ctx.fillRect(x0, y0, mw, mh);
+          ctx.strokeStyle = "rgba(155, 220, 255, 0.85)";
+          ctx.lineWidth = 1.25 / dpr;
+          ctx.beginPath();
+          for (let d = x0 - mh; d < x1; d += 7) {
+            ctx.moveTo(d, y1);
+            ctx.lineTo(d + mh, y0);
+          }
+          ctx.stroke();
+          ctx.restore();
+          ctx.save();
+          ctx.setLineDash([4, 3]);
+          ctx.strokeStyle = "rgba(155, 220, 255, 0.96)";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(x0 + 0.75, y0 + 0.75, Math.max(0, mw - 1.5), Math.max(0, mh - 1.5));
+          ctx.restore();
+          if (mw >= 46 && mh >= 16) {
+            ctx.fillStyle = "rgba(8, 22, 42, 0.86)";
+            ctx.fillRect(x0 + 2, y0 + 2, 42, 12);
+            ctx.font = `9px ${theme.mono}`;
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+            ctx.fillStyle = "rgba(170, 228, 255, 1)";
+            ctx.fillText("FROZEN", x0 + 5, y0 + 4);
+          }
+        } else {
+          ctx.fillStyle = rgba(theme.verified, overlayMode === "boost" ? 0.24 : 0.14);
+          ctx.fillRect(x0, y0, mw, mh);
+          ctx.strokeStyle = rgba(theme.verified, 0.98);
+          ctx.lineWidth = 1.75;
+          ctx.strokeRect(x0 + 0.75, y0 + 0.75, Math.max(0, mw - 1.5), Math.max(0, mh - 1.5));
+          if (mw >= 44 && mh >= 16) {
+            ctx.fillStyle = "rgba(6, 28, 16, 0.86)";
+            ctx.fillRect(x0 + 2, y0 + 2, 40, 12);
+            ctx.font = `9px ${theme.mono}`;
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+            ctx.fillStyle = rgba(theme.verified, 1);
+            ctx.fillText("EDITED", x0 + 5, y0 + 4);
+          }
         }
-        ctx.stroke();
-        ctx.restore();
-      } else {
-        ctx.strokeStyle = rgba(theme.verified, 0.9);
+      }
+    }
+    // Active parameter map overlay: exact pinned coordinates (e.g. super-weights) or layer coverage highlight.
+    if (mapOverlay && mapMode !== "off") {
+      if (mapPoints.length > 0) {
+        let visiblePts = 0;
+        for (const [pr, pc] of mapPoints) {
+          if (pr < reg.r0 || pr >= reg.r1 || pc < reg.c0 || pc >= reg.c1) continue;
+          visiblePts += 1;
+          const px = X(pc + 0.5);
+          const py = t.rows === 1 ? ch / 2 : Y(pr + 0.5);
+          if (kx >= EDGE_PX && (t.rows === 1 ? ch : ky) >= EDGE_PX) {
+            const bx = X(pc);
+            const by = t.rows === 1 ? 1 : Y(pr);
+            const bw = Math.max(2, kx);
+            const bh = t.rows === 1 ? ch - 2 : Math.max(2, ky);
+            ctx.strokeStyle = "rgba(10, 8, 2, 0.92)";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(bx, by, bw, bh);
+            ctx.strokeStyle = "#ffd452";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(bx, by, bw, bh);
+          } else {
+            const rad = mapMode === "boost" ? 4.5 : 3.2;
+            ctx.fillStyle = "rgba(8, 6, 2, 0.85)";
+            ctx.fillRect(px - rad - 1, py - rad - 1, (rad + 1) * 2, (rad + 1) * 2);
+            ctx.fillStyle = "#ffd452";
+            ctx.fillRect(px - rad, py - rad, rad * 2, rad * 2);
+          }
+        }
+        const tag = `MAP: ${mapOverlay.file.replace(/\.json$/, "")} · ${visiblePts}/${mapPoints.length} pts`;
+        ctx.font = `9.5px ${theme.mono}`;
+        const tw = ctx.measureText(tag).width + 12;
+        ctx.fillStyle = "rgba(18, 14, 4, 0.9)";
+        ctx.fillRect(cw - tw - 4, 4, tw, 15);
+        ctx.strokeStyle = "rgba(255, 212, 82, 0.9)";
         ctx.lineWidth = 1;
-        ctx.strokeRect(x0 + 0.5, y0 + 0.5, Math.max(0, x1 - x0 - 1), Math.max(0, y1 - y0 - 1));
+        ctx.strokeRect(cw - tw - 4, 4, tw, 15);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillStyle = "#ffd452";
+        ctx.fillText(tag, cw - tw + 2, 7);
+      } else if (mapLayerHit) {
+        ctx.save();
+        ctx.strokeStyle = mapMode === "boost" ? "rgba(127, 176, 255, 0.98)" : "rgba(127, 176, 255, 0.72)";
+        ctx.lineWidth = mapMode === "boost" ? 2.5 : 1.5;
+        ctx.strokeRect(1, 1, cw - 2, ch - 2);
+        const lv = t.layer !== null ? mapOverlay.layerValues[t.layer] : undefined;
+        const tag = `MAP: ${mapOverlay.file.replace(/\.json$/, "")} · L${t.layer}${lv !== undefined ? ` (${fmt(lv)})` : ""}`;
+        ctx.font = `9.5px ${theme.mono}`;
+        const tw = ctx.measureText(tag).width + 12;
+        ctx.fillStyle = "rgba(8, 16, 36, 0.9)";
+        ctx.fillRect(cw - tw - 4, 4, tw, 15);
+        ctx.strokeStyle = "rgba(127, 176, 255, 0.85)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cw - tw - 4, 4, tw, 15);
+        ctx.textAlign = "left";
+        ctx.textBaseline = "top";
+        ctx.fillStyle = "#b8d6ff";
+        ctx.fillText(tag, cw - tw + 2, 7);
+        ctx.restore();
       }
     }
     if (pick) {
@@ -922,9 +1555,31 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
       ctx.strokeStyle = rgba(theme.signal, 1);
       ctx.strokeRect(x0 - 0.5, y0 - 0.5, w + 1, h + 1);
     }
-  }, [g, img, values, v, kx, ky, cw, ch, t.rows, theme, marks, reg, pick, lut, s, scale, printing, unit]);
+  }, [g, img, values, v, kx, ky, cw, ch, t.rows, t.layer, theme, marks, reg, pick, lut, s, scale, printing, unit, overlayMode, mapOverlay, mapMode, mapPoints, mapLayerHit, hasMapVisual]);
 
-  // The wheel zooms at the cursor. Deeper in, the cells' aspect drifts toward square.
+  const zoomBy = (factor: number, px = 0.5, py = 0.5) => {
+    setView((prev) => {
+      const p = clampView(prev, t, cw, ch);
+      const wx = p.c0 + px * (p.c1 - p.c0);
+      const wy = p.r0 + py * (p.r1 - p.r0);
+      const nw = (p.c1 - p.c0) / factor;
+      const nh = t.rows === 1 ? 1 : (p.r1 - p.r0) / factor;
+      return clampView({ c0: wx - px * nw, c1: wx - px * nw + nw, r0: wy - py * nh, r1: wy - py * nh + nh }, t, cw, ch);
+    });
+  };
+
+  const zoomExact = () => {
+    const cx = pick ? (pick.reg.c0 + pick.reg.c1) / 2 : (v.c0 + v.c1) / 2;
+    const cy = pick ? (pick.reg.r0 + pick.reg.r1) / 2 : (v.r0 + v.r1) / 2;
+    const targetPx = 24;
+    const nw = Math.min(t.cols, Math.max(1, cw / targetPx));
+    const nh = t.rows === 1 ? 1 : Math.min(t.rows, Math.max(1, ch / targetPx));
+    const next = clampView({ c0: cx - nw / 2, c1: cx + nw / 2, r0: cy - nh / 2, r1: cy + nh / 2 }, t, cw, ch);
+    setView(next);
+    setStack((prev) => [...prev, intOf(next, t)]);
+  };
+
+  // The wheel zooms smoothly at the cursor, keeping cursor anchor exact.
   useEffect(() => {
     const c = canvas.current;
     if (!c) return;
@@ -933,20 +1588,13 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
       const rect = c.getBoundingClientRect();
       const px = Math.max(0, Math.min(1, (e.clientX - rect.left) / Math.max(1, rect.width)));
       const py = Math.max(0, Math.min(1, (e.clientY - rect.top) / Math.max(1, rect.height)));
-      const f = Math.exp(-Math.max(-240, Math.min(240, e.deltaY * (e.deltaMode === 1 ? 33 : 1))) * 0.0018);
+      const f = Math.exp(-Math.max(-240, Math.min(240, e.deltaY * (e.deltaMode === 1 ? 33 : 1))) * 0.0028);
       setView((prev) => {
         const p = clampView(prev, t, cw, ch);
         const wx = p.c0 + px * (p.c1 - p.c0);
         const wy = p.r0 + py * (p.r1 - p.r0);
-        let nw = (p.c1 - p.c0) / f;
-        let nh = (p.r1 - p.r0) / f;
-        if (f > 1 && t.rows > 1) {
-          const sx = nw / cw;
-          const sy = nh / ch;
-          const a = Math.pow(sy / sx, 0.82);
-          if (sy > sx) nh = sx * a * ch;
-          else nw = sy * (1 / a) * cw;
-        }
+        const nw = (p.c1 - p.c0) / f;
+        const nh = t.rows === 1 ? 1 : (p.r1 - p.r0) / f;
         return clampView({ c0: wx - px * nw, c1: wx - px * nw + nw, r0: wy - py * nh, r1: wy - py * nh + nh }, t, cw, ch);
       });
     };
@@ -960,15 +1608,29 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
     const y = Math.max(0, Math.min(ch - 1e-6, e.clientY - rect.top));
     return { x, y, c: Math.min(t.cols - 1, Math.floor(v.c0 + x / kx)), r: t.rows === 1 ? 0 : Math.min(t.rows - 1, Math.floor(v.r0 + y / ky)) };
   };
-  const inspect = (r: number, c: number) => {
-    if (!g) return setPick({ reg: { r0: r, r1: r + 1, c0: c, c1: c + 1 } });
+  const inspect = (r: number, c: number): Pick => {
+    if (!g) {
+      const next: Pick = { reg: { r0: r, r1: r + 1, c0: c, c1: c + 1 } };
+      setPick(next);
+      return next;
+    }
     const ij = cellOf(g, r, c);
-    if (!ij) return setPick({ reg: { r0: r, r1: r + 1, c0: c, c1: c + 1 } });
+    if (!ij) {
+      const next: Pick = { reg: { r0: r, r1: r + 1, c0: c, c1: c + 1 } };
+      setPick(next);
+      return next;
+    }
     const n = ij.i * g.w + ij.j;
     const [r0, r1] = span(ij.i, ij.i, g.region.r1 - g.region.r0, g.h, g.region.r0);
     const [c0, c1] = span(ij.j, ij.j, g.region.c1 - g.region.c0, g.w, g.region.c0);
-    if (g.exact || (r1 - r0 === 1 && c1 - c0 === 1)) return setPick({ reg: { r0, r1, c0, c1 }, value: g.exact ? (g.values?.[n] ?? null) : (g.min?.[n] ?? null) });
-    setPick({ reg: { r0, r1, c0, c1 }, cell: { min: g.min?.[n] ?? null, max: g.max?.[n] ?? null, mean: g.mean?.[n] ?? null, rms: g.rms?.[n] ?? null } });
+    if (g.exact || (r1 - r0 === 1 && c1 - c0 === 1)) {
+      const next: Pick = { reg: { r0, r1, c0, c1 }, value: g.exact ? (g.values?.[n] ?? null) : (g.min?.[n] ?? null) };
+      setPick(next);
+      return next;
+    }
+    const next: Pick = { reg: { r0, r1, c0, c1 }, cell: { min: g.min?.[n] ?? null, max: g.max?.[n] ?? null, mean: g.mean?.[n] ?? null, rms: g.rms?.[n] ?? null } };
+    setPick(next);
+    return next;
   };
   const zoomTo = (r: Region, select: boolean) => {
     const z = clampView(r, t, cw, ch);
@@ -980,7 +1642,7 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
     if (e.button !== 0) return;
     e.currentTarget.setPointerCapture(e.pointerId);
     const p = at(e);
-    press.current = { x: p.x, y: p.y, view: v, shift: e.shiftKey, moved: false, id: e.pointerId };
+    press.current = { x: p.x, y: p.y, view: v, shift: e.shiftKey || tool === "box", moved: false, id: e.pointerId };
   };
   const move = (e: ReactPointerEvent<HTMLCanvasElement>) => {
     const p = at(e);
@@ -1003,7 +1665,11 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
     setGrabbing(false);
     if (!pr) return;
     const p = at(e);
-    if (!pr.moved && Math.hypot(p.x - pr.x, p.y - pr.y) < 3) return inspect(p.r, p.c);
+    if (!pr.moved && Math.hypot(p.x - pr.x, p.y - pr.y) < 3) {
+      inspect(p.r, p.c);
+      onOpenInspector();
+      return;
+    }
     if (pr.shift) {
       // The box from the press to the release (the drawn box state may lag a fast drag).
       setBox(null);
@@ -1022,56 +1688,153 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
   const cur = intOf(v, t);
   const top = stack[stack.length - 1] ?? full;
   const tMarks = marks.length > 0;
+  const zoomX = t.cols / Math.max(1e-6, v.c1 - v.c0);
+  const layerMaps = t.layer === null ? [] : maps.map((m) => ({ file: m.file, v: m.layers.find((x) => x.layer === t.layer)?.value })).filter((m): m is { file: string; v: number } => typeof m.v === "number");
   const hv = hover && g ? cellOf(g, hover.r, hover.c) : null;
   const hn = hv ? hv.i * g!.w + hv.j : -1;
   return (
     <div className="grid min-w-0 gap-2" data-e2e="param-overview-primary" data-tensor={t.name}>
       <TensorHeader t={t} whole={whole} mark={pick && pick.reg.r1 - pick.reg.r0 === 1 && pick.reg.c1 - pick.reg.c0 === 1 ? (pick.value ?? null) : null} />
+      {layerMaps.length > 0 && (
+        <div className="mono flex flex-wrap items-center gap-x-3 gap-y-1 border-l-2 border-sense-pale pl-2.5 text-[10px] text-faint" data-e2e="param-layer-maps">
+          <span className="uppercase tracking-[0.1em] text-muted">layer {t.layer} maps</span>
+          {layerMaps.map((m) => (
+            <span key={m.file} className="text-text" title={`${m.file} at layer ${t.layer}`}>
+              <span className="text-faint">{m.file.replace(/\.json$/, "")}</span> {fmt(m.v)}
+            </span>
+          ))}
+        </div>
+      )}
       {!t.readable ? (
         <p className="mono text-[10px] text-quiet">{t.unread ?? "values not held here"}</p>
       ) : (
-        <div className={side ? "grid items-start gap-4" : "grid gap-3"} style={side ? { gridTemplateColumns: `minmax(0,1fr) ${INSPECTOR}px` } : undefined}>
+        <div className="grid min-w-0 gap-2">
           <div className="grid min-w-0 gap-1.5">
-            <div className="grid" style={{ gridTemplateColumns: `${RULER_L}px ${cw}px ${LEGEND}px`, gridTemplateRows: `${RULER_T}px ${ch}px`, columnGap: 0 }}>
-              <span />
-              <Ruler axis="cols" from={v.c0} to={v.c1} px={cw} length={t.cols} />
-              <span />
-              {t.rows > 1 ? <Ruler axis="rows" from={v.r0} to={v.r1} px={ch} length={t.rows} /> : <span className="mono self-center pr-2 text-right text-[9px] text-quiet">row 0</span>}
-              <div className="relative border border-line-strong" style={{ width: cw, height: ch }}>
-                {!g && !q.error && !q.data?.error && (
-                  <div role="status" aria-label="loading region" data-loading="region" className="placeholder absolute inset-0">
-                    <span className="placeholder-label mono">loading region</span>
-                  </div>
-                )}
-                <canvas
-                  ref={canvas}
-                  className={`absolute inset-0 touch-none ${grabbing ? "cursor-grabbing" : "cursor-crosshair"}`}
-                  style={{ width: cw, height: ch }}
-                  onPointerDown={down}
-                  onPointerMove={move}
-                  onPointerUp={up}
-                  onPointerCancel={() => {
-                    press.current = null;
-                    setBox(null);
-                    setGrabbing(false);
-                  }}
-                  onPointerLeave={() => setHover(null)}
-                  onDoubleClick={reset}
-                  aria-label={`${t.name} ${label(cur, t)} heatmap`}
-                  data-e2e="param-overview-canvas"
-                  data-primary="1"
-                  data-exact={g?.exact ? "1" : undefined}
-                />
-                {box && (
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute border border-signal"
-                    style={{ left: Math.min(box.x0, box.x1), top: Math.min(box.y0, box.y1), width: Math.abs(box.x1 - box.x0), height: Math.abs(box.y1 - box.y0) }}
+            <div className="mono flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-faint" style={{ paddingLeft: RULER_L }} data-e2e="param-zoom-bar">
+              <span className="text-quiet">zoom</span>
+              <button type="button" className={btn} disabled={zoomX <= 1.01} onClick={() => zoomBy(0.5)} title="Zoom out 2x (-)">
+                -
+              </button>
+              <span className="min-w-[3.4rem] text-center text-text" title="Current zoom factor">
+                {zoomX < 10 ? `${zoomX.toFixed(1)}x` : `${Math.round(zoomX)}x`}
+                {g?.exact ? " · 1:1" : ""}
+              </span>
+              <button type="button" className={btn} disabled={kx >= CELL_PX_MAX * 0.98} onClick={() => zoomBy(2)} title="Zoom in 2x (+)">
+                +
+              </button>
+              <button type="button" className={g?.exact ? on : btn} onClick={zoomExact} title="Jump straight to individual weight cells with numeric values">
+                1:1 exact
+              </button>
+              <button type="button" className={btn} disabled={stack.length === 1 && same(cur, full)} onClick={reset} title="Show the whole tensor (0)">
+                fit
+              </button>
+              <span aria-hidden className="text-line-strong">|</span>
+              <span className="text-quiet">drag</span>
+              <button type="button" className={tool === "pan" ? on : btn} onClick={() => setTool("pan")} title="Drag pans the view; Shift+drag boxes a region">
+                pan
+              </button>
+              <button type="button" className={tool === "box" ? on : btn} onClick={() => setTool("box")} title="Drag draws a zoom and selection box directly">
+                box zoom
+              </button>
+              <span aria-hidden className="text-line-strong">|</span>
+              <button
+                type="button"
+                className={inspectorOpen ? on : btn}
+                onClick={onToggleInspector}
+                title={inspectorOpen ? "Hide floating Parameter Inspector" : "Open floating Parameter Inspector"}
+                data-e2e="param-inspector-toggle"
+              >
+                {inspectorOpen ? "inspector · open" : pick ? "open inspector" : "inspector"}
+              </button>
+              {tMarks && (
+                <>
+                  <span aria-hidden className="text-line-strong">|</span>
+                  <span className="text-quiet">masks</span>
+                  <button type="button" className={overlayMode === "show" ? on : btn} onClick={() => setOverlayMode("show")}>
+                    on
+                  </button>
+                  <button type="button" className={overlayMode === "boost" ? on : btn} onClick={() => setOverlayMode("boost")} title="Dim the heatmap so masks, freezes and edits pop clearly">
+                    emphasize
+                  </button>
+                  <button type="button" className={overlayMode === "off" ? on : btn} onClick={() => setOverlayMode("off")}>
+                    hide
+                  </button>
+                </>
+              )}
+              {hasMapVisual && mapOverlay && (
+                <>
+                  <span aria-hidden className="text-line-strong">|</span>
+                  <span className="text-quiet">map</span>
+                  <button type="button" className={mapMode === "show" ? on : btn} onClick={() => setMapMode("show")}>
+                    on
+                  </button>
+                  <button type="button" className={mapMode === "boost" ? on : btn} onClick={() => setMapMode("boost")} title="Dim the heatmap so the overlaid parameter map stands out clearly">
+                    emphasize
+                  </button>
+                  <button type="button" className={mapMode === "off" ? on : btn} onClick={() => setMapMode("off")}>
+                    hide
+                  </button>
+                </>
+              )}
+            </div>
+            <div className="overflow-x-auto pb-1">
+              <div className="grid" style={{ gridTemplateColumns: `${RULER_L}px ${cw}px ${LEGEND + LEGEND_GAP}px`, gridTemplateRows: `${RULER_T}px ${ch}px`, columnGap: 0 }}>
+                <span />
+                <Ruler axis="cols" from={v.c0} to={v.c1} px={cw} length={t.cols} />
+                <span />
+                {t.rows > 1 ? <Ruler axis="rows" from={v.r0} to={v.r1} px={ch} length={t.rows} /> : <span className="mono self-center pr-2 text-right text-[9px] text-quiet">row 0</span>}
+                <div className="relative border border-line-strong" style={{ width: cw, height: ch }}>
+                  {!g && !q.error && !q.data?.error && (
+                    <div role="status" aria-label="loading region" data-loading="region" className="placeholder absolute inset-0">
+                      <span className="placeholder-label mono">loading region</span>
+                    </div>
+                  )}
+                  <canvas
+                    ref={canvas}
+                    tabIndex={0}
+                    className={`absolute inset-0 touch-none outline-none focus-visible:ring-1 focus-visible:ring-sense-pale ${tool === "box" ? "cursor-crosshair" : grabbing ? "cursor-grabbing" : "cursor-grab"}`}
+                    style={{ width: cw, height: ch }}
+                    onKeyDown={(e) => {
+                      if (e.key === "+" || e.key === "=") { e.preventDefault(); zoomBy(2); }
+                      else if (e.key === "-") { e.preventDefault(); zoomBy(0.5); }
+                      else if (e.key === "0") { e.preventDefault(); reset(); }
+                    }}
+                    onPointerDown={down}
+                    onPointerMove={move}
+                    onPointerUp={up}
+                    onPointerCancel={() => {
+                      press.current = null;
+                      setBox(null);
+                      setGrabbing(false);
+                    }}
+                    onPointerLeave={() => setHover(null)}
+                    onDoubleClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const x = Math.max(0, Math.min(cw - 1e-6, e.clientX - rect.left));
+                      const y = Math.max(0, Math.min(ch - 1e-6, e.clientY - rect.top));
+                      const c = Math.min(t.cols - 1, Math.floor(v.c0 + x / kx));
+                      const r = t.rows === 1 ? 0 : Math.min(t.rows - 1, Math.floor(v.r0 + y / ky));
+                      const next = inspect(r, c);
+                      onSelect?.(pathOf(t, next.reg));
+                      onOpenInspector();
+                      setEditFocusTick((n) => n + 1);
+                    }}
+                    aria-label={`${t.name} ${label(cur, t)} heatmap`}
+                    data-e2e="param-overview-canvas"
+                    data-primary="1"
+                    data-exact={g?.exact ? "1" : undefined}
                   />
-                )}
-                {q.stale && <span className="mono pointer-events-none absolute top-1 right-1 bg-bg/80 px-1 text-[9px] text-quiet">reading</span>}
+                  {box && (
+                    <span
+                      aria-hidden
+                      className="pointer-events-none absolute border-2 border-signal bg-signal/15"
+                      style={{ left: Math.min(box.x0, box.x1), top: Math.min(box.y0, box.y1), width: Math.abs(box.x1 - box.x0), height: Math.abs(box.y1 - box.y0) }}
+                    />
+                  )}
+                  {q.stale && <span className="mono pointer-events-none absolute top-1 right-1 bg-bg/80 px-1 text-[9px] text-quiet">reading</span>}
+                </div>
+                <div style={{ paddingLeft: LEGEND_GAP }}>{g && <Legend lut={lut} s={s} kind={scale} height={ch} min={ext.min} max={ext.max} stat={stat} />}</div>
               </div>
-              <div className="pl-2">{g && <Legend lut={lut} s={s} kind={scale} height={ch} min={ext.min} max={ext.max} stat={stat} />}</div>
             </div>
             {(q.error || q.data?.error) && <p className="mono text-[10px] text-error">{q.error ?? q.data?.error}</p>}
             <div className="mono grid gap-0.5 text-[9.5px] text-faint" style={{ paddingLeft: RULER_L }}>
@@ -1098,18 +1861,18 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
                 </span>
               )}
               {tMarks && (
-                <span className="flex flex-wrap items-center gap-x-3 text-quiet" data-e2e="param-overlay-key">
-                  <span>overlay, as held:</span>
+                <span className="flex flex-wrap items-center gap-x-3 text-muted" data-e2e="param-overlay-key">
+                  <span className="text-quiet">overlay:</span>
                   <span className="flex items-center gap-1">
-                    <i aria-hidden className="inline-block h-2 w-3 border border-line-strong bg-bg/60" /> masked
+                    <i aria-hidden className="inline-block h-2.5 w-3.5 border border-[#ffc466] bg-[#120c04]" style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(255,184,84,0.75) 0 1px, transparent 1px 4px)" }} /> masked
                   </span>
                   <span className="flex items-center gap-1">
-                    <i aria-hidden className="inline-block h-2 w-3 border border-line-strong" style={{ backgroundImage: "repeating-linear-gradient(45deg, var(--text-3) 0 1px, transparent 1px 4px)" }} /> frozen
+                    <i aria-hidden className="inline-block h-2.5 w-3.5 border border-dashed border-[#9bdcff] bg-[#6ebeff]/25" style={{ backgroundImage: "repeating-linear-gradient(45deg, rgba(155,220,255,0.85) 0 1px, transparent 1px 4px)" }} /> frozen
                   </span>
                   <span className="flex items-center gap-1">
-                    <i aria-hidden className="inline-block h-2 w-3 border border-verified" /> edited
+                    <i aria-hidden className="inline-block h-2.5 w-3.5 border border-verified bg-verified/20" /> edited
                   </span>
-                  <span>changed in the controls below</span>
+                  <span className="text-quiet">({marks.length} active)</span>
                 </span>
               )}
             </div>
@@ -1145,13 +1908,29 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
               <button type="button" className={list ? on : btn} onClick={() => setList(!list)}>
                 values
               </button>
-              <span className="text-quiet">wheel zoom · drag pan · shift drag box · double click whole</span>
+              <span className="text-quiet">wheel zoom · drag pan · shift drag box · double click edit</span>
             </div>
             {list && <Values key={pathOf(t, cur)} k={k} t={t} g={cur} />}
           </div>
-          <div className={side ? "sticky top-2" : ""}>
-            <Inspector key={t.name} k={k} t={t} pick={pick} whole={whole} maps={maps} onSelect={onSelect} onZoom={(r) => zoomTo(r, false)} />
-          </div>
+          <Inspector
+            key={t.name}
+            k={k}
+            t={t}
+            pick={pick}
+            whole={whole}
+            maps={maps}
+            mapOverlay={mapOverlay}
+            editFocusTick={editFocusTick}
+            open={inspectorOpen}
+            minimized={inspectorMin}
+            win={inspectorWin}
+            onWinChange={onInspectorWinChange}
+            onResetWin={onResetInspectorWin}
+            onToggleMin={onToggleInspectorMin}
+            onClose={onCloseInspector}
+            onSelect={onSelect}
+            onZoomToBlock={(r) => zoomTo(r, true)}
+          />
         </div>
       )}
     </div>
@@ -1160,7 +1939,7 @@ function PrimaryView({ k, t, stat, scale, theme, avail, whole, marks, maps, focu
 
 /* ---------- a thumbnail ---------- */
 
-function Thumb({ k, t, stat, scale, theme, primary, onPick, onWhole }: { k: string; t: OverviewTensor; stat: Stat; scale: Scale; theme: Theme; primary: boolean; onPick: (name: string) => void; onWhole: (g: OverviewGrid) => void }) {
+function Thumb({ k, t, stat, scale, theme, primary, mapBadge, onPick, onWhole }: { k: string; t: OverviewTensor; stat: Stat; scale: Scale; theme: Theme; primary: boolean; mapBadge?: string | null; onPick: (name: string) => void; onWhole: (g: OverviewGrid) => void }) {
   const root = useRef<HTMLButtonElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
   const [seen, setSeen] = useState(false);
@@ -1215,7 +1994,10 @@ function Thumb({ k, t, stat, scale, theme, primary, onPick, onWhole }: { k: stri
       data-tensor={t.name}
       title={`${t.name} · ${shape} · ${t.dtype}${t.readable ? " · click to view" : ""}`}
     >
-      <span className={`mono truncate text-[9.5px] ${primary ? "text-text" : "text-muted"}`}>{t.name.replace(/^model\.layers\.\d+\./, "").replace(/\.weight$/, "")}</span>
+      <span className={`mono flex items-center justify-between gap-1 text-[9.5px] ${primary ? "text-text" : "text-muted"}`}>
+        <span className="truncate">{t.name.replace(/^model\.layers\.\d+\./, "").replace(/\.weight$/, "")}</span>
+        {mapBadge && <span className={`shrink-0 text-[8.5px] ${mapBadge.startsWith("★") ? "text-[#ffd452]" : "text-sense-pale"}`}>{mapBadge}</span>}
+      </span>
       {!t.readable ? (
         <span className="mono text-[9px] text-quiet">{t.unread ?? "values not held here"}</span>
       ) : (
@@ -1273,7 +2055,36 @@ function useWhole(k: string, t: OverviewTensor | null, held: OverviewGrid | unde
   return q.data && !q.data.error && !q.stale ? q.data : null;
 }
 
-export default function ParamOverview({ objectKey, onSelect, marks, maps, target }: { objectKey: string; onSelect?: (path: string) => void; marks?: OverviewMark[]; maps?: OverviewMap[]; target?: { path: string; n: number } | null }) {
+const KIND_LABEL: Record<string, string> = {
+  base: "base cartridge",
+  open: "open weights (upstream)",
+  filter: "filter cartridge",
+  adapter: "adapter cartridge",
+  lens: "lens adapter",
+  readout: "read-out adapter",
+  unit: "learning unit",
+  preference: "preference cartridge",
+};
+
+export default function ParamOverview({
+  objectKey,
+  onSelect,
+  marks,
+  maps,
+  mapOverlay,
+  layerFilter = null,
+  onSelectLayer,
+  target,
+}: {
+  objectKey: string;
+  onSelect?: (path: string) => void;
+  marks?: OverviewMark[];
+  maps?: OverviewMap[];
+  mapOverlay?: ActiveMapOverlay | null;
+  layerFilter?: number | null;
+  onSelectLayer?: (layer: number | null) => void;
+  target?: { path: string; n: number } | null;
+}) {
   const root = useRef<HTMLDivElement>(null);
   const primaryRef = useRef<HTMLDivElement>(null);
   const [stat, setStat] = useState<Stat>("mean");
@@ -1284,16 +2095,41 @@ export default function ParamOverview({ objectKey, onSelect, marks, maps, target
   const [wholes, setWholes] = useState<Record<string, OverviewGrid>>({});
   const [focus, setFocus] = useState<{ rect: Rect; n: number } | null>(null);
   const [seenTarget, setSeenTarget] = useState<number | null>(null);
+  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [inspectorMin, setInspectorMin] = useState(false);
+  const [inspectorWin, setInspectorWin] = useState<WinRect>(defaultWin);
   const q = useRead<SetReply>(`${ROUTE}?key=${enc(objectKey)}`);
   const set = q.data;
   const tensors = useMemo(() => set?.tensors ?? [], [set]);
-  const groups = useMemo(() => groupsOf(tensors), [tensors]);
+  const availLayers = useMemo(() => {
+    const ls = [...new Set(tensors.map((t) => t.layer).filter((l): l is number => l !== null))];
+    return ls.sort((a, b) => a - b);
+  }, [tensors]);
+  const visibleTensors = useMemo(
+    () => (layerFilter === null ? tensors : tensors.filter((t) => t.layer === layerFilter)),
+    [tensors, layerFilter],
+  );
+  const groups = useMemo(() => groupsOf(visibleTensors), [visibleTensors]);
   // Few tensors per layer (a job filter's gain and bias): the layers stand side by side in columns
   // instead of one tall list, so the whole set is seen at once.
   const perLayer = Math.max(0, ...groups.map((g) => g.parts.reduce((a, p) => a + p.tensors.length, 0)));
   const compact = groups.length > 3 && perLayer <= 3;
-  const primaryName = chosen ?? firstPrimary(tensors);
-  const primary = tensors.find((t) => t.name === primaryName) ?? null;
+  const chosenVisible = chosen && visibleTensors.some((t) => t.name === chosen) ? chosen : null;
+  const primaryName =
+    chosenVisible ??
+    (mapOverlay
+      ? visibleTensors.find((t) => t.readable && (mapOverlay.pointsByTensor[t.name]?.length ?? 0) > 0)?.name ??
+        visibleTensors.find((t) => t.readable && t.layer !== null && mapOverlay.layers.includes(t.layer) && t.rows > 1)?.name ??
+        firstPrimary(visibleTensors)
+      : firstPrimary(visibleTensors));
+  const primary = visibleTensors.find((t) => t.name === primaryName) ?? null;
+  const badgeFor = (t: OverviewTensor): string | null => {
+    if (!mapOverlay) return null;
+    const pts = mapOverlay.pointsByTensor[t.name]?.length ?? 0;
+    if (pts > 0) return `★ ${pts}`;
+    if (t.layer !== null && mapOverlay.layers.includes(t.layer)) return "map";
+    return null;
+  };
 
   // A target from the controls (an overlay entry picked there) makes its tensor primary and zooms to it.
   if (target && target.n !== seenTarget && tensors.length > 0) {
@@ -1303,13 +2139,22 @@ export default function ParamOverview({ objectKey, onSelect, marks, maps, target
       const b = hit.rects.reduce((a, r) => ({ r0: Math.min(a.r0, r.r0), r1: Math.max(a.r1, r.r1), c0: Math.min(a.c0, r.c0), c1: Math.max(a.c1, r.c1) }));
       setChosen(hit.tensor.name);
       setFocus({ rect: b, n: target.n });
+      if (b.r1 - b.r0 === 1 && b.c1 - b.c0 === 1) {
+        setInspectorOpen(true);
+        setInspectorMin(false);
+      }
     }
   }
 
   useEffect(() => {
     const el = root.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
-    const ro = new ResizeObserver((es) => setWidth(Math.floor(es[0]?.contentRect.width ?? 0)));
+    if (!el) return;
+    if (el.clientWidth > 0) setWidth(Math.floor(el.clientWidth));
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver((es) => {
+      const next = Math.floor(es[0]?.contentRect.width ?? el.clientWidth ?? 0);
+      if (next > 0) setWidth(next);
+    });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
@@ -1343,7 +2188,7 @@ export default function ParamOverview({ objectKey, onSelect, marks, maps, target
         <span>
           {set && !set.error ? (
             <>
-              <span className="text-text">{set.name}</span> · {set.kind} · {set.count} tensors · {set.weights?.toLocaleString()} weights
+              <span className="text-text">{set.name}</span> · {set.kind ? (KIND_LABEL[set.kind] ?? set.kind) : ""} · {set.count} tensors · {set.weights?.toLocaleString()} weights
             </>
           ) : (
             objectKey
@@ -1377,11 +2222,79 @@ export default function ParamOverview({ objectKey, onSelect, marks, maps, target
         </div>
       ) : (
         <>
+          {availLayers.length > 0 && onSelectLayer && (
+            <div className="mono flex flex-wrap items-center gap-1 border-y border-line/60 py-1.5 text-[9.5px]" data-e2e="param-overview-layers">
+              <span className="mr-1 uppercase tracking-[0.12em] text-quiet">layer</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setChosen(null);
+                  onSelectLayer(null);
+                }}
+                className={`press border px-1.5 py-0.5 ${layerFilter === null ? "border-sense-pale bg-bg-2 text-text" : "border-line text-faint hover:text-text"}`}
+              >
+                all ({tensors.length})
+              </button>
+              {availLayers.map((l) => {
+                const active = layerFilter === l;
+                return (
+                  <button
+                    key={l}
+                    type="button"
+                    onClick={() => {
+                      setChosen(null);
+                      onSelectLayer(active ? null : l);
+                    }}
+                    className={`press border px-1.5 py-0.5 ${active ? "border-sense-pale bg-sense/20 text-text" : "border-line text-faint hover:border-line-3 hover:text-text"}`}
+                    title={active ? `Showing layer ${l} only (click for all layers)` : `Show only layer ${l} in the Parameter Viewer`}
+                  >
+                    L{l}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <div ref={primaryRef} className="scroll-mt-4">
-            {primary && width > 0 && <PrimaryView key={primary.name} k={objectKey} t={primary} stat={stat} scale={scale} theme={theme} avail={width} whole={whole} marks={markRects} maps={maps ?? []} focus={focus && chosen === primary.name ? focus : null} onSelect={onSelect} />}
+            {primary && width > 0 && (
+              <PrimaryView
+                key={primary.name}
+                k={objectKey}
+                t={primary}
+                stat={stat}
+                scale={scale}
+                theme={theme}
+                avail={width}
+                whole={whole}
+                marks={markRects}
+                maps={maps ?? []}
+                mapOverlay={mapOverlay}
+                focus={focus && chosen === primary.name ? focus : null}
+                inspectorOpen={inspectorOpen}
+                inspectorMin={inspectorMin}
+                inspectorWin={inspectorWin}
+                onInspectorWinChange={setInspectorWin}
+                onResetInspectorWin={() => {
+                  setInspectorWin(defaultWin());
+                  setInspectorMin(false);
+                }}
+                onOpenInspector={() => {
+                  setInspectorOpen(true);
+                  setInspectorMin(false);
+                }}
+                onToggleInspector={() => {
+                  setInspectorOpen((o) => !o);
+                  setInspectorMin(false);
+                }}
+                onToggleInspectorMin={() => setInspectorMin((m) => !m)}
+                onCloseInspector={() => setInspectorOpen(false)}
+                onSelect={onSelect}
+              />
+            )}
           </div>
           <div className="grid gap-3 border-t border-line-strong pt-3" data-e2e="param-overview-set">
-            <span className="mono text-[9.5px] uppercase tracking-[0.12em] text-quiet">every tensor · click one to view it above</span>
+            <span className="mono text-[9.5px] uppercase tracking-[0.12em] text-quiet">
+              {layerFilter !== null ? `layer ${layerFilter} tensors (${visibleTensors.length}) · click one to view it above` : "every tensor · click one to view it above"}
+            </span>
             {compact && (
               <div className="grid gap-x-6 gap-y-2.5" style={{ gridTemplateColumns: "repeat(auto-fill, minmax(17rem, 1fr))" }} data-e2e="param-overview-compact">
                 {groups.map((g, gi) => (
@@ -1392,7 +2305,7 @@ export default function ParamOverview({ objectKey, onSelect, marks, maps, target
                     <div className="grid min-w-0 gap-2" style={{ gridTemplateColumns: `repeat(${Math.max(1, perLayer)}, minmax(0, 1fr))` }}>
                       {g.parts.flatMap((p) =>
                         p.tensors.map((t) => (
-                          <Thumb key={t.name} k={objectKey} t={t} stat={stat} scale={scale} theme={theme} primary={t.name === primaryName} onPick={(n) => { setChosen(n); setFocus(null); }} onWhole={onWhole} />
+                          <Thumb key={t.name} k={objectKey} t={t} stat={stat} scale={scale} theme={theme} primary={t.name === primaryName} mapBadge={badgeFor(t)} onPick={(n) => { setChosen(n); setFocus(null); }} onWhole={onWhole} />
                         )),
                       )}
                     </div>
@@ -1408,7 +2321,7 @@ export default function ParamOverview({ objectKey, onSelect, marks, maps, target
                     <span className="mono pt-1 text-[9px] uppercase tracking-[0.1em] text-faint">{p.part}</span>
                     <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${THUMB}px, 1fr))` }}>
                       {p.tensors.map((t) => (
-                        <Thumb key={t.name} k={objectKey} t={t} stat={stat} scale={scale} theme={theme} primary={t.name === primaryName} onPick={(n) => { setChosen(n); setFocus(null); }} onWhole={onWhole} />
+                        <Thumb key={t.name} k={objectKey} t={t} stat={stat} scale={scale} theme={theme} primary={t.name === primaryName} mapBadge={badgeFor(t)} onPick={(n) => { setChosen(n); setFocus(null); }} onWhole={onWhole} />
                       ))}
                     </div>
                   </div>

@@ -14,13 +14,30 @@ const noSub = () => () => {};
 
 /** A value shown masked until the viewer asks for it: per item, for this session only, never
  *  saved. In capture mode it cannot be revealed and no control is drawn. */
-export function Masked({ id, shown, full, className = "" }: { id: string; shown: ReactNode; full?: string | null; className?: string }) {
+export function Masked({ id, shown, full, className = "", onDetail }: { id: string; shown: ReactNode; full?: string | null; className?: string; onDetail?: () => void }) {
   const on = useRevealed(id);
   const cap = useSyncExternalStore(noSub, captureMask, () => true);
   if (!full) return <span className={className}>{shown}</span>;
   return (
     <span className={className}>
-      {on ? full : shown}
+      {on && onDetail ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onDetail();
+          }}
+          title="Click to open the full question and details"
+          className="press text-left underline decoration-line-strong decoration-dotted underline-offset-2 hover:text-text"
+        >
+          {full}
+        </button>
+      ) : on ? (
+        full
+      ) : (
+        shown
+      )}
       {!cap && (
         <button
           type="button"
@@ -35,14 +52,27 @@ export function Masked({ id, shown, full, className = "" }: { id: string; shown:
           {on ? "hide" : "show"}
         </button>
       )}
+      {!cap && on && onDetail && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onDetail();
+          }}
+          className="press mono ml-2 align-baseline text-[10px] uppercase tracking-[0.12em] text-sense-pale underline decoration-dotted underline-offset-2 hover:text-text"
+        >
+          detail
+        </button>
+      )}
     </span>
   );
 }
 
 /** The label of a call: its kind in plain words, the question or prompt held back until asked. */
-export function CallText({ id, label, tool, className = "" }: { id: string; label?: string | null; tool?: string | null; className?: string }) {
+export function CallText({ id, label, tool, className = "", onDetail }: { id: string; label?: string | null; tool?: string | null; className?: string; onDetail?: () => void }) {
   const { short, hidden } = callLabel(label, tool);
-  return <Masked id={`call:${id}`} className={className} shown={hidden ? `${short} · question hidden` : short} full={hidden ? `${short}: ${hidden}` : null} />;
+  return <Masked id={`call:${id}`} className={className} shown={hidden ? `${short} · question hidden` : short} full={hidden ? `${short}: ${hidden}` : null} onDetail={onDetail} />;
 }
 
 /** A small reticle before a section heading, as on a spec sheet. */
@@ -269,7 +299,7 @@ export function Segmented({
   const i = Math.max(0, values.indexOf(value));
   const style: CSSProperties = { width: `calc(100% / ${values.length})`, transform: `translateX(${i * 100}%)` };
   return (
-    <div role="radiogroup" aria-label={label} className={`relative inline-grid h-9 min-w-0 border-b border-line-strong p-0 ${busy ? "opacity-60" : ""}`} style={{ gridTemplateColumns: `repeat(${values.length}, minmax(0, 1fr))` }}>
+    <div role="radiogroup" aria-label={label} className={`relative grid min-h-9 w-full min-w-0 items-stretch border-b border-line-strong p-0 ${busy ? "opacity-60" : ""}`} style={{ gridTemplateColumns: `repeat(${values.length}, minmax(0, 1fr))` }}>
       <span aria-hidden className="absolute bottom-[-1px] left-0 h-[2px] bg-sense-pale" style={{ ...style, transition: "transform var(--d-2) var(--ease)" }} />
       {values.map((v) => {
         const on = v === value;
@@ -280,7 +310,7 @@ export function Segmented({
             aria-checked={on}
             disabled={busy}
             onClick={() => !on && onPick(v)}
-            className={`press mono relative z-10 min-h-11 min-w-[48px] px-3 text-[11px] uppercase tracking-[0.08em] ${on ? "text-text" : "text-faint hover:text-text"}`}
+            className={`press mono relative z-10 flex min-h-9 min-w-0 items-center justify-center px-1.5 py-2 text-center text-[10.5px] leading-tight uppercase tracking-[0.06em] ${on ? "text-text" : "text-faint hover:text-text"}`}
           >
             {render(v)}
           </button>

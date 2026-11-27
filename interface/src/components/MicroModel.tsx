@@ -29,29 +29,31 @@ export function useServingBases(): Map<string, string> {
 }
 
 /** The base cartridge mark: a filled violet square and its key. */
-export function BaseMark({ base, quiet = false }: { base: string | null | undefined; quiet?: boolean }) {
+export function BaseMark({ base, quiet = false, labeled = false }: { base: string | null | undefined; quiet?: boolean; labeled?: boolean }) {
   if (!base || base === "open weights") {
     return (
       <span className="mono inline-flex items-center gap-1.5 text-[10.5px] text-attention" title="No Neuromorph base cartridge serves: this MicroModel runs straight on the upstream open weights (open mode)">
         <i aria-hidden className="inline-block h-1.5 w-1.5 border border-attention" />
-        open mode
+        open mode (no base cartridge)
       </span>
     );
   }
   return (
     <span className={`mono inline-flex items-center gap-1.5 text-[10.5px] ${quiet ? "text-faint" : "text-muted"}`} title={`${base}: the Neuromorph base cartridge this MicroModel runs on`}>
       <i aria-hidden className="inline-block h-1.5 w-1.5 bg-learned" />
-      {base}
+      {labeled && <span className="text-quiet">base cartridge</span>}
+      <span>{base}</span>
     </span>
   );
 }
 
 /** The upstream open weights mark: a hollow ring and the model id, quieter than the cartridge. */
-export function WeightsMark({ model }: { model: string }) {
+export function WeightsMark({ model, labeled = false }: { model: string; labeled?: boolean }) {
   return (
     <span className="mono inline-flex items-center gap-1.5 text-[10px] text-quiet" title={`${model}: the upstream open weights (Apache-2.0) the base cartridge was built from; not the MicroModel itself`}>
       <i aria-hidden className="inline-block h-1.5 w-1.5 rounded-full border border-quiet" />
-      {model}
+      {labeled && <span className="text-quiet/80">open weights</span>}
+      <span>{model}</span>
     </span>
   );
 }

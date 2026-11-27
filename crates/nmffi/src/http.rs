@@ -272,6 +272,95 @@ pub fn get(url: &str, token: Option<&str>, token_host: &str, range_from: u64, ti
     Err(format!("too many redirects from {url}"))
 }
 
+/// POST `body` to `url` with `content_type` (without following redirects so an auth token is
+/// never forwarded elsewhere). `token` is sent as `Authorization: Bearer` only to hosts equal to
+/// or ending in `token_host`. Returns `(status, response_body)`.
+/// # Errors
+/// Windows' HTTP service is missing, an address is not https, the body exceeds 32-bit WinHTTP
+/// length, or the network fails.
+pub fn post(url: &str, token: Option<&str>, token_host: &str, content_type: &str, body: &[u8], timeout_ms: u32) -> Result<(u16, Vec<u8>), String> {
+    let a = api()?;
+    let (host, port, path) = split(url)?;
+    let blen = u32::try_from(body.len()).map_err(|_| "request body exceeds WinHTTP size limit".to_owned())?;
+    let timeout = i32::try_from(timeout_ms).unwrap_or(i32::MAX);
+    let mut headers = format!("Content-Type: {content_type}\r\n");
+    if let Some(t) = token
+        && !t.is_empty()
+        && (host == token_host || host.ends_with(&format!(".{token_host}")))
+    {
+        headers.push_str(&format!("Authorization: Bearer {t}\r\n"));
+    }
+    let agent = wide("neuromorph-nano");
+    // SAFETY: `agent` is NUL-terminated and outlives the call; null proxy strings ask for the
+    // system's own proxy choice.
+    let mut session = H(unsafe { (a.open)(agent.as_ptr(), ACCESS_AUTOMATIC_PROXY, std::ptr::null(), std::ptr::null(), 0) });
+    if session.0.is_null() {
+        // SAFETY: as above.
+        session = H(unsafe { (a.open)(agent.as_ptr(), ACCESS_DEFAULT_PROXY, std::ptr::null(), std::ptr::null(), 0) });
+    }
+    if session.0.is_null() {
+        return Err("Windows' HTTP service did not open a session".into());
+    }
+    let whost = wide(&host);
+    // SAFETY: the session handle is open; `whost` is NUL-terminated and outlives the call.
+    let conn = H(unsafe { (a.connect)(session.0, whost.as_ptr(), port, 0) });
+    if conn.0.is_null() {
+        return Err(format!("could not reach {host}"));
+    }
+    let (verb, wpath) = (wide("POST"), wide(&path));
+    // SAFETY: the connection handle is open; the verb and path are NUL-terminated and outlive the
+    // call; null version, referrer and accept types take WinHTTP's defaults.
+    let req = H(unsafe { (a.open_request)(conn.0, verb.as_ptr(), wpath.as_ptr(), std::ptr::null(), std::ptr::null(), std::ptr::null(), FLAG_SECURE) });
+    if req.0.is_null() {
+        return Err(format!("could not open a request to {host}"));
+    }
+    let off = DISABLE_REDIRECTS;
+    // SAFETY: the request handle is open; the option value is a u32 whose size is passed.
+    unsafe {
+        (a.set_option)(req.0, OPTION_DISABLE_FEATURE, (&raw const off).cast::<c_void>(), 4);
+    }
+    // SAFETY: the request handle is open; the timeouts are plain milliseconds.
+    unsafe {
+        (a.set_timeouts)(req.0, 30_000, 30_000, timeout, timeout);
+    }
+    let wheaders = wide(&headers);
+    let bp = if body.is_empty() { std::ptr::null() } else { body.as_ptr().cast::<c_void>() };
+    // SAFETY: the request handle is open; `wheaders` is NUL-terminated and outlives the call; `bp`
+    // points to `blen` valid bytes of `body` (or null when `blen == 0`) for the duration of the call.
+    let sent = unsafe { (a.send_request)(req.0, wheaders.as_ptr(), HEADERS_NUL_TERMINATED, bp, blen, blen, 0) };
+    if sent == 0 {
+        return Err(format!("the upload request to {host} was not sent (network, proxy or certificate)"));
+    }
+    // SAFETY: the request was sent; the reserved pointer must be null.
+    if unsafe { (a.receive_response)(req.0, std::ptr::null_mut()) } == 0 {
+        return Err(format!("no reply from {host}"));
+    }
+    let status = status_of(a, req.0)?;
+    let mut reply: Vec<u8> = Vec::new();
+    let mut buf: Vec<u8> = Vec::new();
+    loop {
+        let mut avail: u32 = 0;
+        // SAFETY: the response was received; `avail` is a u32 WinHTTP writes.
+        if unsafe { (a.query_available)(req.0, &raw mut avail) } == 0 {
+            return Err(format!("the reply from {host} broke off"));
+        }
+        if avail == 0 {
+            break;
+        }
+        buf.resize(avail as usize, 0);
+        let mut read: u32 = 0;
+        // SAFETY: `buf` holds `avail` bytes and outlives the call; `read` is written by WinHTTP.
+        if unsafe { (a.read_data)(req.0, buf.as_mut_ptr().cast::<c_void>(), avail, &raw mut read) } == 0 {
+            return Err(format!("the reply from {host} broke off"));
+        }
+        if read == 0 {
+            break;
+        }
+        reply.extend_from_slice(buf.get(..read as usize).unwrap_or(&[]));
+    }
+    Ok((status, reply))
+}
+
 /// Self-check: the address splitter, and that Windows' HTTP service loads (no request is made).
 /// # Errors
 /// One fault line.

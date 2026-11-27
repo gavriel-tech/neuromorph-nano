@@ -14,6 +14,7 @@ import AgentCalls from "@/components/AgentCalls";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { Dot, Masked, Reticle } from "@/components/ui";
+import { useRail } from "@/components/Workspace";
 import { ago, useApi, useApiLevel, type Join, type PackView, type SessionReply, type SessionState } from "@/lib/api";
 import { useNow } from "@/lib/clock";
 import { API_SESSION, placeShort, primesOf, primeWord, stateBg, stateWord, useProjectKey } from "@/lib/evidence";
@@ -41,19 +42,81 @@ function isCheck(c: { kind?: string; class?: string }): boolean {
   return /^(test|build|check|lint)$/.test(c.kind ?? "") || /test|build|check|clippy/.test(c.class ?? "");
 }
 
-/** What followed one pack, as a path: the pack, then each finding in the order the rules ran. */
-function PackPath({ id, at, label, ask, view, now }: { id: string; at: number; label: string; ask?: string | null; view?: PackView | null; now: number }) {
+/** Detailed side-panel view for one context pack / prime from the session trace. */
+function PackPathDetail({ id, at, label, ask, view, now }: { id: string; at: number; label: string; ask?: string | null; view?: PackView | null; now: number }) {
   const joins: Join[] = view?.joins ?? [];
   const open = view?.window === "open" || (!view?.closed && joins.length === 0);
+  const fullAsk = ask ? scrub(ask) : null;
+  return (
+    <div className="grid gap-3" data-e2e="pack-path-detail">
+      <div className="mono grid gap-1 border-b border-line/60 pb-2.5 text-[11px]">
+        <div className="text-text">{label}</div>
+        <div className="text-[10px] text-faint">
+          id: {id}
+          {now > 0 ? ` · ${ago(at, now)}` : ""} · {new Date(at).toLocaleString()}
+        </div>
+        <div className="text-[10px] text-quiet">
+          {open ? "window open · judged when the turn ends" : view?.closed ? `closed · ${view.closed}` : `${joins.length} outcome(s)`}
+        </div>
+      </div>
+      <div className="grid gap-1">
+        <span className="eyebrow text-muted">Question</span>
+        {fullAsk ? (
+          <p className="read whitespace-pre-wrap break-words border-l-2 border-sense-pale pl-3 text-[12px] leading-relaxed text-text">{fullAsk}</p>
+        ) : (
+          <p className="mono text-[11px] text-quiet">Question text was not recorded for this item.</p>
+        )}
+      </div>
+      <div className="grid gap-1.5 border-t border-line/60 pt-2.5">
+        <span className="eyebrow text-muted">What followed ({joins.length})</span>
+        {joins.length === 0 ? (
+          <p className="mono text-[10.5px] text-quiet">{open ? "Still waiting for the turn to end." : "No follow-up events recorded."}</p>
+        ) : (
+          <ul className="grid gap-2">
+            {joins.map((j, i) => (
+              <li key={i} className="mono grid gap-0.5 border-l border-line-strong pl-2.5 text-[10.5px]">
+                <div className="flex items-center gap-1.5 text-text">
+                  <i aria-hidden className={`inline-block h-1.5 w-1.5 ${stateBg(j.state)}`} />
+                  <span>{j.rule}</span>
+                  <span className="text-muted">· {stateWord(j.state)}</span>
+                  {j.strength && <span className="text-faint">({j.strength})</span>}
+                </div>
+                {j.event?.place && <div className="text-[10px] text-faint">{placeShort(j.event.place)}</div>}
+                {j.why && <div className="read text-[11px] text-muted">{j.why}</div>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/** What followed one pack, as a path: the pack, then each finding in the order the rules ran. */
+function PackPath({ id, at, label, ask, view, now }: { id: string; at: number; label: string; ask?: string | null; view?: PackView | null; now: number }) {
+  const rail = useRail();
+  const joins: Join[] = view?.joins ?? [];
+  const open = view?.window === "open" || (!view?.closed && joins.length === 0);
+  const openDetail = () =>
+    rail.show({
+      key: `pack:${id}`,
+      title: label,
+      body: <PackPathDetail id={id} at={at} label={label} ask={ask} view={view} now={now} />,
+    });
   return (
     <li className="flex min-w-0 flex-wrap items-center gap-x-0 gap-y-1 py-[3px]">
-      <span className="mono flex shrink-0 items-center gap-1.5 text-[10.5px] text-muted">
+      <button
+        type="button"
+        onClick={openDetail}
+        title="Open full question and follow-up details"
+        className="press mono flex shrink-0 items-center gap-1.5 text-[10.5px] text-muted hover:text-text"
+      >
         <i aria-hidden className="inline-block h-1.5 w-1.5 rotate-45 bg-sense-pale" />
         {label}
-      </span>
+      </button>
       {ask !== undefined && (
-        <span className="mono ml-2 min-w-0 max-w-[16rem] truncate text-[10.5px] text-faint">
-          <Masked id={`ask:${id}`} shown="question hidden" full={ask ? scrub(ask) : null} />
+        <span className="mono ml-2 min-w-0 max-w-[20rem] truncate text-[10.5px] text-faint">
+          <Masked id={`ask:${id}`} shown="question hidden" full={ask ? scrub(ask) : null} onDetail={openDetail} />
         </span>
       )}
       {now > 0 && <span className="mono ml-2 shrink-0 text-[10px] text-quiet">{ago(at, now)}</span>}

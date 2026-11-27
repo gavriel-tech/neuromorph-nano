@@ -59,19 +59,14 @@ const BUILD = process.env.NEXT_PUBLIC_BUILD_STAMP ?? "unknown";
 
 type AirGap = { air_gap?: boolean; loopback_only?: boolean; lan_listeners?: number };
 
-/** What leaves this machine, as GET /api/airgap reports it; nothing is claimed before it answers. */
+/** Shows a short status only when air gap or LAN sharing is active; local-only is the default. */
 function IsolationLine() {
-  const { data, error } = useApi<AirGap>("/api/airgap", 30000);
-  if (!data) return error ? <div className="mt-2.5 text-faint">Network isolation not reported.</div> : null;
+  const { data } = useApi<AirGap>("/api/airgap", 30000);
+  if (!data) return null;
   const lan = (data.lan_listeners ?? 0) > 0 || data.loopback_only === false;
-  const words = data.air_gap
-    ? "Air gap on. The Nano sends nothing off this machine."
-    : lan
-      ? "Shared on your local network (LAN on)."
-      : data.loopback_only
-        ? "Local only. The Nano sends nothing off this machine; downloads only when you ask."
-        : "Network isolation not reported.";
-  return <div className={`mt-2.5 ${lan && !data.air_gap ? "text-attention" : "text-faint"}`}>{words}</div>;
+  if (data.air_gap) return <div className="mono mt-2 text-[10px] text-faint">Air gap on</div>;
+  if (lan) return <div className="mono mt-2 text-[10px] text-attention">LAN sharing on</div>;
+  return null;
 }
 
 /* ------------------------------------------------------------------ system meters */
@@ -224,18 +219,23 @@ function EngineStatus({ compact = false }: { compact?: boolean }) {
     <div className={compact ? "text-xs" : "border-t border-line pt-4 text-xs"}>
       <div className="flex items-center gap-2">
         <Dot tone={!data && !error ? "muted" : !online ? "error" : engineOn ? "verified" : "attention"} />
-        <span className={`whitespace-nowrap ${!online ? (error ? "text-error" : "text-muted") : engineOn ? "text-text" : "text-muted"}`}>
+        <span className={`min-w-0 leading-snug ${compact ? "whitespace-nowrap" : ""} ${!online ? (error ? "text-error" : "text-muted") : engineOn ? "text-text" : "text-muted"}`}>
           {!data && !error
             ? "Connecting"
             : !online
               ? "Offline"
               : engineOn
                 ? servingN > 1 ? `Serving ${servingN}` : "Serving"
-                : servingN === null
-                  ? (compact ? "Up" : "Interface up · serving not reported")
-                  : compact ? "Not serving" : "Interface up · not serving"}
+                : compact
+                  ? (servingN === null ? "Up" : "Not serving")
+                  : "Interface up"}
         </span>
       </div>
+      {!compact && online && !engineOn && (
+        <div className="mono mt-0.5 pl-3.5 text-[10.5px] text-faint">
+          {servingN === null ? "serving status not reported" : "engine not serving"}
+        </div>
+      )}
       {!compact && (
         <div className={`mono mt-1.5 text-[10px] text-quiet ${SHORT_HIDE}`} data-build>
           {data ? `v${data.version} · ` : ""}build {BUILD} UTC
@@ -305,6 +305,9 @@ export default function Shell({ children }: { children: ReactNode }) {
                     key={n.href}
                     href={n.href}
                     aria-current={active ? "page" : undefined}
+                    onClick={() => {
+                      if (active) window.dispatchEvent(new CustomEvent("nm:nav-reset", { detail: { href: n.href } }));
+                    }}
                     className={`press group relative flex h-9 shrink-0 items-center gap-3 px-3 text-[13px] [@media(max-height:1040px)]:h-[34px] [@media(max-height:860px)]:h-8 ${active ? "text-text" : "text-faint hover:text-text"}`}
                   >
                     {active && <span aria-hidden className="absolute top-2 bottom-2 left-0 w-[2px] bg-sense-pale shadow-[0_0_10px_rgb(127_176_255/0.6)]" />}
@@ -368,6 +371,10 @@ export default function Shell({ children }: { children: ReactNode }) {
                         key={n.href}
                         href={n.href}
                         aria-current={active ? "page" : undefined}
+                        onClick={() => {
+                          if (active) window.dispatchEvent(new CustomEvent("nm:nav-reset", { detail: { href: n.href } }));
+                          setMenu((m) => ({ ...m, open: false }));
+                        }}
                         className={`press flex h-11 items-center gap-3 px-3 text-sm ${active ? "text-text underline decoration-sense-pale underline-offset-4" : "text-muted"}`}
                       >
                         <span className={active ? "text-text" : "text-faint"}>

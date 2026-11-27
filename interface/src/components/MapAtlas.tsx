@@ -152,7 +152,7 @@ export function AtlasFilters({ filter, setFilter, view, setView }: { filter: Map
         <span className="ml-auto flex items-center gap-0" role="radiogroup" aria-label="View">
           {(["atlas", "list", "cartridges"] as const).map((v) => (
             <button key={v} type="button" role="radio" aria-checked={view === v} onClick={() => setView(v)} className={`${chip} -ml-px ${view === v ? chipOn : chipOff}`} title={VIEW_TITLE[v]} data-e2e="pmap-view" data-view={v}>
-              {v}
+              {v === "cartridges" ? "viewer" : v}
             </button>
           ))}
         </span>
@@ -218,7 +218,23 @@ function StateBar({ maps }: { maps: MapRow[] }) {
 }
 
 /** The layers of one MicroModel: per layer, the shown maps covering it, stacked by kind. */
-function LayerHeat({ maps, total, layer, lit, onLayer, onHover }: { maps: MapRow[]; total: number; layer: number | null; lit: Lit | null; onLayer: (l: number | null) => void; onHover: (l: number | null) => void }) {
+function LayerHeat({
+  maps,
+  total,
+  layer,
+  lit,
+  onLayer,
+  onOpenLayer,
+  onHover,
+}: {
+  maps: MapRow[];
+  total: number;
+  layer: number | null;
+  lit: Lit | null;
+  onLayer: (l: number | null) => void;
+  onOpenLayer?: (l: number) => void;
+  onHover: (l: number | null) => void;
+}) {
   const cols = useMemo(
     () =>
       Array.from({ length: total }, (_, i) => {
@@ -233,7 +249,7 @@ function LayerHeat({ maps, total, layer, lit, onLayer, onHover }: { maps: MapRow
   const bare = cols.filter((c) => c.on.length === 0).length;
   return (
     <div className="grid gap-0.5">
-      <div className="flex h-9 w-full items-end gap-px" role="group" aria-label="Layers: hover one to light the maps on it, click it to show only those" onMouseLeave={() => onHover(null)}>
+      <div className="flex h-9 w-full items-end gap-px" role="group" aria-label="Layers: hover one to light the maps on it, click to open that layer in the Parameter Editor, shift-click to filter atlas" onMouseLeave={() => onHover(null)}>
         {cols.map((c, i) => {
           const hl = lit?.layers.has(i) ?? false;
           const dim = lit !== null && lit.layers.size > 0 && !hl;
@@ -242,10 +258,13 @@ function LayerHeat({ maps, total, layer, lit, onLayer, onHover }: { maps: MapRow
               key={i}
               type="button"
               aria-pressed={layer === i}
-              onClick={() => onLayer(layer === i ? null : i)}
+              onClick={(e) => {
+                if (onOpenLayer && !e.shiftKey) onOpenLayer(i);
+                else onLayer(layer === i ? null : i);
+              }}
               onMouseEnter={() => onHover(i)}
               onFocus={() => onHover(i)}
-              title={`layer ${i}: ${c.on.length} ${c.on.length === 1 ? "map" : "maps"}${c.kinds.length ? ` (${c.kinds.map(([k, n]) => `${n} ${k}`).join(", ")})` : ""}`}
+              title={`layer ${i}: ${c.on.length} ${c.on.length === 1 ? "map" : "maps"}${c.kinds.length ? ` (${c.kinds.map(([k, n]) => `${n} ${k}`).join(", ")})` : ""}${onOpenLayer ? " · click to open layer in Parameter Editor (shift+click to filter atlas)" : ""}`}
               className={`press relative flex h-full min-w-0 flex-1 flex-col-reverse bg-line/30 transition-opacity hover:bg-line/70 ${layer === i ? "outline outline-1 outline-text" : hl ? "outline outline-1 outline-sense-pale/70" : ""} ${dim ? "opacity-35" : ""}`}
             >
               {c.on.length > 0 && (
@@ -322,8 +341,8 @@ function Tile({ m, f, picked, selected, lit, total, onPick, onHover }: { m: MapR
   );
 }
 
-/** The cartridges a lane's maps feed, in version order; hover one to light what made it. */
-function Feeds({ r, jf, lit, onHover }: { r: RoleMaps; jf: JobFilter[]; lit: Lit | null; onHover: (id: string | null) => void }) {
+/** The cartridges a lane's maps feed, in version order; hover one to light what made it, click to open in Parameter Viewer. */
+function Feeds({ r, jf, lit, onHover, onOpen }: { r: RoleMaps; jf: JobFilter[]; lit: Lit | null; onHover: (id: string | null) => void; onOpen?: (key: string) => void }) {
   const carts = useMemo(() => {
     const ids = new Set<string>();
     for (const m of r.maps) {
@@ -346,20 +365,37 @@ function Feeds({ r, jf, lit, onHover }: { r: RoleMaps; jf: JobFilter[]; lit: Lit
         const glow = lit?.carts.has(c.id) ?? false;
         const dim = lit !== null && !glow;
         const prev = carts[i - 1];
+        const openKey = f ? `filter:${r.role}/${f.job}` : c.id;
         return (
           <span key={c.id} className="flex items-center gap-1">
             {prev && prev.kind !== c.kind && <span aria-hidden className="mono mx-1 text-[10px] text-quiet">›</span>}
-            <span
-              tabIndex={0}
-              onMouseEnter={() => onHover(c.id)}
-              onFocus={() => onHover(c.id)}
-              onBlur={() => onHover(null)}
-              title={`${c.id}: ${c.kind === "base" ? "base cartridge" : c.kind === "filter-cart" ? "job filter cartridge" : c.kind === "comp" ? "compensation cartridge" : "cartridge"}${serving ? ", serving now" : ""}${f ? `, ${f.enabled !== false ? "plugged in" : "unplugged"}` : ""}. Hover to light the maps it comes from and the ones made on it.`}
-              className={`mono inline-flex cursor-default items-center gap-1.5 border px-1.5 py-0.5 text-[10px] transition-opacity ${serving ? "border-learned/60 text-text" : glow ? "border-sense-pale/70 text-text" : "border-line text-faint"} ${dim ? "opacity-30" : ""}`}
-            >
-              <i aria-hidden className={`inline-block h-1.5 w-1.5 shrink-0 ${c.kind === "base" ? "bg-learned" : c.kind === "filter-cart" ? `rotate-45 ${f?.enabled !== false ? "bg-signal" : "border border-faint"}` : "border border-learned"}`} />
-              {c.id}
-            </span>
+            {onOpen ? (
+              <button
+                type="button"
+                onClick={() => onOpen(openKey)}
+                onMouseEnter={() => onHover(c.id)}
+                onFocus={() => onHover(c.id)}
+                onBlur={() => onHover(null)}
+                title={`${c.id}: ${c.kind === "base" ? "base cartridge" : c.kind === "filter-cart" ? "job filter cartridge" : c.kind === "comp" ? "compensation cartridge" : "cartridge"}${serving ? ", serving now" : ""}${f ? `, ${f.enabled !== false ? "plugged in" : "unplugged"}` : ""}. Click to open in Parameter Viewer; hover to light its maps.`}
+                className={`press mono inline-flex items-center gap-1.5 border px-1.5 py-0.5 text-[10px] transition-opacity hover:border-sense-pale hover:text-text ${serving ? "border-learned/60 text-text" : glow ? "border-sense-pale/70 text-text" : "border-line text-faint"} ${dim ? "opacity-30" : ""}`}
+              >
+                <i aria-hidden className={`inline-block h-1.5 w-1.5 shrink-0 ${c.kind === "base" ? "bg-learned" : c.kind === "filter-cart" ? `rotate-45 ${f?.enabled !== false ? "bg-signal" : "border border-faint"}` : "border border-learned"}`} />
+                {c.kind === "base" && <span className="text-quiet">base cart</span>}
+                <span>{c.id}</span>
+              </button>
+            ) : (
+              <span
+                tabIndex={0}
+                onMouseEnter={() => onHover(c.id)}
+                onFocus={() => onHover(c.id)}
+                onBlur={() => onHover(null)}
+                title={`${c.id}: ${c.kind === "base" ? "base cartridge" : c.kind === "filter-cart" ? "job filter cartridge" : c.kind === "comp" ? "compensation cartridge" : "cartridge"}${serving ? ", serving now" : ""}${f ? `, ${f.enabled !== false ? "plugged in" : "unplugged"}` : ""}. Hover to light the maps it comes from and the ones made on it.`}
+                className={`mono inline-flex cursor-default items-center gap-1.5 border px-1.5 py-0.5 text-[10px] transition-opacity ${serving ? "border-learned/60 text-text" : glow ? "border-sense-pale/70 text-text" : "border-line text-faint"} ${dim ? "opacity-30" : ""}`}
+              >
+                <i aria-hidden className={`inline-block h-1.5 w-1.5 shrink-0 ${c.kind === "base" ? "bg-learned" : c.kind === "filter-cart" ? `rotate-45 ${f?.enabled !== false ? "bg-signal" : "border border-faint"}` : "border border-learned"}`} />
+                {c.id}
+              </span>
+            )}
           </span>
         );
       })}
@@ -368,7 +404,7 @@ function Feeds({ r, jf, lit, onHover }: { r: RoleMaps; jf: JobFilter[]; lit: Lit
 }
 
 function Lane({ r, filter, setFilter, hot, setHot, picked, onPick, addPicks }: { r: RoleMaps; filter: MapFilter; setFilter: (f: MapFilter) => void; hot: Hot; setHot: (h: Hot) => void; picked: string[]; onPick: (key: string, multi: boolean) => void; addPicks: (keys: string[]) => void }) {
-  const { layerCount, filtersOf, busy, run } = useMaps();
+  const { layerCount, filtersOf, busy, run, openObject } = useMaps();
   const { selected } = useSelectMap();
   const total = layerCount(r.model);
   const jf = filtersOf(r.role);
@@ -377,12 +413,35 @@ function Lane({ r, filter, setFilter, hot, setHot, picked, onPick, addPicks }: {
   const shown = r.maps.filter((m) => passes(m, filter)).sort((a, b) => STATE_ORDER(a) - STATE_ORDER(b) || b.bytes - a.bytes);
   const clean = shown.filter(cleanable);
   const plugged = jf.filter((x) => x.enabled !== false).length;
+  const primaryKey = r.serving_base ?? `open:${r.model}`;
   return (
     <section className="grid min-w-0 gap-3 border-t border-line pt-4" data-e2e="pmap-lane" data-role={r.role}>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <span className="mono text-[13px] uppercase tracking-[0.16em] text-text">{roleTitle(r.role)}</span>
-        <BaseMark base={r.serving_base} quiet />
-        <WeightsMark model={r.model} />
+        {openObject && r.serving_base ? (
+          <button
+            type="button"
+            onClick={() => openObject(r.serving_base!)}
+            className="press border-b border-transparent hover:border-sense-pale"
+            title={`Open base cartridge ${r.serving_base} in the Parameter Editor`}
+          >
+            <BaseMark base={r.serving_base} quiet labeled />
+          </button>
+        ) : (
+          <BaseMark base={r.serving_base} quiet labeled />
+        )}
+        {openObject ? (
+          <button
+            type="button"
+            onClick={() => openObject(`open:${r.model}`)}
+            className="press border-b border-transparent hover:border-sense-pale"
+            title={`Open upstream open weights (${r.model}) in the Parameter Editor`}
+          >
+            <WeightsMark model={r.model} labeled />
+          </button>
+        ) : (
+          <WeightsMark model={r.model} labeled />
+        )}
         <span className="mono ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-faint">
           <StateBar maps={r.maps} />
           <span>
@@ -405,7 +464,18 @@ function Lane({ r, filter, setFilter, hot, setHot, picked, onPick, addPicks }: {
             return (
               <span key={f.job} className="mono -my-2 inline-flex items-center gap-0.5 text-[10.5px]" onMouseEnter={() => setHot({ role: r.role, t: "map", id: `job-filter-${f.job}.json` })} onMouseLeave={() => setHot(null)}>
                 <Switch on={on} busy={busy} label={`${f.job}: ${on ? "unplug" : "plug in"}`} onChange={() => void run(`${r.role}/job-filter-${f.job}.json`, "/api/surgery/job-filter", { role: r.role, job: f.job, action: on ? "disable" : "enable" }, `Job filter ${roleTitle(r.role)}/${f.job} ${on ? "unplugged" : "plugged in"}; the next call uses the change.`)} />
-                <span className={on ? "text-text" : "text-faint"}>{f.job}</span>
+                {openObject ? (
+                  <button
+                    type="button"
+                    onClick={() => openObject(`filter:${r.role}/${f.job}`)}
+                    className={`press border-b border-transparent hover:border-sense-pale ${on ? "text-text" : "text-faint hover:text-text"}`}
+                    title={`Open job filter ${r.role}/${f.job} in the Parameter Editor`}
+                  >
+                    {f.job}
+                  </button>
+                ) : (
+                  <span className={on ? "text-text" : "text-faint"}>{f.job}</span>
+                )}
                 {typeof f.layers === "number" && <span className="text-quiet">· {f.layers}L</span>}
               </span>
             );
@@ -413,7 +483,17 @@ function Lane({ r, filter, setFilter, hot, setHot, picked, onPick, addPicks }: {
         </div>
       )}
 
-      {total !== null && <LayerHeat maps={shown} total={total} layer={filter.layer} lit={lit} onLayer={(l) => setFilter({ ...filter, layer: l })} onHover={(l) => setHot(l === null ? null : { role: r.role, t: "layer", id: String(l) })} />}
+      {total !== null && (
+        <LayerHeat
+          maps={shown}
+          total={total}
+          layer={filter.layer}
+          lit={lit}
+          onLayer={(l) => setFilter({ ...filter, layer: l })}
+          onOpenLayer={openObject ? (l) => openObject(primaryKey, { layer: l }) : undefined}
+          onHover={(l) => setHot(l === null ? null : { role: r.role, t: "layer", id: String(l) })}
+        />
+      )}
 
       {shown.length === 0 ? (
         <p className="mono text-[10.5px] text-faint">no map of the {roleTitle(r.role)} matches what is shown</p>
@@ -442,7 +522,7 @@ function Lane({ r, filter, setFilter, hot, setHot, picked, onPick, addPicks }: {
         </div>
       )}
 
-      <Feeds r={r} jf={jf} lit={lit} onHover={(id) => setHot(id === null ? null : { role: r.role, t: "cart", id })} />
+      <Feeds r={r} jf={jf} lit={lit} onHover={(id) => setHot(id === null ? null : { role: r.role, t: "cart", id })} onOpen={openObject ? (k) => openObject(k, { layer: filter.layer }) : undefined} />
     </section>
   );
 }

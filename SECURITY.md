@@ -8,7 +8,7 @@ Please do not open a public issue or pull request for a security problem.
 Include the version (`neuromorph-nano --version`), what you found, the steps to reproduce it, and
 what it exposes. Fixes are released as a new version and recorded in `CHANGELOG.md`.
 
-Supported version: v0.1.0 (Windows x64), the current release.
+Supported version: v0.1.01 (Windows x64), the current release.
 
 ## Statement
 
@@ -19,18 +19,17 @@ The cargo commands it runs for build help and Step Check are passed `--offline`.
 - **Local only.** The MCP server talks to the agent over standard input and output. The interface
   server binds 127.0.0.1 and is not reachable from other machines, unless the control `network`
   is set to `view` or `control` (off by default; see below).
-- **Downloads only when you ask.** The only outbound requests are the ones you start: downloading
-  the upstream models and the base cartridges, and browsing or fetching from a cartridge source
+- **Downloads and publishing only when you ask.** The only outbound requests are the ones you start: downloading
+  the base cartridges, parameter maps and job filters, optional upstream open weights, browsing or fetching from a cartridge source
   (the official library `gavriel-tech/neuromorph-nano-cartridges` or a third-party Hugging Face
-  library you added). They go to huggingface.co through Windows' own HTTPS service (WinHTTP, part of every Windows; TLS and certificates stay with Windows); a file is kept only
-  once its SHA-256 matches. A Hugging Face token, when one is used, is read from `HF_TOKEN` or the
+  library you added), or explicitly publishing a local parameter map or non-base stack to Hugging Face (`source_publish`, confirmation-gated and audited). They go to huggingface.co through Windows' own HTTPS service (WinHTTP, part of every Windows; TLS and certificates stay with Windows); a downloaded file is kept only
+  once its SHA-256 matches. Public reads from the official library send no token by default. A Hugging Face token, when needed (explicit publishing, or a third-party source you marked as needing it), is read from `HF_TOKEN` or the
   `hf` login file, sent only to huggingface.co (never to the file servers a download is redirected to); for the fallback path, from a temporary header file (never on a command
-  line), and that file is removed afterwards. A third-party source gets a token only when you say
-  so. Files from any source go through the checks of the cartridge library on this machine: stacks arrive on trial, an
+  line), and that file is removed afterwards. Files from any source go through the checks of the cartridge library on this machine: stacks arrive on trial, an
   existing map is never replaced, and base cartridges come from the official library only.
 - **Air-Gap Mode.** The control `air_gap` (or `NANO_AIR_GAP=on` in the environment) keeps the
   interface on 127.0.0.1, turns off local network access and tablet pairing, and refuses every
-  download and remote listing. `GET /api/airgap` and `nm_settings op=airgap` report its state.
+  download, remote listing and publish upload. `GET /api/airgap` and `nm_settings op=airgap` report its state.
 - **Writes only from the interface.** The interface server accepts a change (a control or an
   undo) only with its local token, only as JSON, and only from its own pages or a local program
   that sends no browser origin. The token is made when the server starts, kept in memory only,
@@ -38,7 +37,7 @@ The cargo commands it runs for build help and Step Check are passed `--offline`.
   server (`http://localhost:3000`) is accepted only when the server is started with `--dev`. A
   request from any other site, without the token, or addressed to a host name other than
   127.0.0.1 or localhost is refused (403). Every accepted change is logged.
-- **Deletes are gated.** Deleting anything (a memory, a project's memory, a map, a cartridge
+- **Deletes are gated.** Deleting anything (a memory, a project's memory, a downloaded base cartridge, job filter or parameter map, a cartridge
   source, audit rows) is previewed first and confirmed in more than one step, and is audited.
 - **Tablets on the local network (opt in).** With `network` at `view` or `control`, the interface
   server also listens on this machine's private addresses for paired tablets: private and

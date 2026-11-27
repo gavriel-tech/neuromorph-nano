@@ -28,7 +28,7 @@
     {"id": "nmengn.drone", "version": 1, "hash": "f9bedeb534be4361165565c63b1148bee1e0640382949cb94689f27bf2dbc5df"},
     {"id": "nmengn.filter", "version": 1, "hash": "d220c95de7687e87532d5222768ea309fd14d2559c3cb577c4e0b7e0ce2e7040"},
     {"id": "nmengn.tentacle", "version": 1, "hash": "5a89d21c30fa90dd86ba1e3c4749a926af3d23fa8bb97442653043c717c2c18f"},
-    {"id": "nmengn.capacity", "version": 1, "hash": "16b7f3a2cca4a41761acc78192f10ac56d76ee3941129a0659c88b46172f08b2"},
+    {"id": "nmengn.capacity", "version": 1, "hash": "e88b263b4d66cde420c9b5825e8417b1a1c7b144c269ee560fec18e55044ce5d"},
     {"id": "nmengn.device", "version": 1, "hash": "5a5a6b5dba10d97ed29cea50e8452aca707ba25df8ef553f871090ce305cabc8"},
     {"id": "nmengn.limits", "version": 1, "hash": "f50f4cb0ab175f351189b7899e4f61736978bd27e2f8bdf89f5061567f12adcb"},
     {"id": "nmengn.autotune", "version": 1, "hash": "bb4ee9a64b3e5974a360eb9810db54447e4cba4c86d3b3158761327ce252ab87"},
@@ -38,5 +38,5 @@
   ],
   "lineage": [],
   "source": "in-house engine, Gavriel Technologies",
-  "hash": "b5377c7022cf8e640c07ca6fb62a995d39d6b0c792b8b64bacbced779e67b462"
+  "hash": "04f0a0dad7fc6ba7d8d2b505cfe36a8f3bfb643219585a77c9f3fdb9c700ca3f"
 }

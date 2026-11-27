@@ -437,7 +437,7 @@ function Recommendation({ reply, editable, onNote }: { reply: LimitsReply; edita
   return (
     <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-3" data-e2e="limits-recommended">
       <div className="eyebrow flex items-center justify-between gap-3">
-        <span>Recommended for this machine</span>
+        <span>Recommended</span>
         {(rec.tier_label ?? rec.tier) && (
           <span className="mono min-w-0 truncate text-text normal-case" title={rec.summary ?? rec.tier ?? undefined}>
             {rec.tier_label ?? rec.tier}

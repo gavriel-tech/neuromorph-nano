@@ -16,21 +16,48 @@
 // (CartridgeParams): every object holding parameters, read and edited into new versions.
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NoteLine } from "@/components/Controls";
 import { roleTitle } from "@/components/MicroModel";
 import MapAtlas, { AtlasFilters, MapSummary, type MapView } from "@/components/MapAtlas";
-import CartridgeParams, { ParamKindsKey, linkedKey } from "@/components/CartridgeParams";
+import CartridgeParams, { ParamKindsKey, ParamObjectPicker, linkedKey } from "@/components/CartridgeParams";
 import { BackupsLine } from "@/components/CartridgeRail";
+import { HFDownloadButton } from "@/components/HFDownloadManager";
 import ParamFocus from "@/components/ParamFocus";
 import { ALL_STATES, MapsCtx, cleanable, sum, type MapFilter } from "@/components/MapCore";
 import { useMapsState } from "@/components/MapsState";
 import { ImportPanel } from "@/components/MapInspector";
 import MapList from "@/components/MapList";
 import { AddFilter, ArchiveTab, KindsTab } from "@/components/MapRail";
-import Workspace, { RailSection } from "@/components/Workspace";
+import Workspace, { RailSection, useRail } from "@/components/Workspace";
 import { Failed, Placeholder } from "@/components/ui";
 import { bytes } from "@/lib/api";
+import { useHash } from "@/lib/hash";
+
+const PARAM_RAIL_FOR: Record<string, string> = { add: "add", build: "add", import: "import", archive: "archive", kinds: "kinds", about: "about" };
+
+function ParametersAddressToRail() {
+  const rail = useRail();
+  const open = useRef(rail.open);
+  const clear = useRef(rail.clear);
+  useEffect(() => {
+    open.current = rail.open;
+    clear.current = rail.clear;
+  });
+  const target = PARAM_RAIL_FOR[useHash().replace(/^#/, "")];
+  useEffect(() => {
+    if (target) open.current(target);
+  }, [target]);
+  useEffect(() => {
+    const onReset = (e: Event) => {
+      const href = (e as CustomEvent<{ href?: string }>).detail?.href;
+      if (href === "/parameters/") clear.current();
+    };
+    window.addEventListener("nm:nav-reset", onReset);
+    return () => window.removeEventListener("nm:nav-reset", onReset);
+  }, []);
+  return null;
+}
 
 const ABOUT = (
   <div className="grid">
@@ -81,21 +108,67 @@ export default function Parameters() {
   // Focus on one object's parameters (from Cartridges, "view parameters", or a lane row): the
   // middle becomes that object's working view; leaving it brings the atlas back.
   const [focus, setFocusState] = useState<string | null>(null);
+  const [activeMap, setActiveMapState] = useState<string | null>(null);
+  const [focusLayer, setFocusLayerState] = useState<number | null>(null);
   useEffect(() => {
-    const read = () => setFocusState(linkedKey());
+    const read = () => {
+      setFocusState(linkedKey());
+      const sp = new URLSearchParams(window.location.search);
+      setActiveMapState(sp.get("map"));
+      const lRaw = sp.get("layer");
+      const lNum = lRaw !== null && lRaw !== "" ? Number(lRaw) : NaN;
+      setFocusLayerState(Number.isInteger(lNum) && lNum >= 0 ? lNum : null);
+      const qRole = sp.get("role");
+      if (qRole) setFilter((prev) => (prev.role === qRole ? prev : { ...prev, role: qRole }));
+    };
+    const onReset = (e: Event) => {
+      const href = (e as CustomEvent<{ href?: string }>).detail?.href;
+      if (href !== "/parameters/") return;
+      window.history.pushState(null, "", "/parameters/");
+      setFocusState(null);
+      setActiveMapState(null);
+      setFocusLayerState(null);
+      setView("atlas");
+      setFilter((prev) => ({ ...prev, role: "all", layer: null, text: "" }));
+      window.scrollTo({ top: 0 });
+    };
     read();
     window.addEventListener("popstate", read);
     window.addEventListener("hashchange", read);
+    window.addEventListener("nm:nav-reset", onReset);
     return () => {
       window.removeEventListener("popstate", read);
       window.removeEventListener("hashchange", read);
+      window.removeEventListener("nm:nav-reset", onReset);
     };
   }, []);
-  const setFocus = (key: string | null) => {
-    window.history.pushState(null, "", key ? `/parameters/?cartridge=${encodeURIComponent(key)}` : "/parameters/");
+  const setFocus = useCallback((key: string | null, opts?: { map?: string; layer?: number | null; controls?: boolean }) => {
+    const nextMap = key ? (opts?.map ?? null) : null;
+    const nextLayer = key && typeof opts?.layer === "number" ? opts.layer : null;
+    const qs = new URLSearchParams();
+    if (key) qs.set("cartridge", key);
+    if (nextMap) qs.set("map", nextMap);
+    if (nextLayer !== null) qs.set("layer", String(nextLayer));
+    const hash = opts?.controls ? "#controls" : "";
+    const url = qs.toString() ? `/parameters/?${qs.toString()}${hash}` : "/parameters/";
+    window.history.pushState(null, "", url);
     setFocusState(key);
-    window.scrollTo({ top: 0 });
+    setActiveMapState(nextMap);
+    setFocusLayerState(nextLayer);
+    if (!opts?.controls) window.scrollTo({ top: 0 });
+  }, []);
+  const setActiveMap = (map: string | null) => {
+    if (!focus) {
+      setActiveMapState(map);
+      return;
+    }
+    const qs = new URLSearchParams();
+    qs.set("cartridge", focus);
+    if (map) qs.set("map", map);
+    window.history.pushState(null, "", `/parameters/?${qs.toString()}`);
+    setActiveMapState(map);
   };
+  const ctxApi = useMemo(() => ({ ...api, openObject: setFocus }), [api, setFocus]);
 
   const totals = useMemo(() => {
     const rows = roles.flatMap((r) => r.maps);
@@ -105,7 +178,7 @@ export default function Parameters() {
   }, [roles, surgery.data]);
 
   return (
-    <MapsCtx.Provider value={api}>
+    <MapsCtx.Provider value={ctxApi}>
       <Workspace
         title="Parameters"
         status={
@@ -165,12 +238,27 @@ export default function Parameters() {
         ]}
         about={ABOUT}
       >
-        {focus && <ParamFocus key={focus} k={focus} layerCount={api.layerCount} onLeave={() => setFocus(null)} onOpen={(k) => setFocus(k)} />}
+        <ParametersAddressToRail />
+        {focus && <ParamFocus key={`${focus}:${focusLayer ?? "all"}`} k={focus} layerCount={api.layerCount} activeMap={activeMap} initialLayer={focusLayer} onSelectMap={setActiveMap} onLeave={() => setFocus(null)} onOpen={(k) => setFocus(k)} />}
         {!focus && q.error && !q.data && <Failed error={q.error} />}
         {!focus && !q.data && !q.error && <Placeholder className="h-72" what="parameter maps" />}
         {!focus && q.data && (
           <div className="grid min-w-0 gap-5">
             <NoteLine note={note?.note ?? null} />
+            <div className="mono flex flex-wrap items-center gap-2.5 border border-line bg-bg-1 px-3 py-2 text-[10.5px]" data-e2e="param-viewer-quick">
+              <span className="uppercase tracking-[0.12em] text-muted">Parameter viewer</span>
+              <ParamObjectPicker onPick={(k) => setFocus(k)} placeholder="select any cartridge or parameter object..." className="min-w-[18rem] flex-1 sm:flex-none" />
+              <div className="ml-auto flex flex-wrap items-center gap-3">
+                <HFDownloadButton label="HF downloads" defaultCategory="all" />
+                <button
+                  type="button"
+                  onClick={() => setView(view === "cartridges" ? "atlas" : "cartridges")}
+                  className="press border-b border-sense-pale px-0.5 text-[10px] uppercase tracking-[0.1em] text-sense-pale hover:text-text"
+                >
+                  {view === "cartridges" ? "back to map atlas" : "browse all parameter objects"}
+                </button>
+              </div>
+            </div>
             <MapSummary filter={filter} setFilter={setFilter} />
             <AtlasFilters filter={filter} setFilter={setFilter} view={view} setView={setView} />
             {/* Both map views stay in the page; the one not chosen is hidden. */}

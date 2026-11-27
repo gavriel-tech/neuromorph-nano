@@ -785,10 +785,9 @@ Face repository and revision the card pins), `bytes`, `files`, `present`, `parti
 the serving list (`designs/base-cartridges.json`) names, with `key`, `present`, `on_disk` and its
 `path` in the Nano folder. Also `cartridge_repo` (the Hugging Face repository the base cartridges
 come from), `token` (whether a Hugging Face token is on this machine; never its value), `air_gap`
-and `job` (the download in progress or the last one). The official base cartridges come from the
-official library on Hugging Face, `gavriel-tech/neuromorph-nano-cartridges`; the Qwen3 open weights
-(Apache-2.0) are needed beside them (each base cartridge is checked against them when it is
-seated) and are the fallback in open mode. A file is placed only once its SHA-256 matches; a partial
+and `job` (the download in progress or the last one). The official base cartridges and active parameter maps/job filters come from the
+official public library on Hugging Face, `gavriel-tech/neuromorph-nano-cartridges` (no token required); the Qwen3 open weights
+(Apache-2.0) are optional (for fallback in open mode, output-parity reference checks, parameter mapping, and surgery). A file is placed only once its SHA-256 matches; a partial
 file resumes; one download runs at a time; nothing is fetched while the air gap is on.
 
 ### `/api/cartridge-sources` (v0.1.0)
@@ -934,10 +933,10 @@ pass the same gate.
 | `/api/cartridges/stack` | `{"id", "use", "cartridges": [keys in order], "description"?, "switch"?}` | Makes a stack, or a new version of one, through the cartridge library's stacking order; a new stack starts on trial (v0.1.0) |
 | `/api/cartridges/import` | `{"path": "<stack file on this machine>"}` | Imports a stack file exported by `library export`; every file hash-checked; arrives on trial; a base cartridge is refused (v0.1.0) |
 | `/api/models/roles` | `{"role": "reader" \| "writer" \| "embedder" \| "reranker", "model": "<id>" \| "default"}` | Chooses the model a role runs on from the next start; answers `{audit_id, line, roles}` (v0.1.0) |
-| `/api/downloads` | `{"what": "models:<id>" \| "cartridges", "only"?: "<name suffix>"}` | Starts a download in the background: one model's open weights, or the serving base cartridges from the official library; refused while the air gap is on or a download runs (v0.1.0) |
+| `/api/downloads` | `{"what": "models:<id>" \| "cartridges" \| "parameter-maps", "only"?: "<name suffix>"}` | Starts a download in the background: one model's optional open weights, the serving base cartridges, or the active parameter maps and job filters from the official public library; refused while the air gap is on or a download runs (v0.1.01 adds `"parameter-maps"`) |
 | `/api/training/distil/teach` | `{"action": "start", "set", "prompts", "instruction"?, "licence"?}`, `{"action": "next", "set", "count"?}` or `{"action": "answer", "set", "answers": [{"prompt_id" \| "prompt", "completion", "verdict"?, "paths"?, "tool"?, "score"?: 0..1}], "teacher"?, "licence"?}`; `GET` lists the sets | A live teacher: opens a teaching set, gives its open prompts, takes the teacher's answers into the teacher data (audited; undone in Audit). A local model answers a set through `/api/lab/build` with `{"kind": "teach", "set", "teacher"}` (v0.1.0) |
 | `/api/backups` | `{"action": "add", "url", "parts"?, "token"?}`, `{"action": "remove" \| "backup" \| "snapshots", "id"}`, `{"action": "preview", "id", "commit"}` or `{"action": "restore", "id", "commit", "confirm": true}` | Adds one of your repositories, takes it off the list (its contents stay), backs up the chosen parts as a new snapshot and sends it, lists the snapshots, shows what a restore would write, or restores one (each changed file copied aside first; Audit undoes it) (v0.1.0) |
-| `/api/cartridge-sources` | `{"action": "add", "repo": "<owner/name>", "kind"?, "revision"?, "token"?}`, or `{"action": "remove" \| "browse", "id"}`, or `{"action": "fetch", "id", "path"}` | Adds a third-party Hugging Face library, removes one (two-step delete; what was imported from it stays), lists a source's files (one request to huggingface.co), or fetches one listed file and imports it through its checks (v0.1.0) |
+| `/api/cartridge-sources` | `{"action": "add", "repo": "<owner/name>", "kind"?, "revision"?, "token"?}`, or `{"action": "remove" \| "browse" \| "fetch_all", "id"}`, or `{"action": "fetch", "id", "path"}`, or `{"action": "publish", "repo", "item_kind": "map" \| "stack", "item", "create_pr"?, "summary"?, "confirm"?: true}` | Adds a third-party Hugging Face library, removes one (two-step delete; what was imported from it stays), lists a source's files (one request to huggingface.co), fetches one listed file or all active maps/stacks (`fetch_all`) and imports them through the library checks, or uploads a local parameter map or non-base stack to Hugging Face (`publish`, confirmation-gated, air-gap blocked, audited; v0.1.01 adds `fetch_all` and `publish`) |
 
 ### Stated preferences (v0.1.0)
 

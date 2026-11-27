@@ -332,6 +332,35 @@ function servingWords(n: number | null): string {
   return n !== null ? `${n} serving ${n === 1 ? "process" : "processes"} active` : "A serving process is active";
 }
 
+function DriveStorageSummary() {
+  const storageQ = useApi<{ disk?: { path?: string; free_bytes?: number; total_bytes?: number } | null; disk_floor_gb?: number; below_floor?: boolean; total_bytes?: number }>("/api/storage", 15000);
+  const s = storageQ.data;
+  const disk = s?.disk;
+  if (!disk || typeof disk.free_bytes !== "number" || typeof disk.total_bytes !== "number") return null;
+  const drive = disk.path?.match(/^[A-Za-z]:\\/)?.[0] ?? (disk.path ? maskPath(disk.path) : "drive");
+  const usedShare = disk.total_bytes > 0 ? Math.min(100, Math.round(((disk.total_bytes - disk.free_bytes) / disk.total_bytes) * 100)) : 0;
+  return (
+    <div className="mt-2 grid gap-1.5 border-t border-line/60 pt-2.5" data-e2e="settings-drive-storage">
+      <div className="mono flex items-baseline justify-between gap-2 text-[10.5px]">
+        <span className="text-faint" title={disk.path ? maskPath(disk.path) : undefined}>Drive {drive}</span>
+        <span className={s?.below_floor ? "text-attention" : "text-text"}>
+          {bytes(disk.free_bytes)} free / {bytes(disk.total_bytes)}
+        </span>
+      </div>
+      <div className="h-1 w-full overflow-hidden bg-line/50">
+        <div className={`h-full ${s?.below_floor ? "bg-attention" : "bg-sense-pale"}`} style={{ width: `${usedShare}%` }} />
+      </div>
+      <div className="mono flex flex-wrap items-baseline justify-between gap-2 text-[10px] text-quiet">
+        <span>
+          {typeof s?.total_bytes === "number" ? `Nano ${bytes(s.total_bytes)}` : ""}
+          {typeof s?.disk_floor_gb === "number" ? ` · floor ${s.disk_floor_gb} GB` : ""}
+        </span>
+        <Link href="/storage/" className="link">storage</Link>
+      </div>
+    </div>
+  );
+}
+
 function HomeostasisPanel({ status }: { status?: Status | null }) {
   const controls = useApi<Control[] | { controls?: Control[] }>("/api/controls", 5000);
   const audit = useApi<Audit>("/api/audit", 5000);
@@ -504,6 +533,7 @@ function HomeostasisPanel({ status }: { status?: Status | null }) {
         <div className="grid content-start gap-2">
             <div className="eyebrow">This machine</div>
             <Capacity cap={machine.cap} gpuControl={byKey.get("budget.gpu_mb_max") ?? null} backend={live.reply?.backend ?? null} serving={serving} />
+            <DriveStorageSummary />
           </div>
       </div>
 

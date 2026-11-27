@@ -8,6 +8,40 @@ All notable changes to Neuromorph Nano are recorded here. The format follows
 
 Nothing yet.
 
+## [0.1.01] - 2026-11-27
+
+### Added
+
+- **Parameter maps, job filters, and stacks on Hugging Face (`gavriel-tech/neuromorph-nano-cartridges`):**
+  - Published the 14 active, verified (`outcome = "used"`) parameter maps and serving job filters under `parameter-maps/<role>/` and the shared hardware stack under `stacks/`, each logged with full SHA-256 checksums, build provenance, and plain-English descriptions in `MANIFEST.md` files.
+  - Added a floating, movable, resizable, scrollable **Hugging Face Downloads** manager window (`HF downloads` button on **Cartridges**, **Models**, and **Parameters**) uniting everything Hugging Face offers (base cartridges, job filters, parameter maps, shared stacks, and optional open weights) with category/role/search filters, explicit **what-it-maps** descriptions, multi-select checkboxes, inline confirmation, safe two-step `delete` on downloaded items, and a live sequential download queue; automatically hides decommissioned files under `archived/` (mirroring the active HF folder layout) and deduplicates to the latest version only; also exposed **Downloads** and **Sources** directly on the **Cartridges** page beside **Models**, added per-base-cartridge `download` buttons, and added `fetch all` (`source_fetch_all` over MCP/API).
+  - Added direct **Publish to Hugging Face** from **Models -> Libraries** (`source_publish` over MCP/API) using native zero-dependency WinHTTP `POST`, letting users upload local parameter maps or non-base stacks to their own Hugging Face repository or open a Pull Request against the official cartridge library (confirmation-gated, air-gap blocked, audited, with `hf upload` command guidance for >10 MiB LFS files).
+- **Expandable `info` descriptions:** Added quiet, collapsed-by-default `info` / `hide` toggles in **Models -> Downloads** and **Models -> Libraries** explaining what every base cartridge, job filter, parameter map, super-weights baseline, and stack does.
+- **Project drive storage in Settings:** Added exact drive storage (`Drive`, free / total space, Nano footprint, and disk floor) inside **Settings -> Machine -> This machine**.
+- **Parameter Viewer, parameter maps, masking, MicroModel layer controls, and Context Pack usability:**
+  - Added a universal grouped **Parameter Viewer** selector on `/parameters/` and inside the viewer header covering every parameter object (job filters, compensation/socket cartridges, adapters/lenses/units, preference cartridges, base cartridges, and optional open weights), with explicit `base cartridge` vs `open weights (upstream)` labels across the Parameters page.
+  - Made `base cartridge`, `open weights`, job filter names, `feeds` badges, and per-layer heat bars on `/parameters/` clickable directly into the Parameter Editor, and added an in-viewer `layer: all / L0..Ln` filter bar.
+  - Converted the **Parameter Inspector** into a floating, draggable, resizable, scrollable popup window (full-width heatmap with widened legend spacing and zero overlap) and added direct inline manual editing (`set`, `add`, `mul`, `scale`, `mask`, `freeze`, `unmask`) for both individual weights and multi-weight blocks, with double-click on any cell/block opening and focusing manual edit immediately.
+  - Added **Layers on/off** controls directly on the **Models** page (`/models/`) so you can toggle individual MicroModel layers on or off through the reversible parameter overlay (audited with Undo).
+  - Upgraded the **Parameters -> Build** panel into a 4-step workflow with a collapsible `how it works` guide, clickable existing filters to rebuild, layer range presets (`all`, `first half`, `second half`, `last 8`), and an interactive `share mapped out` slider for parameter maps.
+  - Clicking any cartridge on `/cartridges/` now shows a **Parameters** panel with direct links to open the Parameter Viewer, jump to overlay/mask/freeze controls, filter its MicroModel's parameter maps, or build a new filter/cartridge.
+  - Clicking any parameter map on `/parameters/` shows its connected parameter objects with direct **`view map on viewer`** and **`mask on viewer`** buttons; coordinate maps (`super-weights.json`) render gold weight pins directly over the heatmap, layer/filter maps highlight covered layers and tensors, and both `map` and `masks` support `on / emphasize / hide` toggles.
+  - Added responsive `+ / - / 1:1 exact / fit` zoom controls with a `pan / box zoom` toggle, added clickable context-pack questions that open full untruncated question and follow-up details in the side panel, added direct Audit deep-links from Live Activity rows, added inline `show / hide` question toggles on Audit center timeline and episode rows, and removed the redundant default local-only notice from the sidebar footer.
+
+### Changed
+
+- **Public Hugging Face library defaults:** Switched the official cartridge source and downloader to public no-token requests (`token: false` / `auth: false`) and updated `tools/install.ps1` so an expired local `HF_TOKEN` never causes `401` on public downloads.
+- **Active-only release bundling:** Filtered release packaging to ship strictly active (`outcome = "used"`) serving job filters, `super-weights.json` baselines, per-role `MANIFEST.md` manifests, and only the latest non-trial hardware cartridge (`gtx-1650-4gb-v3`), dropping superseded versions.
+- **Settings GPU tier labels:** Replaced wordy `"Small card (under 6 GB, ...)"` labels with concise tier labels (`CPU only`, `4 GB+ GPU`, `8-12 GB GPU`, `16 GB+ GPU`).
+- **Hugging Face license layout:** Moved upstream Qwen3 Apache-2.0 text to `third_party/APACHE-2.0.txt` so only the Neuromorph Nano `LICENSE` (`PolyForm Noncommercial 1.0.0`) sits at the repository root.
+
+### Fixed
+
+- Removed stale `"the official public library is not live yet"` banner in **Models -> Libraries** and private-repo token notice in **Models -> Downloads**.
+- Fixed `pmaps::check_import` rejecting `act-*-bias.json` files (`bias` key instead of `off`) and fixed incoming download path collisions when fetching same-named maps across multiple MicroModel roles.
+- Fixed uneven vertical spacing and text crowding in `Segmented` controls (including the `Build` tab's `job filter / parameter map / base cartridge` switcher on `/parameters/`) and crunched sidebar status wrapping (`Interface up` / `engine not serving`).
+- Fixed re-clicking a previously opened parameter object tile in `CartridgeParams` silently closing the side rail instead of reopening the Parameter Viewer.
+
 ## [0.1.0] - 2026-11-27
 
 The first public prototype release of **Neuromorph Nano** by Luis Jake Gabriel III (Gavriel Technologies),

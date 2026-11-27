@@ -14,7 +14,7 @@
 [CmdletBinding()]
 param(
   [string]$Root = '',
-  [string]$Version = 'v0.1.0',
+  [string]$Version = 'v0.1.01',
   [string]$OutDir = '',
   [string]$BinDir = '',
   [switch]$IncludeLab
@@ -145,9 +145,22 @@ try {
   $catSrc = Join-Path $libSrc 'cartridges\catalogue.json'
   if (-not (Test-Path -LiteralPath $catSrc)) { $catSrc = Join-Path $libSrc 'catalogue.json' }
   $catalogue = Get-Content -Raw -LiteralPath $catSrc | ConvertFrom-Json
-  $keep = @($catalogue.cartridges | Where-Object { $_.file -like 'base/*' -or $_.file -like 'hardware/*' } | Where-Object { Test-Path -LiteralPath (Join-Path $libSrc ("cartridges\" + ($_.file -replace '/', '\'))) })
+  # Keep only the serving base cartridges and the latest version of each hardware cartridge (no
+  # superseded versions, trial-only learned cartridges, or adapters).
+  $servingBaseKeys = @()
+  $baseDesignPath = Join-Path $Root 'designs\base-cartridges.json'
+  if (Test-Path -LiteralPath $baseDesignPath) {
+    $bd = Get-Content -Raw -LiteralPath $baseDesignPath | ConvertFrom-Json
+    foreach ($p in $bd.serving.PSObject.Properties) {
+      $servingBaseKeys += "$($p.Value.cartridge)@$($p.Value.version)"
+    }
+  }
+  $allPresent = @($catalogue.cartridges | Where-Object { $_.file -like 'base/*' -or $_.file -like 'hardware/*' } | Where-Object { Test-Path -LiteralPath (Join-Path $libSrc ("cartridges\" + ($_.file -replace '/', '\'))) })
+  $keepBase = @($allPresent | Where-Object { $_.file -like 'base/*' -and ($servingBaseKeys.Count -eq 0 -or $servingBaseKeys -contains "$($_.id)@$($_.version)") })
+  $keepHw = @($allPresent | Where-Object { $_.file -like 'hardware/*' } | Group-Object id | ForEach-Object { $_.Group | Sort-Object version -Descending | Select-Object -First 1 })
+  $keep = @($keepBase + $keepHw)
   $keepKeys = @($keep | ForEach-Object { "$($_.id)@$($_.version)" })
-  $stacks = @($catalogue.stacks | Where-Object { $s = $_; @($s.cartridges | Where-Object { $keepKeys -notcontains $_ }).Count -eq 0 })
+  $stacks = @($catalogue.stacks | Where-Object { $s = $_; (-not $s.trial) -and @($s.cartridges | Where-Object { $keepKeys -notcontains $_ }).Count -eq 0 } | Group-Object id | ForEach-Object { $_.Group | Sort-Object version -Descending | Select-Object -First 1 })
   $stackKeys = @($stacks | ForEach-Object { "$($_.id)@$($_.version)" })
   $active = New-Object PSObject
   if ($catalogue.active) {
@@ -167,9 +180,8 @@ try {
     $rel = 'cartridges/' + $c.file
     $src = Join-Path $libSrc ($rel -replace '/', '\')
     if ($c.file -like 'base/*') {
-      # `source`: where the file sits in the cartridge repository the installer reads. Until the
-      # public library opens (2026-11-26), that is the building backups repository, which keeps
-      # the serving version of each base cartridge at base/<role>/<id>.cartridge.
+      # `source`: where the file sits in the public Hugging Face cartridge library the installer
+      # reads (base/<role>/<id>.cartridge).
       $role = ($c.file -split '/')[1]
       $fetch += [ordered]@{ path = $rel; source = "base/$role/$($c.id).cartridge"; sha256 = $c.sha256; bytes = [int64]$c.bytes }
       $manifest = Join-Path (Split-Path $src -Parent) 'MANIFEST.md'
@@ -191,10 +203,37 @@ try {
   [IO.File]::WriteAllText((Join-Path $libDst 'cartridges\release-files.json'), ($filesDoc | ConvertTo-Json -Depth 8), (New-Object System.Text.UTF8Encoding($false)))
   Get-ChildItem -LiteralPath (Join-Path $libSrc 'parameter-maps') -Directory | ForEach-Object {
     $role = $_.Name
-    Get-ChildItem -LiteralPath $_.FullName -File -Filter 'job-filter-*.json' | ForEach-Object {
+    $lineagePath = Join-Path $_.FullName 'lineage.json'
+    $lin = $null
+    $usedNames = @()
+    if (Test-Path -LiteralPath $lineagePath) {
+      $lin = Get-Content -Raw -LiteralPath $lineagePath | ConvertFrom-Json
+      foreach ($prop in $lin.maps.PSObject.Properties) {
+        if ([string]$prop.Value.outcome -eq 'used') { $usedNames += $prop.Name }
+      }
+    }
+    $copied = @()
+    Get-ChildItem -LiteralPath $_.FullName -File | Where-Object {
+      (($_.Name -like 'job-filter-*.json') -or ($_.Name -eq 'super-weights.json')) -and
+      ($usedNames.Count -eq 0 -or $usedNames -contains $_.Name)
+    } | Sort-Object Name | ForEach-Object {
       $dest = Join-Path $libDst "parameter-maps\$role"
       New-Item -ItemType Directory -Force -Path $dest | Out-Null
       Copy-Item -Force -LiteralPath $_.FullName -Destination (Join-Path $dest $_.Name)
+      $sha = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+      $purpose = if ($_.Name -like 'job-filter-*') { 'serving' } else { 'base-build' }
+      $desc = if ($_.Name -eq 'job-filter-read.json') { 'Serving job filter for Reader: calibrated per-layer gain and bias tuning for workspace reading and cited span extraction.' }
+        elseif ($_.Name -eq 'job-filter-write.json') { 'Serving job filter for Writer: per-layer gain and bias tuning for idle L1-L4 world-model note writing.' }
+        elseif ($_.Name -eq 'job-filter-judge-code.json') { 'Serving job filter for Reranker: sharpens close-candidate code judging and decoy withholding.' }
+        elseif ($_.Name -eq 'job-filter-code-slice.json') { "Serving job filter for $($role): focuses $role layers on code-slice representation and retrieval." }
+        elseif ($_.Name -eq 'super-weights.json') { "Precision surgery baseline for $($role): critical high-leverage weight coordinates restored by cascade surgery." }
+        else { "Verified parameter map for $role." }
+      $copied += "| ``$($_.Name)`` | $purpose | $('{0:N0}' -f $_.Length) | ``$sha`` | $desc |"
+    }
+    if ($copied.Count -gt 0) {
+      $mDest = Join-Path $libDst "parameter-maps\$role\MANIFEST.md"
+      $mText = "# $role parameter maps & job filters`n`n| File | Purpose | Bytes | SHA-256 | What it does |`n|---|---|---|---|---|`n" + ($copied -join "`n") + "`n"
+      [IO.File]::WriteAllText($mDest, $mText, (New-Object System.Text.UTF8Encoding($false)))
     }
   }
 
@@ -225,8 +264,8 @@ try {
   }
 
   # Hygiene check 3: weights\ holds weight cards only (no model file ships), and library\ holds only
-  # the release catalogue and release-files.json (in cartridges\), MANIFEST.md files, job filters and
-  # hardware cartridges.
+  # the release catalogue and release-files.json (in cartridges\), MANIFEST.md files, serving job
+  # filters, active super-weights baselines, and hardware cartridges.
   Get-ChildItem -LiteralPath (Join-Path $stageBundle 'weights') -Recurse -File | ForEach-Object {
     if (@('part.json', 'README.md') -notcontains $_.Name) {
       throw "Hygiene failure: only weight cards may ship in weights\: $($_.FullName)"
@@ -236,7 +275,8 @@ try {
   Get-ChildItem -LiteralPath $libStaged -Recurse -File | ForEach-Object {
     $rel = $_.FullName.Substring($libStaged.Length + 1)
     $ok = ($rel -eq 'cartridges\release-catalogue.json') -or ($rel -eq 'cartridges\release-files.json') -or ($_.Name -eq 'MANIFEST.md') -or
-      ($rel -like 'parameter-maps\*\job-filter-*.json') -or ($rel -like 'cartridges\hardware\*')
+      ($rel -like 'parameter-maps\*\job-filter-*.json') -or ($rel -like 'parameter-maps\*\super-weights.json') -or
+      ($rel -like 'cartridges\hardware\*')
     if (-not $ok) {
       throw "Hygiene failure: not on the library allowlist: $($_.FullName)"
     }

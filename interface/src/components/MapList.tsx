@@ -34,7 +34,7 @@ function Coverage({ layers, total }: { layers: number[]; total: number | null })
 }
 
 function Row({ r, m, jf, total }: { r: RoleMaps; m: MapRow; jf: JobFilter[]; total: number | null }) {
-  const { now, busy, run, onNote, buildRunning, rebuild } = useMaps();
+  const { now, busy, run, onNote, buildRunning, rebuild, openObject } = useMaps();
   const { selected, select } = useSelectMap();
   const rail = useRail();
   const f = filterOf(jf, m);
@@ -74,7 +74,12 @@ function Row({ r, m, jf, total }: { r: RoleMaps; m: MapRow; jf: JobFilter[]; tot
         </div>
       )}
       <div className="flex flex-wrap items-start gap-x-4 gap-y-1">
-        <button type="button" onClick={() => select(id, true)} className="press mono border-b border-sense-pale px-0.5 text-[10px] uppercase tracking-[0.1em] text-sense-pale hover:text-text" title="Opens it in the side panel with its contents">
+        {f && openObject && (
+          <button type="button" onClick={() => openObject(`filter:${r.role}/${f.job}`)} className="press mono border-b border-sense-pale px-0.5 text-[10px] uppercase tracking-[0.1em] text-sense-pale hover:text-text" title="Open this job filter in the full Parameter Viewer">
+            parameter viewer
+          </button>
+        )}
+        <button type="button" onClick={() => select(id, true)} className={f && openObject ? linkBtn : "press mono border-b border-sense-pale px-0.5 text-[10px] uppercase tracking-[0.1em] text-sense-pale hover:text-text"} title="Opens it in the side panel with its contents">
           {m.kind === "job filter" ? "inspect / edit filter" : "inspect"}
         </button>
         <button type="button" onClick={() => select(id, false, true)} className={linkBtn} data-e2e="pmap-row-lineage" title="Opens it in the side panel with its lineage editor: made on, made by, purpose, outcome and note">
@@ -173,7 +178,7 @@ function Cleanup({ r, old, armed, setArmed }: { r: RoleMaps; old: MapRow[]; arme
 }
 
 export default function MapList({ filter }: { filter: MapFilter }) {
-  const { roles, layerCount, filtersOf } = useMaps();
+  const { roles, layerCount, filtersOf, openObject } = useMaps();
   const rail = useRail();
   const [armed, setArmed] = useState<string | null>(null);
   return (
@@ -193,10 +198,38 @@ export default function MapList({ filter }: { filter: MapFilter }) {
                 <span className="flex items-baseline gap-3">
                   <span className="text-text">{roleTitle(r.role)}</span>
                   <span className="normal-case tracking-normal">
-                    <BaseMark base={r.serving_base} quiet />
+                    {openObject && r.serving_base ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openObject(r.serving_base!);
+                        }}
+                        className="press border-b border-transparent hover:border-sense-pale"
+                        title={`Open base cartridge ${r.serving_base} in the Parameter Editor`}
+                      >
+                        <BaseMark base={r.serving_base} quiet labeled />
+                      </button>
+                    ) : (
+                      <BaseMark base={r.serving_base} quiet labeled />
+                    )}
                   </span>
                   <span className="normal-case tracking-normal">
-                    <WeightsMark model={r.model} />
+                    {openObject ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openObject(`open:${r.model}`);
+                        }}
+                        className="press border-b border-transparent hover:border-sense-pale"
+                        title={`Open upstream open weights (${r.model}) in the Parameter Editor`}
+                      >
+                        <WeightsMark model={r.model} labeled />
+                      </button>
+                    ) : (
+                      <WeightsMark model={r.model} labeled />
+                    )}
                   </span>
                 </span>
               }
