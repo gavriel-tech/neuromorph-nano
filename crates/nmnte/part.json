@@ -1,0 +1,29 @@
+{
+  "id": "nmnte",
+  "kind": "other",
+  "version": 1,
+  "parent": "nmapi",
+  "ports_in": [{"name": "task", "kind": "json", "required": true}],
+  "ports_out": [{"name": "result", "kind": "any", "required": false}],
+  "deps": ["nmjson", "nmtype"],
+  "config_schema": {},
+  "config_default": {"workers":0},
+  "subcomponents": [
+    {"id": "nmnte.graph", "version": 1, "hash": "bc04fa3430ed39131864b4caa319876d3f3f5158518386fb22ac1f339b1e7216"},
+    {"id": "nmnte.snapshot", "version": 1, "hash": "b75e01bb23c5f298d2d4d579fa200c131bec11eb4d9a709e2c969540df09b6ab"},
+    {"id": "nmnte.frame", "version": 1, "hash": "fffe27e9c694acf6331b62ef9ef68a13a55e91365e48eb96464c526b13909bd5"},
+    {"id": "nmnte.scheduler", "version": 1, "hash": "3e0b773acc5dc65863cb2395af141a1528fdd16c7a61aa310cbfa006e96d2b76"},
+    {"id": "nmnte.runtime", "version": 1, "hash": "032cc399748388f866bd51d2cdd3c879baade4dc8c0c6a852b1ffa7cb02446a5"},
+    {"id": "nmnte.registry", "version": 1, "hash": "eb7ed3a7f6a7f9f87d6c15c44b17b02678e859ed0d9a096d7c660ebba10ba5a4"},
+    {"id": "nmnte.compose", "version": 1, "hash": "db0575858feac63e31664dddf664b96af5b1995caa52f0c77c87ce815142a07c"},
+    {"id": "nmnte.topology", "version": 1, "hash": "bd26d00a6fdd23a5b443c4de39a6808284f4d142bf124d19f2b631e3a33c998e"},
+    {"id": "nmnte.binding", "version": 1, "hash": "69e63df182c8727dec133660f7e66129397b22dbfd00dc47f3c2464bf8ee9121"},
+    {"id": "nmnte.lifecycle", "version": 1, "hash": "495bc512c4dadcaebb05d1afc146926fc7d37367209e2b3ab945ffb0dccb87f3"},
+    {"id": "nmnte.plasticity", "version": 1, "hash": "35c7d6f9850aacef854b38f94ebb91106ffd4ae8f3febaa240d2d5227800736d"},
+    {"id": "nmnte.integrity", "version": 1, "hash": "713930a5e89aa8a7e81cd4cedf8b099c09f48ceda74b472c29d4a04616189ac9"},
+    {"id": "nmnte.homeo", "version": 1, "hash": "caeae2c9ac875471eef2734ce796c3d7c7d4602cee9d861008d7ff962e56f9e1"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "c5d9e00814e1d0d82787ccef40596dde0ab53546e86cd6f09fb7fbd211382750"
+}

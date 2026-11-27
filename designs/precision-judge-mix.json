@@ -1,0 +1,3 @@
+{
+  "reranker": {"default": 4, "L0": 8, "L1.ffn": 8, "L2.ffn": 8, "L3.ffn": 8, "L11.attn": 8}
+}

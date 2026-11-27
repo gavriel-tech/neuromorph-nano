@@ -1,0 +1,17 @@
+[package]
+name = "nmtool"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Build help, Step Check, improvement findings, proposal queue and conformance"
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmlex = { path = "../nmlex" }
+nmtype = { path = "../nmtype" }
+
+[lints]
+workspace = true

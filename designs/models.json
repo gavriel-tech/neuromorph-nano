@@ -1,0 +1,4 @@
+{
+  "note": "Models folder of the Neuromorph Nano. Released open weights are only read here, never written. A relative path is taken from the Nano's folder. NANO_MODELS overrides this.",
+  "dir": "weights"
+}

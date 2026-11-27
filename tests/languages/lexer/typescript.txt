@@ -1,0 +1,123 @@
+=== declaration
+const a = 1;
+---
+const a = 1 ;
+=== string holding a comment opener, then a line comment
+let s = "a//b"; // tail
+---
+let s = $S ;
+=== block comment before a name
+/* block */ x
+---
+x
+=== doc comment over a function
+/** doc
+ * more */
+function f() {}
+---
+function f ( ) { }
+=== plain template literal
+const t = `plain`;
+---
+const t = $S ;
+=== template with one expression
+`a${b}c`
+---
+$S b
+=== template nested in a template expression
+`x${`y${z}`}`
+---
+$S $S z
+=== braces inside a template expression
+`n=${ {a:1}.a }`
+---
+$S { a : 1 } . a
+=== regular expression after =
+const r = /ab+c/i;
+---
+const r = $R ;
+=== slash inside a character class
+x = /[/]/;
+---
+x = $R ;
+=== division chain
+a = b / c / d;
+---
+a = b / c / d ;
+=== division after a closing parenthesis
+(a + b) / 2
+---
+( a + b ) / 2
+=== regular expression after return
+return /x/.test(s);
+---
+return $R . test ( s ) ;
+=== regular expression as an argument
+s.replace(/\s+/g, " ")
+---
+s . replace ( $R , $S )
+=== arrow function with a typed parameter
+const f = (x: number) => x * 2;
+---
+const f = ( x : number ) => x * 2 ;
+=== generic function
+function id<T>(x: T): T { return x; }
+---
+function id < T > ( x : T ) : T { return x ; }
+=== optional chaining and nullish coalescing
+a?.b ?? c
+---
+a ? . b ? ? c
+=== single quotes with an escaped quote
+'it\'s'
+---
+$S
+=== double quotes with escaped quotes
+"say \"hi\""
+---
+$S
+=== block comment opener inside a string
+"/* not */"; y
+---
+$S ; y
+=== quote inside a line comment
+// it's fine
+z
+---
+z
+=== dollar identifiers
+const $el = $("#id");
+---
+const $el = $ ( $S ) ;
+=== decorator
+@Component({ selector: "app" })
+---
+@ Component ( { selector : $S } )
+=== numbers
+const n = 0x1F + 1_000 + 3.14;
+---
+const n = 0x1F + 1_000 + 3.14 ;
+=== JSX element
+<div className="x">{n}</div>
+---
+< div className = $S > { n } < / div >
+=== template in a JSX attribute
+className={`a ${b}`}
+---
+className = { $S b }
+=== object literal method
+const o = { m() { return 1; } };
+---
+const o = { m ( ) { return 1 ; } } ;
+=== union of string types
+type U = "a" | 'b';
+---
+type U = $S | $S ;
+=== unclosed string runs to the end
+"abc
+---
+$S
+=== comments between tokens
+a /* x */ . /* y */ b
+---
+a . b

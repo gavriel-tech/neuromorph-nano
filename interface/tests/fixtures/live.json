@@ -1,0 +1,554 @@
+{
+ "active": [
+  {
+   "elapsed_ms": 143799,
+   "label": "",
+   "model": "embedder",
+   "pid": 10940,
+   "since_ms": 1795577349657,
+   "stage": "dense"
+  }
+ ],
+ "at_ms": 1795577493456,
+ "backend": "cuda",
+ "backend_note": "Graphics card in use: NVIDIA GeForce GTX 1650 (compute 7.5, 4095 MB).",
+ "capacity": {
+  "card": {
+   "compute": "7.5",
+   "free_mb": 698,
+   "name": "NVIDIA GeForce GTX 1650",
+   "reserve_mb": 140,
+   "reserve_measured": true,
+   "total_mb": 4095
+  },
+  "gpu_ceiling_mb": 3955,
+  "hardware_threads": 12,
+  "host_available_mb": 10316,
+  "host_total_mb": 32436,
+  "limits": {
+   "cpu": {
+    "cap": null,
+    "effective_threads": 12,
+    "hardware_threads": 12,
+    "setting": "auto"
+   },
+   "mode": "four seated",
+   "ram": {
+    "available_mb": 10316,
+    "cache_ceiling_mb": null,
+    "cap_mb": null,
+    "room_mb": 10316,
+    "setting": "auto",
+    "used_mb": 8884
+   },
+   "vram": {
+    "cap_mb": null,
+    "cpu_only_next_start": false,
+    "cpu_only_now": false,
+    "driver_free_mb": 698,
+    "effective_free_mb": 698,
+    "note": "auto: the Nano uses what the driver reports free, less the live calls' room",
+    "setting": "auto",
+    "total_mb": 4095,
+    "used_mb": 2105
+   }
+  },
+  "ram_ceiling_mb": 24327,
+  "threads": 12
+ },
+ "models": [
+  {
+   "busy_ms": 144392,
+   "card": "qwen3-embedding-0.6b",
+   "executing": true,
+   "filters": [],
+   "forwards": 588,
+   "lens": null,
+   "precision": "q8",
+   "resident": true,
+   "role": "embedder",
+   "since_ms": 1795577493251,
+   "vram_mb": 381
+  },
+  {
+   "busy_ms": 19037,
+   "card": "qwen3-reranker-0.6b",
+   "executing": false,
+   "filters": [],
+   "forwards": 5,
+   "lens": null,
+   "precision": "q8",
+   "resident": true,
+   "role": "reranker",
+   "since_ms": null,
+   "vram_mb": 382
+  },
+  {
+   "busy_ms": 0,
+   "card": null,
+   "executing": false,
+   "filters": [],
+   "forwards": 0,
+   "lens": null,
+   "precision": null,
+   "resident": false,
+   "role": "reader",
+   "since_ms": null,
+   "vram_mb": 0
+  },
+  {
+   "busy_ms": 60882,
+   "card": "qwen3-1.7b",
+   "executing": false,
+   "filters": [],
+   "forwards": 130,
+   "lens": null,
+   "precision": "q8",
+   "resident": true,
+   "role": "writer",
+   "since_ms": null,
+   "vram_mb": 1196
+  }
+ ],
+ "pid": 10940,
+ "processes": [
+  {
+   "pid": 10940,
+   "project": "repo-6f34c1f1",
+   "state": "busy"
+  }
+ ],
+ "progress": [
+  {
+   "done": 640,
+   "kind": "dense",
+   "since_ms": 1795577349657,
+   "total": 2999
+  }
+ ],
+ "project": "repo-6f34c1f1",
+ "project_key": "repo-6f34c1f1",
+ "serving": 1,
+ "state": "busy",
+ "timeline": [
+  {
+   "at_ms": 1795577349657,
+   "counts": {
+    "done": 0,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "start",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 1,
+   "stage": "dense",
+   "summary": "progress dense start done 0 total 2999"
+  },
+  {
+   "at_ms": 1795577349675,
+   "counts": {},
+   "kind": "call",
+   "label": "nm_status",
+   "model": "",
+   "ms": 22173,
+   "path": null,
+   "pid": 10940,
+   "seq": 2,
+   "stage": "call",
+   "summary": "call nm_status 22173 ms"
+  },
+  {
+   "at_ms": 1795577362755,
+   "counts": {
+    "done": 64,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 3,
+   "stage": "dense",
+   "summary": "progress dense step done 64 total 2999"
+  },
+  {
+   "at_ms": 1795577375850,
+   "counts": {
+    "done": 128,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 4,
+   "stage": "dense",
+   "summary": "progress dense step done 128 total 2999"
+  },
+  {
+   "at_ms": 1795577387831,
+   "counts": {
+    "done": 192,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 5,
+   "stage": "dense",
+   "summary": "progress dense step done 192 total 2999"
+  },
+  {
+   "at_ms": 1795577398422,
+   "counts": {
+    "done": 256,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 6,
+   "stage": "dense",
+   "summary": "progress dense step done 256 total 2999"
+  },
+  {
+   "at_ms": 1795577405782,
+   "counts": {
+    "vram_mb": 1105
+   },
+   "kind": "writer",
+   "label": "seated",
+   "model": "writer",
+   "ms": 56027,
+   "path": null,
+   "pid": 10940,
+   "seq": 7,
+   "stage": "writer",
+   "summary": "writer seated 56027 ms vram_mb 1105"
+  },
+  {
+   "at_ms": 1795577406941,
+   "counts": {
+    "headroom_mb": 140,
+    "kept_resident": 1
+   },
+   "kind": "writer",
+   "label": "session",
+   "model": "writer",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 8,
+   "stage": "writer",
+   "summary": "writer session headroom_mb 140 kept_resident 1"
+  },
+  {
+   "at_ms": 1795577409915,
+   "counts": {},
+   "kind": "call",
+   "label": "nm_status",
+   "model": "",
+   "ms": 17,
+   "path": null,
+   "pid": 10940,
+   "seq": 9,
+   "stage": "call",
+   "summary": "call nm_status 17 ms"
+  },
+  {
+   "at_ms": 1795577409960,
+   "counts": {},
+   "kind": "writer",
+   "label": "preempted",
+   "model": "writer",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 10,
+   "stage": "writer",
+   "summary": "writer preempted"
+  },
+  {
+   "at_ms": 1795577409960,
+   "counts": {
+    "written": 0
+   },
+   "kind": "writer",
+   "label": "kept",
+   "model": "writer",
+   "ms": 3019,
+   "path": null,
+   "pid": 10940,
+   "seq": 11,
+   "stage": "writer",
+   "summary": "writer kept 3019 ms written 0"
+  },
+  {
+   "at_ms": 1795577413512,
+   "counts": {
+    "done": 320,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 12,
+   "stage": "dense",
+   "summary": "progress dense step done 320 total 2999"
+  },
+  {
+   "at_ms": 1795577425135,
+   "counts": {
+    "headroom_mb": 140,
+    "kept_resident": 1
+   },
+   "kind": "writer",
+   "label": "session",
+   "model": "writer",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 13,
+   "stage": "writer",
+   "summary": "writer session headroom_mb 140 kept_resident 1"
+  },
+  {
+   "at_ms": 1795577426569,
+   "counts": {
+    "done": 384,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 14,
+   "stage": "dense",
+   "summary": "progress dense step done 384 total 2999"
+  },
+  {
+   "at_ms": 1795577439544,
+   "counts": {
+    "results": 1
+   },
+   "kind": "writer",
+   "label": "note",
+   "model": "writer",
+   "ms": 12207,
+   "path": "README.md",
+   "pid": 10940,
+   "seq": 15,
+   "stage": "L1",
+   "summary": "writer L1 note 12207 ms results 1"
+  },
+  {
+   "at_ms": 1795577445936,
+   "counts": {
+    "done": 448,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 16,
+   "stage": "dense",
+   "summary": "progress dense step done 448 total 2999"
+  },
+  {
+   "at_ms": 1795577457479,
+   "counts": {
+    "results": 2
+   },
+   "kind": "writer",
+   "label": "note",
+   "model": "writer",
+   "ms": 17933,
+   "path": "README.md",
+   "pid": 10940,
+   "seq": 17,
+   "stage": "L1",
+   "summary": "writer L1 note 17933 ms results 2"
+  },
+  {
+   "at_ms": 1795577461900,
+   "counts": {
+    "done": 512,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 18,
+   "stage": "dense",
+   "summary": "progress dense step done 512 total 2999"
+  },
+  {
+   "at_ms": 1795577467276,
+   "counts": {
+    "results": 3
+   },
+   "kind": "writer",
+   "label": "note",
+   "model": "writer",
+   "ms": 9795,
+   "path": "README.md",
+   "pid": 10940,
+   "seq": 19,
+   "stage": "L1",
+   "summary": "writer L1 note 9795 ms results 3"
+  },
+  {
+   "at_ms": 1795577469937,
+   "counts": {},
+   "kind": "call",
+   "label": "nm_status",
+   "model": "",
+   "ms": 17,
+   "path": null,
+   "pid": 10940,
+   "seq": 20,
+   "stage": "call",
+   "summary": "call nm_status 17 ms"
+  },
+  {
+   "at_ms": 1795577470002,
+   "counts": {},
+   "kind": "writer",
+   "label": "preempted",
+   "model": "writer",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 21,
+   "stage": "writer",
+   "summary": "writer preempted"
+  },
+  {
+   "at_ms": 1795577470002,
+   "counts": {
+    "written": 3
+   },
+   "kind": "writer",
+   "label": "kept",
+   "model": "writer",
+   "ms": 44867,
+   "path": null,
+   "pid": 10940,
+   "seq": 22,
+   "stage": "writer",
+   "summary": "writer kept 44867 ms written 3"
+  },
+  {
+   "at_ms": 1795577473391,
+   "counts": {
+    "done": 576,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 23,
+   "stage": "dense",
+   "summary": "progress dense step done 576 total 2999"
+  },
+  {
+   "at_ms": 1795577484425,
+   "counts": {
+    "done": 640,
+    "total": 2999
+   },
+   "kind": "progress",
+   "label": "step",
+   "model": "",
+   "ms": 0,
+   "path": null,
+   "pid": 10940,
+   "seq": 24,
+   "stage": "dense",
+   "summary": "progress dense step done 640 total 2999"
+  },
+  {
+   "at_ms": 1795577487515,
+   "counts": {},
+   "kind": "call",
+   "label": "nm_context_pack",
+   "model": "",
+   "ms": 17577,
+   "path": null,
+   "pid": 10940,
+   "seq": 25,
+   "stage": "call",
+   "summary": "call nm_context_pack 17577 ms"
+  }
+ ],
+ "vram": {
+  "by_model": {
+   "embedder": 381,
+   "filters": 0,
+   "kv_windows": 0,
+   "reader": 0,
+   "reranker": 382,
+   "writer": 1196
+  },
+  "free_mb": 698,
+  "reserve_mb": 140,
+  "reserve_measured": true,
+  "residency": {
+   "bytes_released_mb": 1146,
+   "weights_released": 3,
+   "window_hits": 0,
+   "window_misses": 0,
+   "windows_held": 0,
+   "windows_released": 0
+  },
+  "total_mb": 4095,
+  "used_mb": 3397
+ },
+ "writer": {
+  "headroom_mb": 140,
+  "held": true,
+  "in_session": false,
+  "kept_resident": true,
+  "last_event": {
+   "at_ms": 1795577470002,
+   "kind": "kept"
+  },
+  "levels": {
+   "L1": 3,
+   "L2": 0,
+   "L3": 0,
+   "L4": 0
+  },
+  "preempted": 2,
+  "queue": 253,
+  "results": 3,
+  "sessions": 2
+ }
+}

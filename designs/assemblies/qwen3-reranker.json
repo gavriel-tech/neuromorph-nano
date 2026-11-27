@@ -1,0 +1,32 @@
+{
+  "base": "qwen3-reference",
+  "edges": [
+    {
+      "from": "nmengn.components#head",
+      "from_port": "logits",
+      "mode": {"kind": "direct"},
+      "to": "nmengn.components#label",
+      "to_port": "logits"
+    }
+  ],
+  "linear_precision": "f16",
+  "name": "qwen3-reranker",
+  "nodes": [
+    {
+      "config": {
+        "labels": ["yes","no"],
+        "op": "labelsoftmax"
+      },
+      "id": "nmengn.components#label",
+      "kind": "head",
+      "ports_in": [
+        {"kind": "tensor", "name": "logits", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "tensor", "name": "y", "required": true}
+      ]
+    }
+  ],
+  "note": "The released qwen3-reranker-0.6b as an addition to the shared Qwen3 structure (2026-11-09; written as an addition 2026-11-10): `qwen3-reference` with f16 linear weights, plus `labelsoftmax` over the head's \"yes\" and \"no\" logits (P(yes), as its model card specifies). Written by `nano-lab run s6 roles`; do not edit by hand.",
+  "version": 1
+}

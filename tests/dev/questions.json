@@ -1,0 +1,717 @@
+{
+ "note": "Development set of the Neuromorph Nano: questions about the Nano's own code, each with the file and line range that answers it. For development only; never a release measure.",
+ "questions": [
+  {
+   "id": "d01",
+   "kind": "name",
+   "question": "Where is the function that marks a pack low confidence when the reranker's best score is below the cut defined?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/whole.rs",
+     "anchor": "pub fn withhold_weak",
+     "lines": [
+      880,
+      895
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d02",
+   "kind": "name",
+   "question": "Which function decides whether a question is a relation, value, explain, name or behaviour question?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/whole.rs",
+     "anchor": "pub fn kind_of",
+     "lines": [
+      757,
+      778
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d03",
+   "kind": "name",
+   "question": "Where is the reranker's card prompt built from the instruction, query and document?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/roles.rs",
+     "anchor": "pub fn card_prompt",
+     "lines": [
+      180,
+      182
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d04",
+   "kind": "name",
+   "question": "Which function computes the softmax over the label logits at the last position?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/model.rs",
+     "anchor": "pub fn label_softmax",
+     "lines": [
+      716,
+      725
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d05",
+   "kind": "name",
+   "question": "Where is the Nano's own root folder found at run time?",
+   "answers": [
+    {
+     "file": "crates/nmtype/src/lib.rs",
+     "anchor": "pub fn find_root",
+     "lines": [
+      51,
+      74
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d06",
+   "kind": "name",
+   "question": "Which function writes the recomputed card hash into a part.json file?",
+   "answers": [
+    {
+     "file": "crates/nmcore/src/bin/main.rs",
+     "anchor": "fn seal(path",
+     "lines": [
+      595,
+      606
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d07",
+   "kind": "name",
+   "question": "Which function picks the pieces the second look reads together?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/decide.rs",
+     "anchor": "pub fn look_set",
+     "lines": [
+      259,
+      262
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d08",
+   "kind": "name",
+   "question": "Where is the struct GMap defined?",
+   "answers": [
+    {
+     "file": "crates/nmbrain/src/gmap.rs",
+     "anchor": "pub struct GMap",
+     "lines": [
+      77,
+      99
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d09",
+   "kind": "value",
+   "question": "What is the default decoy cut on the reranker's best P(yes)?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/whole.rs",
+     "anchor": "pub const WITHHOLD_BELOW",
+     "lines": [
+      875,
+      875
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d10",
+   "kind": "value",
+   "question": "What is the token cap for one input of the base-model embed and rerank roles?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/roles.rs",
+     "anchor": "pub const MAX_TOKENS",
+     "lines": [
+      19,
+      19
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d11",
+   "kind": "value",
+   "question": "What reciprocal rank constant does the dense lane's fusion use?",
+   "answers": [
+    {
+     "file": "crates/nmsubs/src/dense.rs",
+     "anchor": "pub const RRF_K",
+     "lines": [
+      37,
+      37
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d12",
+   "kind": "value",
+   "question": "What are the BM25 k1 and b parameters used by the drones?",
+   "answers": [
+    {
+     "file": "crates/nmpod/src/intake.rs",
+     "anchor": "pub const BM25_K1",
+     "lines": [
+      587,
+      587
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmpod/src/intake.rs",
+     "anchor": "pub const BM25_B",
+     "lines": [
+      588,
+      588
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d13",
+   "kind": "value",
+   "question": "How many uses promote a temporary note, and how long does an unused temporary note live?",
+   "answers": [
+    {
+     "file": "crates/nmmem/src/temp.rs",
+     "anchor": "Self { promote_uses: 3, ttl_ms: 24",
+     "lines": [
+      36,
+      36
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d14",
+   "kind": "value",
+   "question": "What is the maximum number of use sites read per question?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/whole.rs",
+     "anchor": "pub const USES_K",
+     "lines": [
+      799,
+      799
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d15",
+   "kind": "value",
+   "question": "How many pieces does the second look read at most?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/decide.rs",
+     "anchor": "pub const LOOK_PIECES",
+     "lines": [
+      237,
+      237
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d16",
+   "kind": "value",
+   "question": "How many lines may a Rust file have before improve flags it?",
+   "answers": [
+    {
+     "file": "crates/nmtool/src/stepcheck.rs",
+     "anchor": "pub const MAX_LINES",
+     "lines": [
+      12,
+      12
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d17",
+   "kind": "relation",
+   "question": "What calls card_rerank_set_capped?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/whole.rs",
+     "anchor": "nmengn::roles::card_rerank_set_capped(&reranker",
+     "lines": [
+      248,
+      248
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmengn/src/roles.rs",
+     "anchor": "card_rerank_set_capped(m, device, instruction, query, docs, None)",
+     "lines": [
+      214,
+      214
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmengn/src/roles.rs",
+     "anchor": "let g = card_rerank_set_capped(m, Device::Gpu",
+     "lines": [
+      230,
+      230
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d18",
+   "kind": "relation",
+   "question": "Which code calls decide::second_look?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/whole.rs",
+     "anchor": "crate::decide::second_look(&base",
+     "lines": [
+      424,
+      424
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d19",
+   "kind": "relation",
+   "question": "Which code calls make_room on the residency manager?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/model.rs",
+     "anchor": "crate::residency::get().make_room(usize::try_from(need)",
+     "lines": [
+      300,
+      300
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmengn/src/model.rs",
+     "anchor": "crate::residency::get().make_room(need, &self.pop.card.id)",
+     "lines": [
+      1406,
+      1406
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmengn/src/kvstore.rs",
+     "anchor": "crate::residency::get().make_room(need, \"\")",
+     "lines": [
+      666,
+      666
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmengn/src/residency.rs",
+     "anchor": "self.make_room(need, \"\")",
+     "lines": [
+      220,
+      220
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d20",
+   "kind": "relation",
+   "question": "Which function calls withhold_uncovered?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/forage.rs",
+     "anchor": "nmbrain::synthesis::withhold_uncovered(pack",
+     "lines": [
+      812,
+      812
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d21",
+   "kind": "relation",
+   "question": "What calls kind_of on the whole path?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/whole.rs",
+     "anchor": "let kind = kind_of(question)",
+     "lines": [
+      231,
+      231
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d22",
+   "kind": "relation",
+   "question": "Who calls label_softmax?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/model.rs",
+     "anchor": "\"labelsoftmax\" => vec![(\"y\", Act::Cpu(label_softmax(f(",
+     "lines": [
+      1331,
+      1331
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmengn/src/model.rs",
+     "anchor": "let logits = o.download(&t(\"logits\")?)",
+     "lines": [
+      1744,
+      1752
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d23",
+   "kind": "behaviour",
+   "question": "What happens when a JSON object has a duplicate key?",
+   "answers": [
+    {
+     "file": "crates/nmjson/src/json.rs",
+     "anchor": "duplicate JSON key",
+     "lines": [
+      137,
+      137
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d24",
+   "kind": "behaviour",
+   "question": "What happens to packets that do not fit the token budget of a whole-path pack?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/whole.rs",
+     "anchor": "pub fn pack(task",
+     "lines": [
+      900,
+      913
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d25",
+   "kind": "behaviour",
+   "question": "What happens on the whole path when the reranker fails?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/whole.rs",
+     "anchor": "(arrival order kept)",
+     "lines": [
+      254,
+      254
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d26",
+   "kind": "behaviour",
+   "question": "What does the stop hook do when Rust files changed and cargo check fails?",
+   "answers": [
+    {
+     "file": "crates/nmcore/src/bin/main.rs",
+     "anchor": "Some(\"hook\") if args.get(1)",
+     "lines": [
+      856,
+      896
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d27",
+   "kind": "behaviour",
+   "question": "What happens to a population's device copies when the residency manager releases idle weights?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/residency.rs",
+     "anchor": "fn release_weights",
+     "lines": [
+      224,
+      243
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmengn/src/model.rs",
+     "anchor": "pub fn try_release_device",
+     "lines": [
+      173,
+      184
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d28",
+   "kind": "behaviour",
+   "question": "What does the launcher do before it runs a command?",
+   "answers": [
+    {
+     "file": "crates/nmcore/src/bin/launch.rs",
+     "anchor": "pub fn run(home",
+     "lines": [
+      46,
+      75
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d29",
+   "kind": "behaviour",
+   "question": "What happens when the memory gate refuses a write?",
+   "answers": [
+    {
+     "file": "crates/nmmem/src/gate.rs",
+     "anchor": "pub fn admit",
+     "lines": [
+      66,
+      96
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d30",
+   "kind": "behaviour",
+   "question": "How is a logged setting change undone?",
+   "answers": [
+    {
+     "file": "crates/nmcore/src/bin/controls.rs",
+     "anchor": "pub fn undo(",
+     "lines": [
+      233,
+      246
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d31",
+   "kind": "explain",
+   "question": "How does the reranker reuse the shared prompt head when it scores a set of documents?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/roles.rs",
+     "anchor": "pub fn card_rerank_set_capped",
+     "lines": [
+      242,
+      279
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d32",
+   "kind": "explain",
+   "question": "How does the dense lane fuse the embedding order with the lexical order?",
+   "answers": [
+    {
+     "file": "crates/nmsubs/src/dense.rs",
+     "anchor": "fn fuse(&self",
+     "lines": [
+      320,
+      335
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d33",
+   "kind": "explain",
+   "question": "How do profiling spans record their exclusive time?",
+   "answers": [
+    {
+     "file": "crates/nmffi/src/prof.rs",
+     "anchor": "impl Drop for Span",
+     "lines": [
+      100,
+      119
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d34",
+   "kind": "explain",
+   "question": "How is the document token cap of a role model derived from free memory?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/roles.rs",
+     "anchor": "pub fn input_cap",
+     "lines": [
+      49,
+      58
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d35",
+   "kind": "explain",
+   "question": "How does the base-model embed role pool the final hidden states?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/roles.rs",
+     "anchor": "pub fn embed_on",
+     "lines": [
+      99,
+      121
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d36",
+   "kind": "explain",
+   "question": "How does forking a key and value cache share its entries?",
+   "answers": [
+    {
+     "file": "crates/nmengn/src/model.rs",
+     "anchor": "pub fn fork(&self) -> Self",
+     "lines": [
+      473,
+      475
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "d37",
+   "kind": "file",
+   "question": "Which file runs the MCP JSON-RPC loop over standard input and output?",
+   "answers": [
+    {
+     "file": "crates/nmapi/src/mcp.rs",
+     "anchor": "pub fn run(api",
+     "lines": [
+      83,
+      83
+     ],
+     "match": "file"
+    }
+   ]
+  },
+  {
+   "id": "d38",
+   "kind": "file",
+   "question": "Which file reads the headers of safetensors weight files?",
+   "answers": [
+    {
+     "file": "crates/nmsafe/src/tensors.rs",
+     "anchor": "fn header(file",
+     "lines": [
+      81,
+      81
+     ],
+     "match": "file"
+    }
+   ]
+  },
+  {
+   "id": "d39",
+   "kind": "file",
+   "question": "Which file holds the forgetting curve and retention rules of memory?",
+   "answers": [
+    {
+     "file": "crates/nmmem/src/retention.rs",
+     "anchor": "pub fn retrievability",
+     "lines": [
+      43,
+      43
+     ],
+     "match": "file"
+    }
+   ]
+  },
+  {
+   "id": "d40",
+   "kind": "file",
+   "question": "Which file serves the local interface and compares its access token?",
+   "answers": [
+    {
+     "file": "crates/nmcore/src/bin/ui.rs",
+     "anchor": "let token_ok = token.is_some_and",
+     "lines": [
+      51,
+      51
+     ],
+     "match": "file"
+    }
+   ]
+  }
+ ]
+}

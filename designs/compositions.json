@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "note": "Objective kind to composition (PLAN 4d item 4; guide 11.2, future addition 1). compose picks the row by TaskKind; unlisted kinds use the context row. Slots not in a row are suspended for the task. Budgets keep every task under one minute (law 7).",
+  "rows": [
+    {"objective_kind": "context", "tentacles": 8, "tips": 8, "views": ["global", "local", "structural", "semantic", "temporal", "operational", "epistemic", "objective"], "slots": ["router", "embedder", "reranker"], "max_depth": 1, "budget": {"tokens": 4000, "ms": 50000, "depth": 1, "units": 16}},
+    {"objective_kind": "understand", "tentacles": 8, "tips": 8, "views": ["global", "structural", "local", "semantic", "epistemic"], "slots": ["router", "embedder", "reranker"], "max_depth": 1, "budget": {"tokens": 4000, "ms": 50000, "depth": 1, "units": 16}},
+    {"objective_kind": "improve", "tentacles": 8, "tips": 8, "views": ["structural", "local", "operational", "epistemic", "objective"], "slots": ["router", "embedder", "reranker", "writer"], "max_depth": 1, "budget": {"tokens": 4000, "ms": 50000, "depth": 1, "units": 16}},
+    {"objective_kind": "build", "tentacles": 8, "tips": 8, "views": ["operational", "local", "structural"], "slots": ["router", "writer"], "max_depth": 1, "budget": {"tokens": 3000, "ms": 50000, "depth": 1, "units": 16}},
+    {"objective_kind": "verify", "tentacles": 8, "tips": 8, "views": ["operational", "structural", "epistemic"], "slots": ["router", "reranker"], "max_depth": 1, "budget": {"tokens": 3000, "ms": 50000, "depth": 1, "units": 16}},
+    {"objective_kind": "anatomy", "tentacles": 8, "tips": 8, "views": ["structural", "operational"], "slots": ["router"], "max_depth": 1, "budget": {"tokens": 2000, "ms": 50000, "depth": 1, "units": 16}}
+  ],
+  "whole_path": {
+    "note": "Live anatomy (2026-11-13): the whole path's arrangement per question kind (nmapi::whole::kind_of), read with serve --anatomy. Fitted on the CX1 development questions: the second look gains on value (+3 right first of 11) and name (+1 of 12) questions and changes nothing on behaviour, explain and relation questions, where turning it off saves about 6.5 s per question. Reach and use sites as served.",
+    "kinds": {
+      "behaviour": {"reach": true, "uses": true, "look": false},
+      "explain": {"reach": true, "uses": true, "look": false},
+      "relation": {"reach": true, "uses": true, "look": false},
+      "name": {"reach": true, "uses": true, "look": true},
+      "value": {"reach": true, "uses": true, "look": true}
+    }
+  }
+}

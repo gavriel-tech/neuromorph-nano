@@ -1,0 +1,17 @@
+[package]
+name = "nmdoc"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Document decoders for the Neuromorph Nano: format table, text encodings, document structure"
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmlex = { path = "../nmlex" }
+nmtype = { path = "../nmtype" }
+
+[lints]
+workspace = true

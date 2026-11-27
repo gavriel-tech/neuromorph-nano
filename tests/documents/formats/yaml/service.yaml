@@ -1,0 +1,16 @@
+# Service schedule for the trial pumps
+name: aq40-trial
+interval_days: 60
+benches:
+  - id: bench1
+    pump: 3
+  - id: bench2
+    pump: 5
+
+# who is called when a fault is logged
+contacts:
+  primary: service desk
+  backup: site lead
+---
+name: aq40-spares
+reorder_level: 12

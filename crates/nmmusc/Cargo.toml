@@ -1,0 +1,17 @@
+[package]
+name = "nmmusc"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Pattern recognition and muscle memory: behaviour log, chunk miner, gain gate, packs"
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmhash = { path = "../nmhash" }
+nmtype = { path = "../nmtype" }
+
+[lints]
+workspace = true

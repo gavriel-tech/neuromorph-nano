@@ -1,0 +1,11 @@
+# Build output stays inside this folder (law 14, standalone; PLAN section 3).
+# Incremental cache off: D: refuses hard links, and the cache only costs disk here.
+[build]
+target-dir = "target"
+incremental = false
+
+# CPU baseline pinned here (2026-11-08), so the build never depends on a .cargo/config.toml
+# in a folder above this one (Cargo reads those too). Same flags every earlier mini build
+# used: AVX2, FMA, F16C; never AVX-512.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+avx2,+fma,+f16c"]

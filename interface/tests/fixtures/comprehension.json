@@ -1,0 +1,293 @@
+{
+ "base_backed_up": 4,
+ "base_cartridges": 4,
+ "drone_default_heads": 16,
+ "drone_lens_sets": 1,
+ "heads": [
+  {
+   "count": 16,
+   "heads": [
+    [
+     13,
+     6
+    ],
+    [
+     14,
+     6
+    ],
+    [
+     13,
+     14
+    ],
+    [
+     16,
+     8
+    ],
+    [
+     13,
+     15
+    ],
+    [
+     14,
+     14
+    ],
+    [
+     14,
+     13
+    ],
+    [
+     17,
+     1
+    ],
+    [
+     13,
+     7
+    ],
+    [
+     16,
+     13
+    ],
+    [
+     8,
+     4
+    ],
+    [
+     17,
+     12
+    ],
+    [
+     12,
+     0
+    ],
+    [
+     11,
+     11
+    ],
+    [
+     17,
+     13
+    ],
+    [
+     17,
+     11
+    ]
+   ],
+   "lens": "default",
+   "population": "qwen3-0.6b"
+  },
+  {
+   "count": 16,
+   "heads": [
+    [
+     11,
+     3
+    ],
+    [
+     17,
+     0
+    ],
+    [
+     10,
+     4
+    ],
+    [
+     14,
+     12
+    ],
+    [
+     17,
+     1
+    ],
+    [
+     14,
+     8
+    ],
+    [
+     16,
+     7
+    ],
+    [
+     16,
+     10
+    ],
+    [
+     9,
+     4
+    ],
+    [
+     9,
+     5
+    ],
+    [
+     13,
+     14
+    ],
+    [
+     14,
+     14
+    ],
+    [
+     17,
+     11
+    ],
+    [
+     17,
+     12
+    ],
+    [
+     13,
+     6
+    ],
+    [
+     16,
+     8
+    ]
+   ],
+   "lens": "words",
+   "population": "qwen3-0.6b"
+  }
+ ],
+ "levels": [
+  {
+   "count": 0,
+   "level": 1,
+   "name": "piece",
+   "tags": [
+    {
+     "count": 0,
+     "tag": "note"
+    },
+    {
+     "count": 0,
+     "tag": "names"
+    },
+    {
+     "count": 0,
+     "tag": "sum"
+    }
+   ]
+  },
+  {
+   "count": 0,
+   "level": 2,
+   "name": "file",
+   "tags": [
+    {
+     "count": 0,
+     "tag": "file"
+    }
+   ]
+  },
+  {
+   "count": 0,
+   "level": 3,
+   "name": "module",
+   "tags": [
+    {
+     "count": 0,
+     "tag": "module"
+    }
+   ]
+  },
+  {
+   "count": 0,
+   "level": 4,
+   "name": "system",
+   "tags": [
+    {
+     "count": 0,
+     "tag": "outline"
+    }
+   ]
+  }
+ ],
+ "note_counts": {},
+ "notes_store": null,
+ "outline": null,
+ "outline_key": null,
+ "routing": {
+  "base_cartridges": [
+   "qwen3-embedding-0.6b",
+   "qwen3-reranker-0.6b"
+  ],
+  "combine": [
+   {
+    "combine": true,
+    "decisive": 2.148641,
+    "job": "code-close",
+    "kind": "code"
+   },
+   {
+    "combine": true,
+    "decisive": null,
+    "job": "prose-close",
+    "kind": "prose"
+   }
+  ],
+  "lens": "embedder-lens-5270b394a1b2@9,none",
+  "lenses": [
+   "embedder-lens-5270b394a1b2@9",
+   "none"
+  ],
+  "made_utc": "2026-11-23T23:56:06Z",
+  "present": true,
+  "rows": [
+   {
+    "accuracy": 0.7812,
+    "check_accuracy": 0.7184,
+    "check_n": 103,
+    "correct": 125,
+    "job": "code-close",
+    "kind": "code",
+    "model": "embedder",
+    "n": 160,
+    "slope": 13.292735,
+    "stack": "embedder-base+project lens",
+    "strength": 78.125
+   },
+   {
+    "accuracy": 0.7341,
+    "check_accuracy": 0.7917,
+    "check_n": 120,
+    "correct": 127,
+    "job": "code-close",
+    "kind": "code",
+    "model": "judge",
+    "n": 173,
+    "slope": -1.167455,
+    "stack": "reranker-base+judge-code adapter",
+    "strength": 73.4104
+   },
+   {
+    "accuracy": 0.7838,
+    "check_accuracy": 0.7297,
+    "check_n": 37,
+    "correct": 29,
+    "job": "prose-close",
+    "kind": "prose",
+    "model": "embedder",
+    "n": 37,
+    "slope": 10.726143,
+    "stack": "embedder-base+project lens",
+    "strength": 78.3784
+   },
+   {
+    "accuracy": 0.8367,
+    "check_accuracy": 0.9111,
+    "check_n": 45,
+    "correct": 41,
+    "job": "prose-close",
+    "kind": "prose",
+    "model": "judge",
+    "n": 49,
+    "slope": -2.206707,
+    "stack": "reranker-base+judge-code adapter",
+    "strength": 83.6735
+   }
+  ],
+  "version": 1
+ },
+ "routing_record": true,
+ "total_notes": 0,
+ "unlevelled_notes": 0
+}

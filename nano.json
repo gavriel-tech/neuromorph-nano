@@ -1,0 +1,6 @@
+{
+  "name": "Neuromorph Nano",
+  "version": "0.1.0",
+  "layout": 1,
+  "note": "Marks the top of a Neuromorph Nano folder. The program finds its folder by this file (or by the NANO_HOME environment variable)."
+}

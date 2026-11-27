@@ -1,0 +1,39 @@
+{
+  "id": "weight-opnwgt-basewt-qwen3-1.7b",
+  "level": "9-weight",
+  "kind": "wgtset",
+  "label": "qwen3-1.7b",
+  "purpose": "Qwen3-1.7B base weights: the approved second population (Luis Jake Gabriel III 2026-11-08 08:24 UTC), in the same NPCS store and engine as Qwen3-0.6B.",
+  "weights": {
+    "origin": "https://huggingface.co/Qwen/Qwen3-1.7B",
+    "licence": "apache-2.0",
+    "revision": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+    "sha256": "169ad53ec313c3a34b06c0809216e4fc072cce444a5d4ff2b59690d064130ed5",
+    "main_file": "files/model-00001-of-00002.safetensors",
+    "bytes": 4079453454,
+    "files": 12,
+    "manifest": "INTEGRITY.md (Weights): one SHA-256 row per file",
+    "location": "weights/qwen3-1.7b/files",
+    "derived_from": null
+  },
+  "state": {
+    "status": "approved second population",
+    "read_only": true,
+    "base": "base weights: used exactly as released, nothing added or edited (Luis Jake Gabriel III 2026-11-09)"
+  },
+  "owner": "Gavriel Technologies",
+  "version": "70d244cc86ccca08cf5af4e1e306ecf908b1ad5e",
+  "hash": "169ad53ec313c3a34b06c0809216e4fc072cce444a5d4ff2b59690d064130ed5",
+  "history": {
+    "purpose_before": "Qwen3-1.7B as released: the shared core.",
+    "manifest_before": "emma-experiments/runs/9-weight/2026-10-30-opnwgt-move/qwen3-1.7b.after.json",
+    "location_before": "library/9-weight/opnwgt/basewt/qwen3-1.7b/files",
+    "files_before": 27,
+    "state_before": {
+      "status": "candidate",
+      "read_only": true,
+      "moved": "2026-10-30 from emma-external-models, every file hash identical before and after"
+    }
+  },
+  "card_text_updated": "2026-11-09: descriptive fields brought up to date; main_file, sha256, bytes, revision unchanged"
+}

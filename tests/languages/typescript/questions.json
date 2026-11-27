@@ -1,0 +1,164 @@
+{
+  "questions": [
+    {
+      "id": "t01",
+      "kind": "name",
+      "question": "Where is the board's task limit defined?",
+      "answers": [
+        {
+          "file": "packages/core/src/store.ts",
+          "anchor": "export const MAX_TASKS = 500;",
+          "lines": [
+            4,
+            4
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "t02",
+      "kind": "behaviour",
+      "question": "What happens when a task is added with an id that is already on the board?",
+      "answers": [
+        {
+          "file": "packages/core/src/store.ts",
+          "anchor": "throw new TaskValidationError(\"id\", \"duplicate id\");",
+          "lines": [
+            22,
+            22
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "t03",
+      "kind": "value",
+      "question": "How long may an API request take before it is abandoned?",
+      "answers": [
+        {
+          "file": "packages/web/src/api/client.ts",
+          "anchor": "const REQUEST_TIMEOUT_MS = 8000;",
+          "lines": [
+            7,
+            7
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "t04",
+      "kind": "name",
+      "question": "Which function computes the next due date of a recurring task?",
+      "answers": [
+        {
+          "file": "packages/core/src/schedule.ts",
+          "anchor": "export function nextDueDate",
+          "lines": [
+            13,
+            13
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "t05",
+      "kind": "behaviour",
+      "question": "How are tags normalized before they are stored on a task?",
+      "answers": [
+        {
+          "file": "packages/core/src/task.ts",
+          "anchor": "export const normalizeTag",
+          "lines": [
+            47,
+            47
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "t06",
+      "kind": "relation",
+      "question": "Which hook loads the tasks of one column and refreshes them on a timer?",
+      "answers": [
+        {
+          "file": "packages/web/src/hooks/useTasks.ts",
+          "anchor": "export function useTasks",
+          "lines": [
+            6,
+            6
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "t07",
+      "kind": "file",
+      "question": "Which file holds the styles for overdue cards?",
+      "answers": [
+        {
+          "file": "packages/web/src/app.css",
+          "anchor": ".card--overdue .card__title {",
+          "lines": [
+            21,
+            21
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "t08",
+      "kind": "value",
+      "question": "What label is shown for a due date one day away?",
+      "answers": [
+        {
+          "file": "packages/web/src/format.ts",
+          "anchor": "if (days === 1) return \"tomorrow\";",
+          "lines": [
+            18,
+            18
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "t09",
+      "kind": "explain",
+      "question": "How does the client authorize its requests to the server?",
+      "answers": [
+        {
+          "file": "packages/web/src/api/client.ts",
+          "anchor": "headers: { authorization:",
+          "lines": [
+            37,
+            37
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "t10",
+      "kind": "name",
+      "question": "Where is the Monday of a week computed?",
+      "answers": [
+        {
+          "file": "packages/core/src/schedule.ts",
+          "anchor": "export function weekStart",
+          "lines": [
+            27,
+            27
+          ],
+          "match": "file"
+        }
+      ]
+    }
+  ]
+}

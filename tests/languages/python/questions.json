@@ -1,0 +1,164 @@
+{
+  "questions": [
+    {
+      "id": "p01",
+      "kind": "value",
+      "question": "How many units fit on one shelf?",
+      "answers": [
+        {
+          "file": "src/inventory/models.py",
+          "anchor": "SHELF_CAPACITY = 240",
+          "lines": [
+            10,
+            10
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "p02",
+      "kind": "behaviour",
+      "question": "What happens when more units are shipped than are in stock?",
+      "answers": [
+        {
+          "file": "src/inventory/models.py",
+          "anchor": "raise StockError(",
+          "lines": [
+            48,
+            48
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "p03",
+      "kind": "name",
+      "question": "Which method lists the SKUs that need reordering?",
+      "answers": [
+        {
+          "file": "src/inventory/models.py",
+          "anchor": "def needs_reorder",
+          "lines": [
+            52,
+            52
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "p04",
+      "kind": "value",
+      "question": "What discount applies to an order of 300 units?",
+      "answers": [
+        {
+          "file": "src/inventory/pricing.py",
+          "anchor": "VOLUME_STEPS = ",
+          "lines": [
+            6,
+            6
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "p05",
+      "kind": "behaviour",
+      "question": "How is the unit price rounded to cents?",
+      "answers": [
+        {
+          "file": "src/inventory/pricing.py",
+          "anchor": "return price.quantize(",
+          "lines": [
+            19,
+            19
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "p06",
+      "kind": "name",
+      "question": "Where is a warehouse saved to a CSV file?",
+      "answers": [
+        {
+          "file": "src/inventory/storage/csvstore.py",
+          "anchor": "def save(self, wh: Warehouse) -> Path:",
+          "lines": [
+            18,
+            18
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "p07",
+      "kind": "behaviour",
+      "question": "Which currency codes does the rates fetch keep?",
+      "answers": [
+        {
+          "file": "src/inventory/pricing.py",
+          "anchor": "return len(code) == 3 and code.isupper()",
+          "lines": [
+            26,
+            26
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "p08",
+      "kind": "name",
+      "question": "Where is the command line parser for ship and quote built?",
+      "answers": [
+        {
+          "file": "src/inventory/cli.py",
+          "anchor": "def build_parser()",
+          "lines": [
+            12,
+            12
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "p09",
+      "kind": "explain",
+      "question": "How is the stock report table padded?",
+      "answers": [
+        {
+          "file": "scripts/tablefmt.py",
+          "anchor": "widths = [max(len(row[i])",
+          "lines": [
+            8,
+            8
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "p10",
+      "kind": "name",
+      "question": "How many shelves does an item need?",
+      "answers": [
+        {
+          "file": "src/inventory/models.py",
+          "anchor": "def shelves_needed",
+          "lines": [
+            21,
+            21
+          ],
+          "match": "file"
+        }
+      ]
+    }
+  ]
+}

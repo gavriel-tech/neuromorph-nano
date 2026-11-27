@@ -1,0 +1,35 @@
+a.start	-
+a.prompt	-
+a.fail	-
+a.edit.pre	-
+a.edit.post	-
+a.pass	-
+a.stop	-
+b.start	-
+b.prompt	-
+b.fail	Neuromorph Nano memory: cargo-test shop failed the same way before (E0308 at crates/shop/src/lib.rs:18, mismatched types). The change that fixed it then is at crates/shop/src/lib.rs:18; cargo-test shop passed after it (verified once, evidence direct). Those lines are unchanged since.
+b.read	-
+b.edit.pre	Neuromorph Nano memory: crates/shop/src/lib.rs:18 holds the change that fixed cargo-test shop E0308 at crates/shop/src/lib.rs:18 (verified once).
+b.edit.post	-
+b.pass	-
+b.stop	-
+b.thanks	-
+b.stop2	-
+ledger	outcome fixed verified direct check crates/shop/src/lib.rs:18 failure=cargo-test shop E0308 crates/shop/src/lib.rs:18 mismatched types
+ledger	primed failure-fix PostToolUseFailure quiet crates/shop/src/lib.rs:18 from=memory
+ledger	primed edit-impact PreToolUse quiet crates/shop/src/lib.rs:18 from=memory
+ledger	outcome fixed verified direct check crates/shop/src/lib.rs:18 failure=cargo-test shop E0308 crates/shop/src/lib.rs:18 mismatched types
+ledger	evidence n1 read used direct steps=0 Read crates/shop/src/lib.rs:13-19 closed=next turn ended
+ledger	evidence n1 edit used direct steps=1 Edit crates/shop/src/lib.rs:18 closed=next turn ended
+ledger	evidence n1 elsewhere none - steps=- - - closed=next turn ended
+ledger	evidence n1 check verified indirect steps=2 Bash cargo-test closed=next turn ended
+ledger	evidence n1 revert none - steps=- - - closed=next turn ended
+ledger	evidence n1 next-prompt verified weak steps=3 UserPromptSubmit - closed=next turn ended
+ledger	evidence n1 followed used direct steps=0 Read crates/shop/src/lib.rs:13-19 closed=next turn ended
+ledger	evidence n2 read none - steps=- - - closed=next turn ended
+ledger	evidence n2 edit none - steps=- - - closed=next turn ended
+ledger	evidence n2 elsewhere unknown - steps=- - - closed=next turn ended
+ledger	evidence n2 check verified weak steps=0 Bash cargo-test closed=next turn ended
+ledger	evidence n2 revert unknown - steps=- - - closed=next turn ended
+ledger	evidence n2 next-prompt verified weak steps=1 UserPromptSubmit - closed=next turn ended
+ledger	evidence n2 followed passed-over weak steps=- - - closed=next turn ended

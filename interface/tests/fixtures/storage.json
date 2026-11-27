@@ -1,0 +1,366 @@
+{
+ "below_floor": false,
+ "categories": [
+  {
+   "bytes": 23519530,
+   "files": 189,
+   "id": "memory",
+   "items": [
+    {
+     "bytes": 22699176,
+     "class": "read-only",
+     "files": 1,
+     "kind": "file",
+     "label": "audit log",
+     "modified_ms": 1795577488000,
+     "path": "C:\\neuromorph-nano\\memory\\audit.jsonl",
+     "project": "nano"
+    },
+    {
+     "bytes": 75035,
+     "class": "read-only",
+     "files": 1,
+     "kind": "folder",
+     "label": "memory tier",
+     "modified_ms": 1795333004000,
+     "path": "C:\\neuromorph-nano\\memory\\2-active",
+     "project": "nano"
+    },
+    {
+     "bytes": 71805,
+     "class": "read-only",
+     "files": 30,
+     "kind": "folder",
+     "label": "live server records",
+     "modified_ms": 1795577494000,
+     "path": "C:\\neuromorph-nano\\memory\\live",
+     "project": "nano"
+    },
+    {
+     "bytes": 52947,
+     "class": "read-only",
+     "files": 2,
+     "kind": "folder",
+     "label": "memory journal",
+     "modified_ms": 1795333034000,
+     "path": "C:\\neuromorph-nano\\memory\\journal",
+     "project": "nano"
+    },
+    {
+     "bytes": 45158,
+     "class": "read-only",
+     "files": 1,
+     "kind": "file",
+     "label": "memory record",
+     "modified_ms": 1795332954000,
+     "path": "C:\\neuromorph-nano\\memory\\snapshot.json",
+     "project": "nano"
+    },
+    {
+     "bytes": 41771,
+     "class": "read-only",
+     "files": 1,
+     "kind": "folder",
+     "label": "memory tier",
+     "modified_ms": 1795332816000,
+     "path": "C:\\neuromorph-nano\\memory\\projects\\material-code-5270b394\\2-active",
+     "project": "material-code-5270b394"
+    },
+    {
+     "bytes": 41037,
+     "class": "read-only",
+     "files": 1,
+     "kind": "folder",
+     "label": "memory tier",
+     "modified_ms": 1795153950000,
+     "path": "C:\\neuromorph-nano\\memory\\projects\\ab-nano-f915a313\\2-active",
+     "project": "ab-nano-f915a313"
+    },
+    {
+     "bytes": 38103,
+     "class": "read-only",
+     "files": 1,
+     "kind": "file",
+     "label": "memory record",
+     "modified_ms": 1795332724000,
+     "path": "C:\\neuromorph-nano\\memory\\projects\\material-code-5270b394\\snapshot.json",
+     "project": "material-code-5270b394"
+    }
+   ],
+   "name": "Memory & World Model",
+   "read_only_bytes": 23519530,
+   "rebuildable_bytes": 0,
+   "removable_bytes": 0,
+   "items_total": 110
+  },
+  {
+   "bytes": 338019077,
+   "files": 9,
+   "id": "vectors",
+   "items": [
+    {
+     "bytes": 241525460,
+     "class": "rebuildable",
+     "files": 1,
+     "kind": "file",
+     "label": "substrate index cache",
+     "modified_ms": 1795332954000,
+     "path": "C:\\neuromorph-nano\\memory\\substrate-cache-4ead3ffdb8db.bin",
+     "project": "nano"
+    },
+    {
+     "bytes": 72425536,
+     "class": "rebuildable",
+     "files": 1,
+     "kind": "file",
+     "label": "substrate index cache",
+     "modified_ms": 1795332792000,
+     "path": "C:\\neuromorph-nano\\memory\\projects\\material-code-5270b394\\substrate-cache-95a30bc64508.bin",
+     "project": "material-code-5270b394"
+    },
+    {
+     "bytes": 23498693,
+     "class": "rebuildable",
+     "files": 1,
+     "kind": "folder",
+     "label": "dense vectors kept on disk",
+     "modified_ms": 1795052558000,
+     "path": "C:\\neuromorph-nano\\memory\\projects\\ab-nano-f915a313\\dense",
+     "project": "ab-nano-f915a313"
+    },
+    {
+     "bytes": 552802,
+     "class": "rebuildable",
+     "files": 3,
+     "kind": "folder",
+     "label": "dense vectors kept on disk",
+     "modified_ms": 1795333014000,
+     "path": "C:\\neuromorph-nano\\memory\\dense",
+     "project": "nano"
+    },
+    {
+     "bytes": 15361,
+     "class": "rebuildable",
+     "files": 1,
+     "kind": "folder",
+     "label": "dense vectors kept on disk",
+     "modified_ms": 1795147590000,
+     "path": "C:\\neuromorph-nano\\memory\\projects\\agy-test-repo-67300805\\dense",
+     "project": "agy-test-repo-67300805"
+    },
+    {
+     "bytes": 1225,
+     "class": "rebuildable",
+     "files": 2,
+     "kind": "folder",
+     "label": "meaning floors and rerank-pair cache",
+     "modified_ms": 1795302146000,
+     "path": "C:\\neuromorph-nano\\memory\\projects\\material-code-5270b394\\meaning",
+     "project": "material-code-5270b394"
+    }
+   ],
+   "name": "Dense Vectors & Index Caches",
+   "note": "Auxiliary note vectors are held in RAM and seeded again from the world-model notes at start; none are kept on disk.",
+   "read_only_bytes": 0,
+   "rebuildable_bytes": 338019077,
+   "removable_bytes": 0,
+   "items_total": 6
+  },
+  {
+   "bytes": 12744996,
+   "files": 2353,
+   "id": "compression",
+   "items": [
+    {
+     "bytes": 11931894,
+     "class": "rebuildable",
+     "files": 2343,
+     "kind": "folder",
+     "label": "temporary folder of job-filter builds",
+     "modified_ms": 1795577494000,
+     "path": "C:\\neuromorph-nano\\scratch\\tmp",
+     "project": ""
+    },
+    {
+     "bytes": 462505,
+     "class": "read-only",
+     "files": 1,
+     "kind": "folder",
+     "label": "affine compensation of a compressed base",
+     "modified_ms": 1795075706000,
+     "path": "C:\\neuromorph-nano\\library\\cartridges\\learned\\writer-base-comp",
+     "project": ""
+    },
+    {
+     "bytes": 233102,
+     "class": "read-only",
+     "files": 1,
+     "kind": "folder",
+     "label": "affine compensation of a compressed base",
+     "modified_ms": 1795048952000,
+     "path": "C:\\neuromorph-nano\\library\\cartridges\\learned\\embedder-base-comp",
+     "project": ""
+    },
+    {
+     "bytes": 100491,
+     "class": "read-only",
+     "files": 1,
+     "kind": "folder",
+     "label": "affine compensation of a compressed base",
+     "modified_ms": 1795061722000,
+     "path": "C:\\neuromorph-nano\\library\\cartridges\\learned\\reranker-base-comp",
+     "project": ""
+    },
+    {
+     "bytes": 13464,
+     "class": "read-only",
+     "files": 3,
+     "kind": "folder",
+     "label": "precision and compression settings for a card",
+     "modified_ms": 1794977372000,
+     "path": "C:\\neuromorph-nano\\library\\cartridges\\hardware\\gtx-1650-4gb",
+     "project": ""
+    },
+    {
+     "bytes": 2836,
+     "class": "read-only",
+     "files": 1,
+     "kind": "file",
+     "label": "learned unit (8-bit weights, managed by nm_unit)",
+     "modified_ms": 1795333004000,
+     "path": "C:\\neuromorph-nano\\units\\decisions.jsonl",
+     "project": ""
+    },
+    {
+     "bytes": 353,
+     "class": "rebuildable",
+     "files": 1,
+     "kind": "file",
+     "label": "temporary file left by a stopped write",
+     "modified_ms": 1794869686000,
+     "path": "C:\\neuromorph-nano\\memory\\live\\project-67ac7a84.json.tmp",
+     "project": "nano"
+    },
+    {
+     "bytes": 351,
+     "class": "rebuildable",
+     "files": 1,
+     "kind": "file",
+     "label": "temporary file left by a stopped write",
+     "modified_ms": 1795204140000,
+     "path": "C:\\neuromorph-nano\\memory\\live\\small-repo-d02ef857.json.tmp",
+     "project": "nano"
+    }
+   ],
+   "name": "Compression & Quantized Copies",
+   "note": "The bmq8, q8 and q4 copies of the base MicroModels are made on the card at load and are not kept on disk.",
+   "read_only_bytes": 812398,
+   "rebuildable_bytes": 11932598,
+   "removable_bytes": 0,
+   "items_total": 9
+  },
+  {
+   "bytes": 15253057953,
+   "files": 179,
+   "id": "cartridges",
+   "items": [
+    {
+     "bytes": 3011825,
+     "class": "removable",
+     "files": 1,
+     "kind": "file",
+     "label": "job filter",
+     "modified_ms": 1795502158000,
+     "path": "C:\\neuromorph-nano\\library\\parameter-maps\\writer\\job-filter-write.json",
+     "project": ""
+    },
+    {
+     "bytes": 4079452828,
+     "class": "read-only",
+     "files": 14,
+     "kind": "folder",
+     "label": "released open weights (read-only)",
+     "modified_ms": 1794708904000,
+     "path": "C:\\neuromorph-nano\\weights\\qwen3-1.7b",
+     "project": ""
+    },
+    {
+     "bytes": 3441228927,
+     "class": "read-only",
+     "files": 2,
+     "kind": "folder",
+     "label": "base cartridge (read-only)",
+     "modified_ms": 1795339172000,
+     "path": "C:\\neuromorph-nano\\library\\cartridges\\base\\writer",
+     "project": ""
+    },
+    {
+     "bytes": 1519213658,
+     "class": "read-only",
+     "files": 23,
+     "kind": "folder",
+     "label": "released open weights (read-only)",
+     "modified_ms": 1794708870000,
+     "path": "C:\\neuromorph-nano\\weights\\qwen3-0.6b",
+     "project": ""
+    },
+    {
+     "bytes": 1207491370,
+     "class": "read-only",
+     "files": 14,
+     "kind": "folder",
+     "label": "released open weights (read-only)",
+     "modified_ms": 1794708846000,
+     "path": "C:\\neuromorph-nano\\weights\\qwen3-embedding-0.6b",
+     "project": ""
+    },
+    {
+     "bytes": 1207490510,
+     "class": "read-only",
+     "files": 16,
+     "kind": "folder",
+     "label": "released open weights (read-only)",
+     "modified_ms": 1794708858000,
+     "path": "C:\\neuromorph-nano\\weights\\qwen3-reranker-0.6b",
+     "project": ""
+    },
+    {
+     "bytes": 1192178058,
+     "class": "read-only",
+     "files": 2,
+     "kind": "folder",
+     "label": "base cartridge (read-only)",
+     "modified_ms": 1795337844000,
+     "path": "C:\\neuromorph-nano\\library\\cartridges\\base\\reader",
+     "project": ""
+    },
+    {
+     "bytes": 1191632273,
+     "class": "read-only",
+     "files": 2,
+     "kind": "folder",
+     "label": "base cartridge (read-only)",
+     "modified_ms": 1795337848000,
+     "path": "C:\\neuromorph-nano\\library\\cartridges\\base\\embedder",
+     "project": ""
+    }
+   ],
+   "name": "Parameter Cartridges & Weights",
+   "read_only_bytes": 15244089213,
+   "rebuildable_bytes": 0,
+   "removable_bytes": 8968740,
+   "items_total": 112
+  }
+ ],
+ "disk": {
+  "free_bytes": 6276251648,
+  "path": "C:\\neuromorph-nano",
+  "total_bytes": 1000169668608
+ },
+ "disk_floor_bytes": 4294967296,
+ "disk_floor_gb": 4,
+ "home": "C:\\neuromorph-nano",
+ "time_ms": 1795577494546,
+ "total_bytes": 15627341556,
+ "total_files": 2730
+}

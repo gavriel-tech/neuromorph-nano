@@ -1,0 +1,21 @@
+{
+  "id": "nmjson",
+  "kind": "other",
+  "version": 1,
+  "parent": null,
+  "ports_in": [],
+  "ports_out": [],
+  "deps": [],
+  "config_schema": {},
+  "config_default": {},
+  "subcomponents": [
+    {"id": "nmjson.json", "version": 1, "hash": "0eb3938adea9f8c908c9fb372187ec89e1ac575b4a68386727588ba752865e56"},
+    {"id": "nmjson.encode", "version": 1, "hash": "f573cbc8b67c05c95d83910cc51c52351a19c45dc7b1487406b58fd5954d2378"},
+    {"id": "nmjson.error", "version": 1, "hash": "62d7b3c9140e1d3e2879ee88c52f2d37545dee4fa0057a85ffbfda87f9bdcd4c"},
+    {"id": "nmjson.pretty", "version": 1, "hash": "064a9ecb002c34fdf0be2c18906db57126d533bae5aa2aad325e4d4abc61a9e5"},
+    {"id": "nmjson.check", "version": 1, "hash": "06ebafd3dfb99cc5ea966cad8c6b4314ffbfabbd42da8479099dd54c76ea962b"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "ad42bfdb5e00f031c0bb8af2d72daa92f13650a5ce7a091d43811fa3128e1f48"
+}

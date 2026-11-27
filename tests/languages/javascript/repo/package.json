@@ -1,0 +1,9 @@
+{
+  "name": "logtail",
+  "version": "1.4.0",
+  "type": "module",
+  "bin": { "logtail": "bin/cli.mjs" },
+  "dependencies": {
+    "chalk": "^5.3.0"
+  }
+}

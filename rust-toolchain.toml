@@ -1,0 +1,5 @@
+[toolchain]
+channel = "1.99.1"   # 1.99.1 fixes an FFI bool return regression in 1.99.0
+components = ["rustfmt", "clippy", "llvm-tools-preview"]
+targets = ["x86_64-pc-windows-msvc", "wasm32-unknown-unknown"]  # wasm32 for the interface views
+profile = "minimal"

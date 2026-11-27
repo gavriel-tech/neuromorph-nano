@@ -1,0 +1,400 @@
+2026-10-03T06:00:00Z INFO logsvc service started, version 2.4.1, benches=2
+2026-10-03T06:01:05Z INFO bench2 pump=5 flow=38.6 lpm pressure=3.9 bar
+2026-10-03T06:02:59Z INFO bench2 pump=4 flow=41.1 lpm pressure=4.0 bar
+2026-10-03T06:04:03Z INFO bench1 pump=3 flow=41.5 lpm pressure=3.6 bar
+2026-10-03T06:05:27Z INFO bench1 pump=3 flow=39.2 lpm pressure=3.6 bar
+2026-10-03T06:06:27Z INFO bench1 pump=3 flow=41.0 lpm pressure=3.8 bar
+2026-10-03T06:08:09Z INFO bench2 pump=5 started
+2026-10-03T06:09:11Z INFO bench1 pump=3 flow=39.8 lpm pressure=3.9 bar
+2026-10-03T06:11:21Z INFO bench2 pump=6 flow=39.4 lpm pressure=3.8 bar
+2026-10-03T06:13:28Z INFO bench1 pump=1 flow=40.6 lpm pressure=4.0 bar
+2026-10-03T06:15:13Z INFO bench2 pump=5 started
+2026-10-03T06:16:38Z INFO bench2 pump=5 flow=38.4 lpm pressure=3.9 bar
+2026-10-03T06:17:50Z INFO bench1 pump=2 flow=40.1 lpm pressure=3.9 bar
+2026-10-03T06:19:30Z INFO bench1 pump=2 flow=41.2 lpm pressure=3.7 bar
+2026-10-03T06:21:05Z INFO bench1 pump=3 stopped, demand met
+2026-10-03T06:22:50Z INFO bench1 pump=1 flow=41.7 lpm pressure=3.6 bar
+2026-10-03T06:24:16Z INFO bench1 pump=1 flow=38.2 lpm pressure=3.6 bar
+2026-10-03T06:25:33Z INFO bench2 pump=5 flow=40.3 lpm pressure=3.8 bar
+2026-10-03T06:26:41Z INFO bench1 pump=1 started
+2026-10-03T06:28:11Z INFO bench2 pump=6 started
+2026-10-03T06:30:14Z INFO bench2 pump=5 flow=41.3 lpm pressure=4.0 bar
+2026-10-03T06:31:27Z INFO bench2 pump=5 flow=39.1 lpm pressure=3.6 bar
+2026-10-03T06:33:44Z INFO bench1 pump=1 flow=40.5 lpm pressure=3.8 bar
+2026-10-03T06:35:44Z INFO bench1 pump=3 flow=41.9 lpm pressure=4.0 bar
+2026-10-03T06:36:58Z INFO bench2 pump=4 flow=41.7 lpm pressure=3.8 bar
+2026-10-03T06:38:20Z INFO bench2 pump=5 started
+2026-10-03T06:39:56Z INFO bench2 pump=4 flow=39.5 lpm pressure=3.8 bar
+2026-10-03T06:41:23Z INFO bench1 pump=3 flow=41.6 lpm pressure=3.6 bar
+2026-10-03T06:42:53Z INFO bench2 pump=4 housing temperature 53 C
+2026-10-03T06:43:59Z INFO bench2 pump=4 flow=41.9 lpm pressure=3.6 bar
+2026-10-03T06:46:01Z INFO bench1 pump=2 started
+2026-10-03T06:47:42Z INFO bench2 pump=5 flow=39.8 lpm pressure=3.8 bar
+2026-10-03T06:49:37Z INFO bench2 pump=4 started
+2026-10-03T06:51:36Z INFO bench1 pump=3 flow=41.3 lpm pressure=3.7 bar
+2026-10-03T06:52:41Z INFO bench1 pump=2 flow=39.4 lpm pressure=3.8 bar
+2026-10-03T06:54:57Z INFO bench2 pump=4 flow=41.8 lpm pressure=4.0 bar
+2026-10-03T06:56:18Z INFO bench2 pump=5 flow=38.7 lpm pressure=4.0 bar
+2026-10-03T06:57:36Z INFO bench1 pump=2 flow=39.1 lpm pressure=3.8 bar
+2026-10-03T06:59:17Z INFO bench1 pump=1 flow=41.0 lpm pressure=3.9 bar
+2026-10-03T07:01:31Z INFO bench1 pump=2 flow=40.9 lpm pressure=3.9 bar
+2026-10-03T07:03:40Z INFO bench2 pump=4 flow=41.5 lpm pressure=3.7 bar
+2026-10-03T07:05:25Z INFO bench2 pump=4 flow=39.2 lpm pressure=3.7 bar
+2026-10-03T07:07:07Z INFO bench2 pump=5 flow=38.9 lpm pressure=3.9 bar
+2026-10-03T07:09:23Z INFO bench1 pump=3 flow=40.9 lpm pressure=3.8 bar
+2026-10-03T07:11:19Z INFO bench2 pump=6 flow=38.3 lpm pressure=3.8 bar
+2026-10-03T07:12:25Z INFO bench2 pump=5 flow=39.1 lpm pressure=4.0 bar
+2026-10-03T07:14:08Z INFO bench1 pump=3 flow=41.6 lpm pressure=3.8 bar
+2026-10-03T07:16:23Z INFO bench2 pump=6 started
+2026-10-03T07:18:01Z INFO bench2 pump=5 housing temperature 53 C
+2026-10-03T07:19:11Z INFO bench2 pump=6 flow=41.7 lpm pressure=3.7 bar
+2026-10-03T07:20:32Z INFO bench1 pump=1 flow=41.0 lpm pressure=3.6 bar
+2026-10-03T07:21:42Z INFO bench2 pump=4 started
+2026-10-03T07:22:47Z INFO bench1 pump=3 flow=38.8 lpm pressure=3.6 bar
+2026-10-03T07:24:21Z INFO bench1 pump=2 flow=38.2 lpm pressure=4.0 bar
+2026-10-03T07:25:46Z INFO bench2 pump=6 started
+2026-10-03T07:26:46Z INFO bench2 pump=5 housing temperature 58 C
+2026-10-03T07:28:07Z INFO bench1 pump=1 flow=41.7 lpm pressure=4.0 bar
+2026-10-03T07:30:01Z INFO bench2 pump=5 flow=40.8 lpm pressure=3.6 bar
+2026-10-03T07:31:57Z INFO bench1 pump=3 flow=39.8 lpm pressure=3.6 bar
+2026-10-03T07:32:58Z INFO bench1 pump=3 flow=39.0 lpm pressure=3.7 bar
+2026-10-03T07:34:27Z INFO bench2 pump=4 flow=40.7 lpm pressure=3.7 bar
+2026-10-03T07:36:16Z INFO bench2 pump=6 flow=38.7 lpm pressure=3.9 bar
+2026-10-03T07:37:54Z INFO bench1 pump=2 housing temperature 52 C
+2026-10-03T07:39:39Z INFO bench2 pump=4 flow=39.3 lpm pressure=3.8 bar
+2026-10-03T07:41:46Z INFO bench2 pump=5 flow=41.7 lpm pressure=3.7 bar
+2026-10-03T07:43:30Z INFO bench2 pump=4 flow=38.1 lpm pressure=3.8 bar
+2026-10-03T07:45:07Z INFO bench1 pump=2 flow=38.0 lpm pressure=3.6 bar
+2026-10-03T07:46:40Z INFO bench2 pump=5 stopped, demand met
+2026-10-03T07:47:51Z INFO bench2 pump=6 flow=41.2 lpm pressure=3.7 bar
+2026-10-03T07:49:08Z INFO bench2 pump=5 flow=40.2 lpm pressure=3.9 bar
+2026-10-03T07:51:15Z INFO bench1 pump=1 flow=39.2 lpm pressure=3.8 bar
+2026-10-03T07:52:39Z INFO bench2 pump=6 flow=39.5 lpm pressure=4.0 bar
+2026-10-03T07:54:32Z INFO bench1 pump=2 housing temperature 53 C
+2026-10-03T07:56:04Z INFO bench1 pump=3 flow=40.3 lpm pressure=3.8 bar
+2026-10-03T07:57:24Z INFO bench2 pump=5 flow=39.0 lpm pressure=3.8 bar
+2026-10-03T07:58:41Z INFO bench2 pump=6 flow=41.6 lpm pressure=4.0 bar
+2026-10-03T08:00:58Z INFO bench1 pump=1 flow=39.5 lpm pressure=4.0 bar
+2026-10-03T08:02:55Z INFO bench2 pump=5 started
+2026-10-03T08:04:08Z INFO bench1 pump=1 flow=39.2 lpm pressure=3.6 bar
+2026-10-03T08:06:11Z INFO bench1 pump=3 stopped, demand met
+2026-10-03T08:08:07Z INFO bench2 pump=5 flow=38.0 lpm pressure=3.7 bar
+2026-10-03T08:09:16Z INFO bench2 pump=4 flow=38.6 lpm pressure=3.8 bar
+2026-10-03T08:10:42Z INFO bench2 pump=4 flow=40.8 lpm pressure=3.8 bar
+2026-10-03T08:12:01Z INFO bench1 pump=3 flow=39.1 lpm pressure=3.9 bar
+2026-10-03T08:13:14Z INFO bench2 pump=6 flow=38.6 lpm pressure=3.8 bar
+2026-10-03T08:14:15Z INFO bench2 pump=5 flow=39.4 lpm pressure=3.6 bar
+2026-10-03T08:15:41Z INFO bench2 pump=6 flow=40.5 lpm pressure=3.8 bar
+2026-10-03T08:16:53Z INFO bench1 pump=1 flow=38.8 lpm pressure=3.6 bar
+2026-10-03T08:18:46Z INFO bench1 pump=1 stopped, demand met
+2026-10-03T08:20:23Z INFO bench1 pump=3 flow=40.7 lpm pressure=3.7 bar
+2026-10-03T08:22:02Z INFO bench1 pump=2 flow=42.0 lpm pressure=3.7 bar
+2026-10-03T08:23:18Z INFO bench2 pump=6 flow=38.3 lpm pressure=3.7 bar
+2026-10-03T08:24:26Z INFO bench2 pump=4 flow=40.3 lpm pressure=4.0 bar
+2026-10-03T08:26:09Z INFO bench2 pump=6 stopped, demand met
+2026-10-03T08:28:19Z INFO bench2 pump=5 flow=41.4 lpm pressure=3.9 bar
+2026-10-03T08:29:57Z INFO bench1 pump=2 flow=38.1 lpm pressure=3.7 bar
+2026-10-03T08:31:02Z INFO bench1 pump=1 flow=39.1 lpm pressure=3.9 bar
+2026-10-03T08:32:14Z INFO bench1 pump=2 flow=41.4 lpm pressure=3.8 bar
+2026-10-03T08:34:19Z INFO bench2 pump=4 flow=39.6 lpm pressure=3.7 bar
+2026-10-03T08:36:36Z INFO bench1 pump=2 started
+2026-10-03T08:38:10Z INFO bench1 pump=3 started
+2026-10-03T08:40:19Z INFO bench1 pump=1 flow=39.9 lpm pressure=3.8 bar
+2026-10-03T08:42:30Z INFO bench2 pump=5 flow=40.2 lpm pressure=3.8 bar
+2026-10-03T08:44:39Z INFO bench2 pump=4 stopped, demand met
+2026-10-03T08:46:08Z INFO bench1 pump=3 started
+2026-10-03T08:47:08Z INFO bench2 pump=4 started
+2026-10-03T08:48:50Z INFO bench1 pump=2 flow=38.0 lpm pressure=4.0 bar
+2026-10-03T08:50:15Z INFO bench1 pump=3 flow=41.3 lpm pressure=3.7 bar
+2026-10-03T08:51:50Z INFO bench2 pump=4 flow=40.2 lpm pressure=3.8 bar
+2026-10-03T08:53:56Z INFO bench1 pump=2 flow=40.8 lpm pressure=3.7 bar
+2026-10-03T08:56:03Z INFO bench2 pump=6 flow=39.5 lpm pressure=3.8 bar
+2026-10-03T08:57:29Z INFO bench2 pump=6 flow=39.5 lpm pressure=3.6 bar
+2026-10-03T08:58:44Z INFO bench1 pump=3 flow=38.6 lpm pressure=3.6 bar
+2026-10-03T08:59:48Z INFO bench2 pump=6 flow=39.3 lpm pressure=3.9 bar
+2026-10-03T09:00:55Z INFO bench2 pump=6 flow=39.0 lpm pressure=3.7 bar
+2026-10-03T09:03:00Z INFO bench1 pump=2 flow=40.1 lpm pressure=3.9 bar
+2026-10-03T09:04:57Z INFO bench1 pump=1 flow=38.8 lpm pressure=3.6 bar
+2026-10-03T09:06:59Z INFO bench2 pump=4 flow=39.4 lpm pressure=3.8 bar
+2026-10-03T09:08:09Z INFO bench1 pump=2 flow=40.7 lpm pressure=3.8 bar
+2026-10-03T09:09:09Z INFO bench2 pump=5 flow=39.0 lpm pressure=3.6 bar
+2026-10-03T09:10:59Z INFO bench2 pump=4 flow=40.4 lpm pressure=3.8 bar
+2026-10-03T09:12:07Z ERROR logsvc failed to rotate log file pump-service.log
+    at logsvc::rotate::rename_current (rotate.rs:88)
+    at logsvc::rotate::run (rotate.rs:41)
+    at logsvc::main_loop (main.rs:120)
+    caused by: access denied, file is open in another program
+2026-10-03T09:12:10Z WARN logsvc rotation skipped, will retry at next hour
+2026-10-03T09:13:18Z INFO bench2 pump=4 flow=41.2 lpm pressure=3.8 bar
+2026-10-03T09:15:15Z INFO bench2 pump=5 flow=42.0 lpm pressure=3.6 bar
+2026-10-03T09:17:23Z INFO bench2 pump=4 flow=39.0 lpm pressure=4.0 bar
+2026-10-03T09:19:16Z INFO bench1 pump=1 flow=41.6 lpm pressure=3.9 bar
+2026-10-03T09:20:23Z INFO bench2 pump=5 flow=39.1 lpm pressure=3.9 bar
+2026-10-03T09:22:19Z INFO bench2 pump=4 started
+2026-10-03T09:24:29Z INFO bench2 pump=5 flow=41.2 lpm pressure=3.9 bar
+2026-10-03T09:25:47Z INFO bench1 pump=1 flow=40.2 lpm pressure=3.7 bar
+2026-10-03T09:27:42Z INFO bench1 pump=3 flow=39.0 lpm pressure=3.8 bar
+2026-10-03T09:29:53Z INFO bench1 pump=2 flow=38.2 lpm pressure=4.0 bar
+2026-10-03T09:31:25Z INFO bench2 pump=5 stopped, demand met
+2026-10-03T09:33:26Z INFO bench2 pump=5 flow=38.1 lpm pressure=3.8 bar
+2026-10-03T09:35:35Z INFO bench2 pump=5 flow=39.4 lpm pressure=3.9 bar
+2026-10-03T09:37:16Z INFO bench1 pump=2 flow=40.0 lpm pressure=3.6 bar
+2026-10-03T09:38:32Z INFO bench1 pump=2 flow=39.0 lpm pressure=4.0 bar
+2026-10-03T09:39:51Z INFO bench2 pump=4 flow=42.0 lpm pressure=4.0 bar
+2026-10-03T09:41:19Z INFO bench1 pump=2 flow=38.7 lpm pressure=3.7 bar
+2026-10-03T09:42:41Z INFO bench2 pump=5 flow=38.3 lpm pressure=3.6 bar
+2026-10-03T09:44:08Z INFO bench2 pump=6 flow=41.8 lpm pressure=3.8 bar
+2026-10-03T09:45:27Z INFO bench1 pump=1 flow=40.7 lpm pressure=4.0 bar
+2026-10-03T09:47:34Z INFO bench2 pump=6 flow=39.3 lpm pressure=3.6 bar
+2026-10-03T09:49:52Z INFO bench1 pump=1 flow=40.7 lpm pressure=3.7 bar
+2026-10-03T09:51:46Z INFO bench2 pump=5 flow=40.8 lpm pressure=3.7 bar
+2026-10-03T09:53:02Z INFO bench2 pump=6 flow=39.4 lpm pressure=3.7 bar
+2026-10-03T09:55:09Z INFO bench2 pump=6 flow=42.0 lpm pressure=3.8 bar
+2026-10-03T09:57:00Z INFO bench2 pump=4 stopped, demand met
+2026-10-03T09:58:38Z INFO bench2 pump=4 flow=39.8 lpm pressure=3.7 bar
+2026-10-03T10:00:36Z INFO bench1 pump=3 flow=41.9 lpm pressure=3.9 bar
+2026-10-03T10:02:00Z INFO bench1 pump=2 flow=41.6 lpm pressure=3.9 bar
+2026-10-03T10:03:28Z INFO bench2 pump=4 stopped, demand met
+2026-10-03T10:04:29Z INFO bench2 pump=5 flow=40.2 lpm pressure=3.8 bar
+2026-10-03T10:06:02Z INFO bench2 pump=4 flow=38.9 lpm pressure=3.6 bar
+2026-10-03T10:07:39Z INFO bench1 pump=3 flow=40.8 lpm pressure=3.6 bar
+2026-10-03T10:09:49Z INFO bench1 pump=1 flow=41.3 lpm pressure=4.0 bar
+2026-10-03T10:11:34Z INFO bench2 pump=5 flow=39.7 lpm pressure=3.6 bar
+2026-10-03T10:13:28Z INFO bench2 pump=4 housing temperature 59 C
+2026-10-03T10:14:58Z INFO bench2 pump=5 flow=40.1 lpm pressure=3.6 bar
+2026-10-03T10:16:17Z INFO bench2 pump=6 flow=39.1 lpm pressure=3.9 bar
+2026-10-03T10:17:55Z INFO bench1 pump=3 started
+2026-10-03T10:19:31Z INFO bench1 pump=2 flow=41.6 lpm pressure=3.8 bar
+2026-10-03T10:21:23Z INFO bench1 pump=1 flow=41.5 lpm pressure=3.6 bar
+2026-10-03T10:23:11Z INFO bench2 pump=6 flow=39.8 lpm pressure=4.0 bar
+2026-10-03T10:24:42Z INFO bench1 pump=2 flow=40.5 lpm pressure=4.0 bar
+2026-10-03T10:26:36Z INFO bench1 pump=1 flow=38.6 lpm pressure=3.8 bar
+2026-10-03T10:28:00Z INFO bench2 pump=5 flow=39.8 lpm pressure=3.7 bar
+2026-10-03T10:30:08Z INFO bench2 pump=4 started
+2026-10-03T10:32:19Z INFO bench2 pump=5 housing temperature 59 C
+2026-10-03T10:34:26Z INFO bench2 pump=4 flow=39.8 lpm pressure=3.6 bar
+2026-10-03T10:36:33Z INFO bench2 pump=4 flow=39.6 lpm pressure=4.0 bar
+2026-10-03T10:38:12Z INFO bench2 pump=6 flow=40.4 lpm pressure=3.6 bar
+2026-10-03T10:40:23Z INFO bench1 pump=3 flow=39.3 lpm pressure=3.9 bar
+2026-10-03T10:42:11Z INFO bench2 pump=4 flow=40.2 lpm pressure=3.7 bar
+2026-10-03T10:44:07Z INFO bench2 pump=4 flow=41.0 lpm pressure=3.8 bar
+2026-10-03T10:45:19Z INFO bench1 pump=1 flow=41.4 lpm pressure=3.6 bar
+2026-10-03T10:47:09Z INFO bench1 pump=2 flow=39.3 lpm pressure=3.7 bar
+2026-10-03T10:49:18Z INFO bench2 pump=6 flow=40.0 lpm pressure=3.7 bar
+2026-10-03T10:50:57Z INFO bench2 pump=5 started
+2026-10-03T10:53:11Z INFO bench1 pump=1 flow=39.3 lpm pressure=3.8 bar
+2026-10-03T10:55:19Z INFO bench2 pump=4 flow=39.1 lpm pressure=3.8 bar
+2026-10-03T10:57:38Z INFO bench2 pump=6 housing temperature 52 C
+2026-10-03T10:59:11Z INFO bench1 pump=2 flow=40.7 lpm pressure=3.7 bar
+2026-10-03T11:00:30Z INFO bench2 pump=4 flow=39.0 lpm pressure=3.9 bar
+2026-10-03T11:01:51Z INFO bench2 pump=5 flow=41.1 lpm pressure=3.9 bar
+2026-10-03T11:03:43Z INFO bench2 pump=4 housing temperature 59 C
+2026-10-03T11:05:15Z INFO bench2 pump=6 flow=38.4 lpm pressure=3.8 bar
+2026-10-03T11:06:37Z INFO bench1 pump=3 flow=40.3 lpm pressure=3.8 bar
+2026-10-03T11:08:07Z INFO bench1 pump=3 flow=40.7 lpm pressure=3.7 bar
+2026-10-03T11:10:24Z INFO bench2 pump=4 flow=39.4 lpm pressure=3.8 bar
+2026-10-03T11:12:32Z INFO bench2 pump=6 flow=40.5 lpm pressure=3.9 bar
+2026-10-03T11:14:37Z INFO bench2 pump=6 flow=38.1 lpm pressure=4.0 bar
+2026-10-03T11:16:49Z INFO bench1 pump=3 flow=40.9 lpm pressure=3.9 bar
+2026-10-03T11:19:04Z INFO bench2 pump=4 flow=39.7 lpm pressure=3.7 bar
+2026-10-03T11:20:13Z INFO bench2 pump=5 flow=40.5 lpm pressure=3.7 bar
+2026-10-03T11:21:29Z INFO bench2 pump=4 flow=41.5 lpm pressure=3.8 bar
+2026-10-03T11:23:35Z INFO bench2 pump=6 housing temperature 56 C
+2026-10-03T11:25:33Z INFO bench1 pump=1 flow=41.0 lpm pressure=3.9 bar
+2026-10-03T11:26:56Z INFO bench2 pump=6 flow=39.0 lpm pressure=3.6 bar
+2026-10-03T11:28:24Z INFO bench2 pump=4 flow=41.6 lpm pressure=4.0 bar
+2026-10-03T11:30:43Z INFO bench2 pump=4 flow=38.4 lpm pressure=3.8 bar
+2026-10-03T11:32:38Z INFO bench1 pump=1 housing temperature 56 C
+2026-10-03T11:34:24Z INFO bench2 pump=6 flow=41.7 lpm pressure=3.8 bar
+2026-10-03T11:35:39Z INFO bench2 pump=4 flow=40.2 lpm pressure=3.6 bar
+2026-10-03T11:36:44Z INFO bench2 pump=4 flow=40.9 lpm pressure=3.8 bar
+2026-10-03T11:37:50Z INFO bench2 pump=4 stopped, demand met
+2026-10-03T11:39:05Z INFO bench1 pump=3 flow=39.8 lpm pressure=3.8 bar
+2026-10-03T11:41:18Z INFO bench2 pump=6 flow=41.1 lpm pressure=4.0 bar
+2026-10-03T11:43:19Z INFO bench2 pump=4 flow=40.5 lpm pressure=3.9 bar
+2026-10-03T11:44:57Z INFO bench1 pump=3 started
+2026-10-03T11:47:30Z WARN bench2 pump=5 strainer pressure drop high, clean strainer
+2026-10-03T11:47:06Z INFO bench2 pump=5 flow=41.0 lpm pressure=3.9 bar
+2026-10-03T11:48:54Z INFO bench2 pump=5 flow=38.5 lpm pressure=4.0 bar
+2026-10-03T11:50:46Z INFO bench1 pump=1 flow=38.3 lpm pressure=3.6 bar
+2026-10-03T11:52:48Z INFO bench2 pump=4 housing temperature 58 C
+2026-10-03T11:54:58Z INFO bench2 pump=5 flow=39.7 lpm pressure=3.6 bar
+2026-10-03T11:57:08Z INFO bench1 pump=1 flow=39.1 lpm pressure=4.0 bar
+2026-10-03T11:58:15Z INFO bench2 pump=4 flow=38.7 lpm pressure=3.9 bar
+2026-10-03T12:00:06Z INFO bench2 pump=5 housing temperature 51 C
+2026-10-03T12:01:19Z INFO bench1 pump=1 flow=41.9 lpm pressure=3.6 bar
+2026-10-03T12:02:59Z INFO bench2 pump=4 housing temperature 56 C
+2026-10-03T12:04:10Z INFO bench1 pump=3 flow=39.8 lpm pressure=4.0 bar
+2026-10-03T12:06:22Z INFO bench2 pump=5 flow=39.5 lpm pressure=3.8 bar
+2026-10-03T12:08:01Z INFO bench1 pump=3 flow=41.3 lpm pressure=3.7 bar
+2026-10-03T12:10:19Z INFO bench2 pump=6 flow=40.8 lpm pressure=4.0 bar
+2026-10-03T12:11:47Z INFO bench1 pump=3 flow=40.9 lpm pressure=3.7 bar
+2026-10-03T12:13:50Z INFO bench1 pump=3 flow=40.0 lpm pressure=3.8 bar
+2026-10-03T12:15:16Z INFO bench1 pump=2 flow=41.0 lpm pressure=3.9 bar
+2026-10-03T12:16:50Z INFO bench1 pump=3 flow=39.0 lpm pressure=3.9 bar
+2026-10-03T12:17:58Z INFO bench1 pump=1 flow=41.5 lpm pressure=3.6 bar
+2026-10-03T12:19:59Z INFO bench2 pump=5 flow=38.3 lpm pressure=4.0 bar
+2026-10-03T12:21:15Z INFO bench2 pump=6 flow=42.0 lpm pressure=4.0 bar
+2026-10-03T12:23:12Z INFO bench2 pump=5 flow=38.5 lpm pressure=3.6 bar
+2026-10-03T12:24:21Z INFO bench1 pump=2 flow=38.0 lpm pressure=3.7 bar
+2026-10-03T12:26:32Z INFO bench1 pump=3 flow=40.7 lpm pressure=4.0 bar
+2026-10-03T12:27:46Z INFO bench2 pump=4 housing temperature 56 C
+2026-10-03T12:29:22Z INFO bench2 pump=5 flow=40.8 lpm pressure=3.6 bar
+2026-10-03T12:30:40Z INFO bench1 pump=2 flow=39.0 lpm pressure=4.0 bar
+2026-10-03T12:32:30Z INFO bench1 pump=1 flow=41.5 lpm pressure=3.7 bar
+2026-10-03T12:33:33Z INFO bench1 pump=3 started
+2026-10-03T12:35:44Z INFO bench1 pump=2 flow=41.2 lpm pressure=3.9 bar
+2026-10-03T12:37:07Z INFO bench2 pump=6 started
+2026-10-03T12:39:02Z INFO bench1 pump=2 flow=38.8 lpm pressure=3.7 bar
+2026-10-03T12:40:07Z INFO bench2 pump=4 flow=41.8 lpm pressure=4.0 bar
+2026-10-03T12:41:40Z INFO bench2 pump=4 started
+2026-10-03T12:42:48Z INFO bench1 pump=3 started
+2026-10-03T12:44:35Z INFO bench2 pump=6 flow=41.2 lpm pressure=3.8 bar
+2026-10-03T12:46:54Z INFO bench1 pump=2 flow=39.7 lpm pressure=3.7 bar
+2026-10-03T12:48:23Z INFO bench1 pump=2 flow=39.7 lpm pressure=3.8 bar
+2026-10-03T12:49:50Z INFO bench1 pump=2 started
+2026-10-03T12:51:03Z INFO bench2 pump=5 flow=40.0 lpm pressure=3.9 bar
+2026-10-03T12:53:15Z INFO bench1 pump=2 housing temperature 55 C
+2026-10-03T12:54:21Z INFO bench2 pump=6 flow=39.5 lpm pressure=3.9 bar
+2026-10-03T12:56:08Z INFO bench1 pump=1 flow=38.4 lpm pressure=3.9 bar
+2026-10-03T12:58:01Z INFO bench1 pump=1 stopped, demand met
+2026-10-03T12:59:48Z INFO bench2 pump=5 housing temperature 50 C
+2026-10-03T13:00:57Z INFO bench2 pump=5 flow=38.8 lpm pressure=3.7 bar
+2026-10-03T13:03:07Z INFO bench1 pump=3 flow=40.2 lpm pressure=3.9 bar
+2026-10-03T13:04:56Z INFO bench1 pump=3 flow=41.6 lpm pressure=3.6 bar
+2026-10-03T13:06:32Z INFO bench2 pump=6 housing temperature 58 C
+2026-10-03T13:07:48Z INFO bench1 pump=1 flow=40.0 lpm pressure=3.8 bar
+2026-10-03T13:08:57Z INFO bench1 pump=2 flow=40.7 lpm pressure=3.6 bar
+2026-10-03T13:10:38Z INFO bench2 pump=5 flow=40.4 lpm pressure=3.9 bar
+2026-10-03T13:12:07Z INFO bench2 pump=4 flow=39.5 lpm pressure=3.8 bar
+2026-10-03T13:13:07Z INFO bench2 pump=4 flow=38.3 lpm pressure=4.0 bar
+2026-10-03T13:14:41Z INFO bench2 pump=4 flow=40.0 lpm pressure=3.9 bar
+2026-10-03T13:15:44Z INFO bench2 pump=4 flow=39.1 lpm pressure=3.7 bar
+2026-10-03T13:17:02Z INFO bench1 pump=1 flow=38.1 lpm pressure=3.6 bar
+2026-10-03T13:18:59Z INFO bench2 pump=4 flow=38.7 lpm pressure=3.7 bar
+2026-10-03T13:20:34Z INFO bench1 pump=2 flow=38.2 lpm pressure=3.6 bar
+2026-10-03T13:22:22Z INFO bench2 pump=5 stopped, demand met
+2026-10-03T13:24:30Z INFO bench1 pump=3 housing temperature 59 C
+2026-10-03T13:25:31Z INFO bench2 pump=4 flow=39.9 lpm pressure=3.9 bar
+2026-10-03T13:27:02Z INFO bench1 pump=3 started
+2026-10-03T13:29:07Z INFO bench1 pump=1 stopped, demand met
+2026-10-03T13:30:40Z INFO bench1 pump=3 stopped, demand met
+2026-10-03T13:32:30Z INFO bench1 pump=2 flow=38.5 lpm pressure=3.6 bar
+2026-10-03T13:33:52Z INFO bench2 pump=6 flow=38.5 lpm pressure=3.7 bar
+2026-10-03T13:35:46Z INFO bench2 pump=5 flow=39.8 lpm pressure=4.0 bar
+2026-10-03T13:37:04Z INFO bench2 pump=4 started
+2026-10-03T13:38:21Z INFO bench2 pump=4 flow=39.5 lpm pressure=3.6 bar
+2026-10-03T13:39:37Z INFO bench2 pump=6 flow=39.9 lpm pressure=3.9 bar
+2026-10-03T13:41:56Z INFO bench2 pump=4 started
+2026-10-03T13:44:06Z INFO bench2 pump=4 flow=40.2 lpm pressure=3.6 bar
+2026-10-03T13:45:15Z INFO bench1 pump=3 flow=40.2 lpm pressure=3.7 bar
+2026-10-03T13:47:23Z INFO bench1 pump=2 flow=40.0 lpm pressure=3.9 bar
+2026-10-03T13:48:39Z INFO bench1 pump=3 started
+2026-10-03T13:49:45Z INFO bench2 pump=5 flow=40.6 lpm pressure=4.0 bar
+2026-10-03T13:51:16Z INFO bench1 pump=2 stopped, demand met
+2026-10-03T13:53:27Z INFO bench1 pump=3 flow=42.0 lpm pressure=3.7 bar
+2026-10-03T13:55:31Z INFO bench1 pump=3 housing temperature 57 C
+2026-10-03T13:57:51Z INFO bench2 pump=4 flow=41.5 lpm pressure=3.8 bar
+2026-10-03T13:59:38Z INFO bench1 pump=3 flow=38.4 lpm pressure=3.7 bar
+2026-10-03T14:00:41Z INFO bench1 pump=2 flow=38.4 lpm pressure=3.6 bar
+2026-10-03T14:01:51Z INFO bench2 pump=4 started
+2026-10-03T14:03:12Z INFO bench1 pump=2 flow=41.4 lpm pressure=3.9 bar
+2026-10-03T14:04:47Z INFO bench2 pump=5 stopped, demand met
+2026-10-03T14:06:43Z INFO bench1 pump=2 flow=39.8 lpm pressure=3.8 bar
+2026-10-03T14:07:54Z INFO bench2 pump=6 flow=40.5 lpm pressure=4.0 bar
+2026-10-03T14:09:33Z INFO bench1 pump=3 stopped, demand met
+2026-10-03T14:10:40Z INFO bench2 pump=5 flow=39.7 lpm pressure=3.7 bar
+2026-10-03T14:12:16Z INFO bench1 pump=1 flow=41.6 lpm pressure=3.7 bar
+2026-10-03T14:13:26Z INFO bench1 pump=3 flow=41.2 lpm pressure=4.0 bar
+2026-10-03T14:14:59Z INFO bench1 pump=3 flow=41.5 lpm pressure=3.9 bar
+2026-10-03T14:17:05Z INFO bench1 pump=2 flow=39.8 lpm pressure=4.0 bar
+2026-10-03T14:18:17Z INFO bench1 pump=1 stopped, demand met
+2026-10-03T14:19:47Z INFO bench2 pump=4 flow=39.1 lpm pressure=3.9 bar
+2026-10-03T14:21:42Z INFO bench1 pump=3 flow=38.5 lpm pressure=3.6 bar
+2026-10-03T14:23:30Z INFO bench1 pump=3 flow=40.9 lpm pressure=3.8 bar
+2026-10-03T14:24:43Z INFO bench1 pump=1 flow=41.5 lpm pressure=3.6 bar
+2026-10-03T14:26:52Z INFO bench1 pump=2 flow=40.6 lpm pressure=3.6 bar
+2026-10-03T14:28:27Z INFO bench1 pump=1 stopped, demand met
+2026-10-03T14:30:05Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:07Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:09Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:11Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:13Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:15Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:17Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:19Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:21Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:23Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:25Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:27Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:29Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:31Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:33Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:35Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:37Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:39Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:41Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:43Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:45Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:47Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:49Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:30:51Z ERROR bench1 pump=2 pressure sensor read timeout after 500 ms
+2026-10-03T14:31:02Z ERROR bench1 pump=2 stopped, fault code 5 (pressure switch fault)
+2026-10-03T14:36:14Z INFO bench1 pump=2 fault cleared by operator
+2026-10-03T14:36:20Z INFO bench1 pump=2 started
+2026-10-03T14:37:00Z INFO bench2 pump=6 flow=40.3 lpm pressure=3.7 bar
+2026-10-03T14:38:15Z INFO bench2 pump=5 started
+2026-10-03T14:39:19Z INFO bench1 pump=2 flow=40.5 lpm pressure=3.7 bar
+2026-10-03T14:41:08Z INFO bench2 pump=6 flow=38.3 lpm pressure=3.8 bar
+2026-10-03T14:42:29Z INFO bench1 pump=3 flow=38.0 lpm pressure=3.6 bar
+2026-10-03T14:43:46Z INFO bench1 pump=2 started
+2026-10-03T14:45:28Z INFO bench1 pump=2 flow=39.9 lpm pressure=3.6 bar
+2026-10-03T14:47:15Z INFO bench2 pump=6 flow=38.3 lpm pressure=3.8 bar
+2026-10-03T14:48:35Z INFO bench1 pump=1 flow=40.2 lpm pressure=4.0 bar
+2026-10-03T14:49:59Z INFO bench2 pump=5 flow=40.3 lpm pressure=3.8 bar
+2026-10-03T14:51:35Z INFO bench2 pump=5 flow=40.9 lpm pressure=3.7 bar
+2026-10-03T14:53:12Z INFO bench1 pump=1 started
+2026-10-03T14:54:35Z INFO bench2 pump=4 flow=41.0 lpm pressure=3.6 bar
+2026-10-03T14:56:23Z INFO bench1 pump=2 flow=41.3 lpm pressure=3.9 bar
+2026-10-03T14:57:58Z INFO bench1 pump=2 flow=40.9 lpm pressure=3.7 bar
+2026-10-03T14:59:13Z INFO bench2 pump=6 flow=38.9 lpm pressure=3.8 bar
+2026-10-03T15:01:14Z INFO bench1 pump=3 flow=40.1 lpm pressure=3.9 bar
+2026-10-03T15:03:12Z INFO bench2 pump=5 housing temperature 59 C
+2026-10-03T15:05:13Z INFO bench1 pump=2 flow=38.1 lpm pressure=3.8 bar
+2026-10-03T15:07:26Z INFO bench1 pump=2 flow=41.6 lpm pressure=3.9 bar
+2026-10-03T15:09:02Z INFO bench2 pump=6 flow=41.4 lpm pressure=3.7 bar
+2026-10-03T15:10:25Z INFO bench1 pump=1 flow=40.4 lpm pressure=3.7 bar
+2026-10-03T15:11:41Z INFO bench1 pump=1 flow=41.7 lpm pressure=3.6 bar
+2026-10-03T15:12:50Z INFO bench2 pump=4 flow=41.8 lpm pressure=3.7 bar
+2026-10-03T15:14:02Z INFO bench2 pump=4 flow=41.3 lpm pressure=3.9 bar
+2026-10-03T15:15:45Z INFO bench2 pump=4 flow=40.7 lpm pressure=3.8 bar
+2026-10-03T15:17:34Z INFO bench1 pump=2 flow=40.9 lpm pressure=3.8 bar
+2026-10-03T15:19:27Z INFO bench2 pump=6 flow=40.8 lpm pressure=3.9 bar
+2026-10-03T15:20:12Z WARN bench2 pump=6 starts per hour 14, above limit 12
+2026-10-03T15:20:54Z INFO bench1 pump=3 flow=42.0 lpm pressure=3.9 bar
+2026-10-03T15:22:39Z INFO bench2 pump=6 flow=41.5 lpm pressure=3.8 bar
+2026-10-03T15:24:46Z INFO bench2 pump=4 flow=39.4 lpm pressure=4.0 bar
+2026-10-03T15:26:52Z INFO bench2 pump=4 flow=41.4 lpm pressure=3.6 bar
+2026-10-03T15:28:55Z INFO bench2 pump=6 started
+2026-10-03T15:30:21Z INFO bench1 pump=2 flow=39.6 lpm pressure=3.8 bar
+2026-10-03T15:32:14Z INFO bench2 pump=5 started
+2026-10-03T15:34:25Z INFO bench1 pump=2 flow=41.4 lpm pressure=4.0 bar
+2026-10-03T15:35:53Z INFO bench2 pump=6 started
+2026-10-03T15:38:13Z INFO bench1 pump=1 flow=41.1 lpm pressure=3.7 bar
+2026-10-03T15:39:53Z INFO bench2 pump=4 flow=41.9 lpm pressure=3.6 bar
+2026-10-03T15:40:56Z INFO bench1 pump=1 flow=39.6 lpm pressure=4.0 bar
+2026-10-03T15:42:53Z INFO bench2 pump=5 flow=41.5 lpm pressure=3.6 bar
+2026-10-03T15:44:53Z INFO bench2 pump=6 flow=39.7 lpm pressure=3.9 bar
+2026-10-03T15:46:57Z INFO bench1 pump=3 housing temperature 56 C
+2026-10-03T15:49:11Z INFO bench2 pump=6 flow=38.0 lpm pressure=3.6 bar
+2026-10-03T15:50:40Z INFO bench2 pump=6 flow=38.4 lpm pressure=3.9 bar
+2026-10-03T15:51:43Z INFO bench2 pump=5 flow=39.6 lpm pressure=4.0 bar
+2026-10-03T15:53:07Z INFO bench1 pump=3 started
+2026-10-03T15:54:44Z INFO bench1 pump=2 flow=41.2 lpm pressure=3.7 bar
+2026-10-03T15:55:53Z INFO bench1 pump=1 flow=42.0 lpm pressure=3.6 bar
+2026-10-03T15:57:57Z INFO bench2 pump=5 flow=39.6 lpm pressure=4.0 bar
+2026-10-03T15:59:54Z INFO bench1 pump=2 flow=38.8 lpm pressure=4.0 bar
+2026-10-03T16:01:35Z INFO bench2 pump=4 flow=39.8 lpm pressure=3.8 bar
+2026-10-03T16:03:41Z INFO bench1 pump=1 flow=38.8 lpm pressure=4.0 bar
+2026-10-03T16:04:41Z INFO logsvc daily summary: 6 pumps, 1 fault stop
+2026-10-03T16:04:42Z INFO logsvc service stopping

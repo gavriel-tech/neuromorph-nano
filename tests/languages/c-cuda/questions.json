@@ -1,0 +1,164 @@
+{
+  "questions": [
+    {
+      "id": "c01",
+      "kind": "value",
+      "question": "What is the capacity of the ring buffer?",
+      "answers": [
+        {
+          "file": "include/ringbuf.h",
+          "anchor": "#define RB_CAPACITY 1024",
+          "lines": [
+            8,
+            8
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "c02",
+      "kind": "behaviour",
+      "question": "What happens when a sample is pushed into a full ring buffer?",
+      "answers": [
+        {
+          "file": "src/ringbuf.c",
+          "anchor": "/* Oldest sample is dropped",
+          "lines": [
+            12,
+            12
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "c03",
+      "kind": "name",
+      "question": "Which kernel scales the samples on the device?",
+      "answers": [
+        {
+          "file": "kernels/scale.cu",
+          "anchor": "__global__ void scale_kernel",
+          "lines": [
+            13,
+            13
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "c04",
+      "kind": "behaviour",
+      "question": "How are samples clamped before scaling?",
+      "answers": [
+        {
+          "file": "kernels/scale.cu",
+          "anchor": "constexpr float CLAMP_LIMIT",
+          "lines": [
+            6,
+            6
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "c05",
+      "kind": "explain",
+      "question": "How does the reduction sum values within a warp?",
+      "answers": [
+        {
+          "file": "kernels/reduce.cu",
+          "anchor": "__device__ float warp_sum",
+          "lines": [
+            7,
+            7
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "c06",
+      "kind": "behaviour",
+      "question": "How are CUDA errors checked after each call?",
+      "answers": [
+        {
+          "file": "kernels/scale.cuh",
+          "anchor": "#define CUDA_CHECK(call)",
+          "lines": [
+            4,
+            4
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "c07",
+      "kind": "value",
+      "question": "What block size do the kernels launch with?",
+      "answers": [
+        {
+          "file": "kernels/scale.cuh",
+          "anchor": "#define SCALE_BLOCK 256",
+          "lines": [
+            3,
+            3
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "c08",
+      "kind": "name",
+      "question": "Where is the name of a status code looked up?",
+      "answers": [
+        {
+          "file": "src/ringbuf.c",
+          "anchor": "const char *rb_status_name",
+          "lines": [
+            40,
+            40
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "c09",
+      "kind": "name",
+      "question": "Which function adds up the samples on the device?",
+      "answers": [
+        {
+          "file": "kernels/reduce.cu",
+          "anchor": "extern \"C\" float sum_on_device",
+          "lines": [
+            31,
+            31
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "c10",
+      "kind": "behaviour",
+      "question": "Where does the program read samples from standard input?",
+      "answers": [
+        {
+          "file": "src/main.c",
+          "anchor": "while (scanf(\"%f\", &x) == 1) {",
+          "lines": [
+            18,
+            18
+          ],
+          "match": "file"
+        }
+      ]
+    }
+  ]
+}

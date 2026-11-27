@@ -1,0 +1,29 @@
+{
+  "id": "nmpod",
+  "kind": "neuropod",
+  "version": 1,
+  "parent": "nmapi",
+  "ports_in": [{"name": "plan", "kind": "json", "required": true}],
+  "ports_out": [{"name": "packets", "kind": "packets", "required": true}],
+  "deps": ["nmjson", "nmlex", "nmtype"],
+  "config_schema": {},
+  "config_default": {"tentacles":8,"tips":8,"max_depth":1},
+  "subcomponents": [
+    {"id": "nmpod.unit", "version": 1, "hash": "723f354b871340c44024bb34f26c56e4b8e9a523c4935fc7d4a24839b387674c"},
+    {"id": "nmpod.tip", "version": 1, "hash": "9733af1d99e9d26f9e9be90cab391924b9bd32bd50f29e09d4672647f5046017"},
+    {"id": "nmpod.pipeline", "version": 1, "hash": "824fbe7f63c231e91cc4d706d4957100985dd4776516eb230a208ed902b3c6e4"},
+    {"id": "nmpod.record", "version": 1, "hash": "7e2d7d48c0f4314eba2ac459cf4f10c5765b6dfc810eac667711572f0c790e1e"},
+    {"id": "nmpod.recursion", "version": 1, "hash": "9890956c73de31208a562b7d7cd916887363e46b822109979592fe2b7a8ca24b"},
+    {"id": "nmpod.territory", "version": 1, "hash": "2ac509a5e44b071cc7b1122b96f086c3a0fcea25443fe94e5f15bdb5882148d3"},
+    {"id": "nmpod.attention", "version": 1, "hash": "d5b021a3d21f349f74359876212cad013dbdc94e471d5f7b0a1090c1382bdc97"},
+    {"id": "nmpod.pod", "version": 1, "hash": "ab3477f57f72763405789a6783ba11a197d13ef0c3a535bcf541d8695a16bd5b"},
+    {"id": "nmpod.core", "version": 1, "hash": "748891d8f657198d68799628740628e36622992de9e18ff2f4a6f78a73db277d"},
+    {"id": "nmpod.evidence", "version": 1, "hash": "226ab6feb5596e25f1a886828d6f6811ccc497f1361d79a5bb269cfb6847b832"},
+    {"id": "nmpod.fixture", "version": 1, "hash": "e4b498dd6215abbba4ea749d79ca44b11b191753e0c7111a1aa32bde8db6684f"},
+    {"id": "nmpod.intake", "version": 1, "hash": "3e96f07ff705883e7b69b27494656b818797ca9ea20fa7e942d3179439f37ff1"},
+    {"id": "nmpod.window", "version": 1, "hash": "ce3d1a4f4527f99a7920097abe8c7041a19d7f9bedba09467163504e54cc0a9b"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "6f70dbbdd84abb408aea2c90d2d4f426b11609690acb814267d4915193950e58"
+}

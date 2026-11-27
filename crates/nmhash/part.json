@@ -1,0 +1,17 @@
+{
+  "id": "nmhash",
+  "kind": "other",
+  "version": 1,
+  "parent": null,
+  "ports_in": [],
+  "ports_out": [],
+  "deps": [],
+  "config_schema": {},
+  "config_default": {},
+  "subcomponents": [
+    {"id": "nmhash.sha256", "version": 1, "hash": "ab28fd3ceb682ac1e31ef32f0a9d1d4f36f2a99f9d31ca76ab3ad4ed649bb8ad"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "03c18b9f8689391f7c71dafddc0f24985782bd663e9325d341a5e2209cf38743"
+}

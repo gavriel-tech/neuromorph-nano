@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE manual [
+  <!ENTITY vendor "Halvern">
+]>
+<manual id="HV-AQ40-QR">
+  <title>AQ-40 Quick Reference</title>
+  <section>
+    <title>Start up</title>
+    <para>Fill the volute with clean water through the priming hole before the first start.</para>
+    <para>Open the outlet valve one turn and switch on.</para>
+  </section>
+  <section>
+    <title>Limits</title>
+    <limit><name>pressure</name><value>6</value><unit>bar</unit></limit>
+    <limit><name>temperature</name><value>40</value><unit>C</unit></limit>
+    <section>
+      <title>Dry running</title>
+      <para>Never run the pump dry for more than twenty seconds.</para>
+    </section>
+  </section>
+  <revision date="2026-10-01" by="service"/>
+  <!-- the end -->
+</manual>

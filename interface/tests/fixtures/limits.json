@@ -1,0 +1,67 @@
+{
+ "applies": "live, with no restart (batches tile within the limits at the next call); a card limit of 0 (processor only) applies at the next start",
+ "current": {
+  "limits.cpu_threads": "auto",
+  "limits.ram_mb": "auto",
+  "limits.vram_mb": "auto"
+ },
+ "effective": {
+  "cpu": {
+   "cap": null,
+   "effective_threads": 12,
+   "hardware_threads": 12,
+   "setting": "auto"
+  },
+  "mode": "processor",
+  "ram": {
+   "available_mb": 10458,
+   "cache_ceiling_mb": null,
+   "cap_mb": null,
+   "room_mb": 10458,
+   "setting": "auto",
+   "used_mb": 17
+  },
+  "vram": {
+   "cap_mb": null,
+   "cpu_only_next_start": false,
+   "cpu_only_now": false,
+   "driver_free_mb": null,
+   "effective_free_mb": null,
+   "note": "auto: the Nano uses what the driver reports free, less the live calls' room",
+   "setting": "auto",
+   "total_mb": null,
+   "used_mb": null
+  }
+ },
+ "profile": {
+  "card": null,
+  "gpu_ceiling_mb": null,
+  "hardware_threads": 12,
+  "host_available_mb": 10459,
+  "host_total_mb": 32436,
+  "ram_ceiling_mb": 24327,
+  "threads": 12
+ },
+ "recommendation": {
+  "cpu_threads": {
+   "key": "limits.cpu_threads",
+   "reason": "Every MicroModel runs on the processor here. 11 of the 12 threads leaves one for the system and the editor, so the machine stays responsive.",
+   "value": "11"
+  },
+  "notes": [
+   "Only 5 GB is free on the Nano's drive: the meaning index and job filter builds need room. Prune rebuildable storage (nm_storage prune, or the Storage page)."
+  ],
+  "ram_mb": {
+   "key": "limits.ram_mb",
+   "reason": "The machine has 32436 MiB (10458 MiB available now). Auto lets the encoded-chunk cache take half of what is available and homeostasis act at three quarters, which leaves the system ample room.",
+   "value": "auto"
+  },
+  "tier": "cpu-only",
+  "tier_label": "Processor only (no usable graphics card)",
+  "vram_mb": {
+   "key": "limits.vram_mb",
+   "reason": "No graphics card the engine can use was found, so the MicroModels run on the processor (0 means processor only).",
+   "value": "0"
+  }
+ }
+}

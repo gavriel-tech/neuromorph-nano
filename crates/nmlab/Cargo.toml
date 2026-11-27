@@ -1,0 +1,40 @@
+[package]
+name = "nmlab"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "The Neuromorph Nano lab: research harnesses, stage runs, and the builders of parameter maps, base cartridges and job filters; inside the product as `neuromorph-nano lab`, and its own program nano-lab"
+autobins = false
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmapi = { path = "../nmapi" }
+nmhash = { path = "../nmhash" }
+nmtype = { path = "../nmtype" }
+nmnte = { path = "../nmnte" }
+nmlex = { path = "../nmlex" }
+nmsubs = { path = "../nmsubs" }
+nmpod = { path = "../nmpod" }
+nmbrain = { path = "../nmbrain" }
+nmmem = { path = "../nmmem" }
+nmnpcs = { path = "../nmnpcs" }
+nmengn = { path = "../nmengn" }
+nmlearn = { path = "../nmlearn" }
+nmffi = { path = "../nmffi" }
+nmsafe = { path = "../nmsafe" }
+nmtokz = { path = "../nmtokz" }
+nmtool = { path = "../nmtool" }
+nmmusc = { path = "../nmmusc" }
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "nano-lab"
+path = "src/main.rs"
+
+[lints]
+workspace = true

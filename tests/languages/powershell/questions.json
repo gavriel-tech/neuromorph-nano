@@ -1,0 +1,164 @@
+{
+  "questions": [
+    {
+      "id": "s01",
+      "kind": "value",
+      "question": "What is the largest page size the build allows?",
+      "answers": [
+        {
+          "file": "scripts/build.ps1",
+          "anchor": "$MaxPageKb = 512",
+          "lines": [
+            13,
+            13
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "kind": "name",
+      "question": "Which function converts Markdown headings to HTML?",
+      "answers": [
+        {
+          "file": "scripts/lib/common.ps1",
+          "anchor": "function Convert-Markdown",
+          "lines": [
+            12,
+            12
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "kind": "value",
+      "question": "How long does the deploy wait for the target to answer?",
+      "answers": [
+        {
+          "file": "scripts/deploy.ps1",
+          "anchor": "$HealthTimeoutSec = 30",
+          "lines": [
+            5,
+            5
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "kind": "name",
+      "question": "Where is the build manifest written?",
+      "answers": [
+        {
+          "file": "scripts/build.ps1",
+          "anchor": "function Write-Manifest",
+          "lines": [
+            33,
+            33
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "kind": "value",
+      "question": "Where is the log file kept?",
+      "answers": [
+        {
+          "file": "scripts/lib/common.ps1",
+          "anchor": "$script:LogPath =",
+          "lines": [
+            3,
+            3
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "kind": "name",
+      "question": "Which function checks the health endpoint of a deploy target?",
+      "answers": [
+        {
+          "file": "scripts/deploy.ps1",
+          "anchor": "function Test-Health",
+          "lines": [
+            7,
+            7
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "s07",
+      "kind": "value",
+      "question": "What URLs do the preview and production targets have?",
+      "answers": [
+        {
+          "file": "scripts/lib/common.ps1",
+          "anchor": "$targets = @{",
+          "lines": [
+            46,
+            46
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "s08",
+      "kind": "behaviour",
+      "question": "What does the clean switch of the build remove?",
+      "answers": [
+        {
+          "file": "scripts/build.ps1",
+          "anchor": "if ($Clean) { Remove-SiteOutput",
+          "lines": [
+            43,
+            43
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "s09",
+      "kind": "name",
+      "question": "Which class describes a deploy target?",
+      "answers": [
+        {
+          "file": "scripts/lib/common.ps1",
+          "anchor": "class DeployTarget {",
+          "lines": [
+            26,
+            26
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "s10",
+      "kind": "behaviour",
+      "question": "What happens when a page is too large?",
+      "answers": [
+        {
+          "file": "scripts/build.ps1",
+          "anchor": "throw \"page $Source is",
+          "lines": [
+            27,
+            27
+          ],
+          "match": "file"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "questions": [
+    {"id": "r01", "kind": "name", "question": "Which function removes tokens, keys and passwords from text before it is shown?",
+     "answers": [{"file": "interface/src/lib/privacy.ts", "anchor": "export function scrub(text: string): string {", "lines": [54, 56]}]},
+    {"id": "r02", "kind": "name", "question": "Where does the interface keep the URL hash as React state?",
+     "answers": [{"file": "interface/src/lib/hash.ts", "anchor": "export function useHash(): string {", "lines": [20, 26]}]},
+    {"id": "r03", "kind": "value", "question": "Which path does the interface poll for live tool rows?",
+     "answers": [{"file": "interface/src/lib/live.ts", "anchor": "export const LIVE_PATH =", "lines": [7, 7]}]},
+    {"id": "r04", "kind": "behaviour", "question": "How is a byte count formatted for display in the interface?",
+     "answers": [{"file": "interface/src/lib/api.ts", "anchor": "export function bytes(n: number): string {", "lines": [209, 214]}]},
+    {"id": "r05", "kind": "name", "question": "Which kernel computes the RMS norm of a row with one block per row?",
+     "answers": [{"file": "kernels/cukern/element.cu", "anchor": "void norm_row_kernel(emma_op_args a) {", "lines": [39, 62]}]},
+    {"id": "r06", "kind": "behaviour", "question": "Where is an int8 weight dequantized and rounded to float16 on the graphics card?",
+     "answers": [{"file": "kernels/cukern/linear.cu", "anchor": "// Dequantized weight (row, k), rounded to float16 like the CPU reference.", "lines": [7, 20]}]},
+    {"id": "r07", "kind": "name", "question": "Which kernel computes attention scores with a shared key tile?",
+     "answers": [{"file": "kernels/cukern/attention.cu", "anchor": "void score_tile_kernel(", "lines": [35, 60]}]},
+    {"id": "r08", "kind": "file", "question": "Which header declares the launch functions of the CUDA kernels?",
+     "answers": [{"file": "kernels/cukern/common.cuh", "anchor": "void attention_launch(const emma_op_args& args, cudaStream_t stream);", "lines": [58, 58], "match": "file"}]},
+    {"id": "r09", "kind": "value", "question": "What status value means success in the CUDA bridge?",
+     "answers": [{"file": "kernels/cbridg/include/emma_cbridg.h", "anchor": "#define EMMA_OK 0", "lines": [19, 19]}]},
+    {"id": "r10", "kind": "name", "question": "Which hook re-renders when an item is revealed or hidden?",
+     "answers": [{"file": "interface/src/lib/privacy.ts", "anchor": "export function useRevealed(id: string): boolean {", "lines": [39, 50]}]}
+  ]
+}

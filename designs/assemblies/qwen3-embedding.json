@@ -1,0 +1,29 @@
+{
+  "base": "qwen3-reference",
+  "edges": [
+    {
+      "from": "nmengn.components#final_norm",
+      "from_port": "y",
+      "mode": {"kind": "direct"},
+      "to": "nmengn.components#pool",
+      "to_port": "x"
+    }
+  ],
+  "linear_precision": "f16",
+  "name": "qwen3-embedding",
+  "nodes": [
+    {
+      "config": {"op": "lastpool"},
+      "id": "nmengn.components#pool",
+      "kind": "head",
+      "ports_in": [
+        {"kind": "tensor", "name": "x", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "tensor", "name": "y", "required": true}
+      ]
+    }
+  ],
+  "note": "The released qwen3-embedding-0.6b as an addition to the shared Qwen3 structure (2026-11-09; written as an addition 2026-11-10): `qwen3-reference` with f16 linear weights, plus `lastpool` on the final norm (the last token's state, L2-normalised, as its model card specifies). Written by `nano-lab run s6 roles`; do not edit by hand.",
+  "version": 1
+}

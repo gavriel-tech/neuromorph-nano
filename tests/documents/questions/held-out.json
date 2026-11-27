@@ -1,0 +1,1345 @@
+{
+ "note": "Held-out set: locked, scored only, never used for tuning; different questions from dev.json.",
+ "questions": [
+  {
+   "id": "h01",
+   "kind": "define",
+   "question": "What is the volute of a pump?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "**Volute**",
+     "lines": [
+      510,
+      511
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h02",
+   "kind": "define",
+   "question": "What is cavitation and how does it show itself?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "**Cavitation**",
+     "lines": [
+      494,
+      495
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h03",
+   "kind": "define",
+   "question": "What is heat flux?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "**Heat flux** is the rate",
+     "lines": [
+      15,
+      15
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h04",
+   "kind": "define",
+   "question": "What does thermal resistance mean, and in what units is it given?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "**Thermal resistance** is the temperature difference",
+     "lines": [
+      97,
+      97
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h05",
+   "kind": "define",
+   "question": "How is the standard deviation defined relative to the variance?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "The standard deviation is the square root of the variance.",
+     "lines": [
+      91,
+      93
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h06",
+   "kind": "define",
+   "question": "What is the time constant of a body that is cooling?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "The **time constant** of a cooling body",
+     "lines": [
+      151,
+      151
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h07",
+   "kind": "define",
+   "question": "What does suction lift refer to?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "**Suction lift**",
+     "lines": [
+      508,
+      508
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h08",
+   "kind": "lookup",
+   "question": "What current does the AQ-40 draw at full load?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "| Full load current |",
+     "lines": [
+      87,
+      87
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h09",
+   "kind": "lookup",
+   "question": "What cut-in pressure is the pressure switch set to from the factory, and what range can it be set to?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "The pressure switch starts the pump when",
+     "lines": [
+      413,
+      415
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h10",
+   "kind": "lookup",
+   "question": "Which way do I turn the impeller nut to undo it?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "5. Unscrew the impeller nut clockwise",
+     "lines": [
+      298,
+      298
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h11",
+   "kind": "lookup",
+   "question": "What thermal conductivity does the textbook give for copper?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "| Copper |",
+     "lines": [
+      29,
+      29
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h12",
+   "kind": "lookup",
+   "question": "What is the range of the twelve pump readings in the statistics chapter?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "The range is the largest value minus the smallest.",
+     "lines": [
+      71,
+      73
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h13",
+   "kind": "lookup",
+   "question": "What flow did pump 6 deliver on the first day of the trial?",
+   "answers": [
+    {
+     "file": "notes/2026-09-10-pump-trial.md",
+     "anchor": "- pump 6: 37",
+     "lines": [
+      14,
+      14
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h14",
+   "kind": "lookup",
+   "question": "What did the meter read on pump 1's run capacitor?",
+   "answers": [
+    {
+     "file": "notes/2026-10-27-capacitor-check.md",
+     "anchor": "| 1 | 13.1 |",
+     "lines": [
+      9,
+      9
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h15",
+   "kind": "lookup",
+   "question": "How much does the shop charge for a product code it does not recognise?",
+   "answers": [
+    {
+     "file": "mixed/crates/shop/src/lib.rs",
+     "anchor": "_ => 100,",
+     "lines": [
+      9,
+      9
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h16",
+   "kind": "lookup",
+   "question": "What does Penhale Seals charge per kit on a large order of fifty or more?",
+   "answers": [
+    {
+     "file": "notes/2026-10-22-supplier-visit.txt",
+     "anchor": "Price per kit",
+     "lines": [
+      17,
+      17
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h17",
+   "kind": "procedure",
+   "question": "How do I prime and start a new AQ-40 for the first time?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "To prime and start the pump for the first time:",
+     "lines": [
+      200,
+      210
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h18",
+   "kind": "procedure",
+   "question": "What are the steps to take the impeller off?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "1. Isolate the pump, close both valves and drain the volute.",
+     "lines": [
+      294,
+      299
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h19",
+   "kind": "procedure",
+   "question": "How is the pressure switch tested?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "To test the pressure switch:",
+     "lines": [
+      417,
+      425
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h20",
+   "kind": "procedure",
+   "question": "How should the pump be made ready for a frosty winter?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "To prepare the pump for winter:",
+     "lines": [
+      347,
+      353
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h21",
+   "kind": "procedure",
+   "question": "How do I test whether the motor capacitor is still good?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "To check the capacitor:",
+     "lines": [
+      366,
+      374
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h22",
+   "kind": "procedure",
+   "question": "Give me the steps for checking and adjusting the vessel air charge on the T model.",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "To check and set the air charge:",
+     "lines": [
+      225,
+      233
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h23",
+   "kind": "procedure",
+   "question": "How do I build the shop workspace?",
+   "answers": [
+    {
+     "file": "mixed/docs/setup-guide.md",
+     "anchor": "1. Open a terminal at the top of this folder",
+     "lines": [
+      15,
+      17
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h24",
+   "kind": "explain",
+   "question": "What harm does running the pump without water do?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "> **Warning:** Never run the pump dry.",
+     "lines": [
+      41,
+      42
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h25",
+   "kind": "explain",
+   "question": "Why is a suction pipe narrower than the pump thread a problem?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "Use pipe of at least the same size as the pump threads.",
+     "lines": [
+      171,
+      172
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h26",
+   "kind": "explain",
+   "question": "Why does a faster fluid flow raise the convection coefficient?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "The thin layer shown in Figure 1.2 explains",
+     "lines": [
+      63,
+      63
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h27",
+   "kind": "explain",
+   "question": "Why can a room feel cold even when its air is warm?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "That is of the same size as the heat a resting person",
+     "lines": [
+      91,
+      91
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h28",
+   "kind": "explain",
+   "question": "If two quantities are strongly correlated, does one cause the other?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "Correlation is not causation.",
+     "lines": [
+      144,
+      146
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h29",
+   "kind": "explain",
+   "question": "Why was the bench test pressure changed during the trial?",
+   "answers": [
+    {
+     "file": "notes/2026-09-29-pressure-change.md",
+     "anchor": "Reason: both trial sites run at about",
+     "lines": [
+      9,
+      10
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h30",
+   "kind": "compare",
+   "question": "How is the care of the two motor bearings different?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "The motor has two ball bearings.",
+     "lines": [
+      332,
+      333
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "Every 2000 running hours, remove the fan cover",
+     "lines": [
+      335,
+      337
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h31",
+   "kind": "compare",
+   "question": "Parallel flow or counterflow in a heat exchanger: what is the difference and which moves more heat?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "Fluids can flow in the same direction",
+     "lines": [
+      183,
+      183
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "Figure 1.7:",
+     "lines": [
+      185,
+      185
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h32",
+   "kind": "compare",
+   "question": "How does a skewed distribution differ from a symmetric one, and how can you tell from the mean and median?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "A distribution is symmetric when",
+     "lines": [
+      104,
+      106
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "Skew shows itself in the relation",
+     "lines": [
+      108,
+      110
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h33",
+   "kind": "compare",
+   "question": "How did pump 6's housing temperature change after it was moved away from the wall?",
+   "answers": [
+    {
+     "file": "notes/2026-09-19-heat-notes.txt",
+     "anchor": "Pumps 1 to 5: between 52",
+     "lines": [
+      4,
+      4
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "notes/2026-09-22-meeting.md",
+     "anchor": "- Pump 6 moved 10 cm away from the wall",
+     "lines": [
+      4,
+      4
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h34",
+   "kind": "compare",
+   "question": "What is each of the two crates in the shop workspace responsible for?",
+   "answers": [
+    {
+     "file": "mixed/docs/design-note.md",
+     "anchor": "Stock keeping and selling change for different reasons.",
+     "lines": [
+      5,
+      7
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "mixed/README.md",
+     "anchor": "`inventory` keeps stock on a shelf",
+     "lines": [
+      4,
+      4
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h35",
+   "kind": "summarise",
+   "question": "Summarise what different pump noises can mean.",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "## 5.5 Noise and vibration",
+     "lines": [
+      439,
+      453
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h36",
+   "kind": "summarise",
+   "question": "Give an overview of the main parts the AQ-40 is made of.",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "## 2.2 Main components",
+     "lines": [
+      99,
+      110
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h37",
+   "kind": "summarise",
+   "question": "Summarise the idea of thermal resistance networks.",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "## 1.5 Thermal resistance",
+     "lines": [
+      95,
+      118
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h38",
+   "kind": "summarise",
+   "question": "What does the statistics chapter say about choosing samples?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "2.7 Samples and bias",
+     "lines": [
+      152,
+      166
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h39",
+   "kind": "summarise",
+   "question": "What did the review of the 3 October log conclude?",
+   "answers": [
+    {
+     "file": "notes/2026-10-04-log-review.md",
+     "anchor": "# Log review: 3 October",
+     "lines": [
+      1,
+      17
+     ],
+     "match": "file"
+    }
+   ]
+  },
+  {
+   "id": "h40",
+   "kind": "locate",
+   "question": "Where are the blink codes of the red light explained?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "## 5.1 Reading the fault codes",
+     "lines": [
+      378,
+      396
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h41",
+   "kind": "locate",
+   "question": "Where does the manual explain how to read the serial number?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "## 2.5 The rating plate",
+     "lines": [
+      130,
+      142
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h42",
+   "kind": "locate",
+   "question": "Which section of the heat transfer chapter treats a body as having one uniform temperature while it cools?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "## 1.8 Heating and cooling over time",
+     "lines": [
+      143,
+      176
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h43",
+   "kind": "locate",
+   "question": "Where is the five number summary described?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "2.8 Reporting summary statistics",
+     "lines": [
+      167,
+      186
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h44",
+   "kind": "locate",
+   "question": "Which function adds up the units across all stock lines, and where is it?",
+   "answers": [
+    {
+     "file": "mixed/crates/inventory/src/lib.rs",
+     "anchor": "/// Total units across",
+     "lines": [
+      18,
+      21
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h45",
+   "kind": "table",
+   "question": "What does the 1 inch stainless hose clamp cost?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10175,",
+     "lines": [
+      176,
+      176
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h46",
+   "kind": "table",
+   "question": "Which parts are listed under the gauge category?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10088,",
+     "lines": [
+      89,
+      89
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10219,",
+     "lines": [
+      220,
+      220
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h47",
+   "kind": "table",
+   "question": "Which items are consumables?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10203,",
+     "lines": [
+      204,
+      204
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10266,",
+     "lines": [
+      267,
+      267
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h48",
+   "kind": "table",
+   "question": "Which parts were last counted on 27 October 2026?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10040,",
+     "lines": [
+      41,
+      41
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h49",
+   "kind": "table",
+   "question": "What is the cheapest part in the inventory?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10300,",
+     "lines": [
+      301,
+      301
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h50",
+   "kind": "table",
+   "question": "Which parts have the largest stock count?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10073,",
+     "lines": [
+      74,
+      74
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10103,",
+     "lines": [
+      104,
+      104
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10181,",
+     "lines": [
+      182,
+      182
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h51",
+   "kind": "table",
+   "question": "What is kept in bin F-01?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10291,",
+     "lines": [
+      292,
+      292
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h52",
+   "kind": "table",
+   "question": "Which country is supplier S035 in?",
+   "answers": [
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Orwell Components",
+     "lines": [
+      36,
+      36
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h53",
+   "kind": "table",
+   "question": "Which suppliers quote a lead time of 28 days or more?",
+   "answers": [
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Redcar Electric",
+     "lines": [
+      26,
+      26
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Dunmore Bearings",
+     "lines": [
+      31,
+      31
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h54",
+   "kind": "table",
+   "question": "List the suppliers located in Poland.",
+   "answers": [
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Gilden Bearings",
+     "lines": [
+      8,
+      8
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Orwell Bearings",
+     "lines": [
+      10,
+      10
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Merrow Valves",
+     "lines": [
+      19,
+      19
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Corvane Supply",
+     "lines": [
+      22,
+      22
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Dunmore Bearings",
+     "lines": [
+      31,
+      31
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h55",
+   "kind": "table",
+   "question": "Which orders were placed in November?",
+   "answers": [
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0100\"",
+     "lines": [
+      100,
+      100
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h56",
+   "kind": "table",
+   "question": "What was ordered on 24 September 2026?",
+   "answers": [
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0057\"",
+     "lines": [
+      57,
+      57
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0058\"",
+     "lines": [
+      58,
+      58
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h57",
+   "kind": "table",
+   "question": "Which orders went to supplier S036?",
+   "answers": [
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0068\"",
+     "lines": [
+      68,
+      68
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h58",
+   "kind": "table",
+   "question": "Which order has the biggest quantity?",
+   "answers": [
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0081\"",
+     "lines": [
+      81,
+      81
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h59",
+   "kind": "table",
+   "question": "What are the details of order O-2026-0077?",
+   "answers": [
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0077\"",
+     "lines": [
+      77,
+      77
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h60",
+   "kind": "table",
+   "question": "Which parts does supplier S035 provide?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10088,",
+     "lines": [
+      89,
+      89
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10219,",
+     "lines": [
+      220,
+      220
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h61",
+   "kind": "temporal",
+   "question": "Who do we order shaft seal kits from now?",
+   "answers": [
+    {
+     "file": "notes/2026-10-20-supplier-switch.md",
+     "anchor": "Decision: from today seal kits are ordered",
+     "lines": [
+      10,
+      11
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h62",
+   "kind": "temporal",
+   "question": "What pressure are pumps tested at on the bench now?",
+   "answers": [
+    {
+     "file": "notes/2026-09-29-pressure-change.md",
+     "anchor": "From today the bench test pressure is 3.8 bar",
+     "lines": [
+      7,
+      7
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h63",
+   "kind": "temporal",
+   "question": "At what stock level do we reorder seal kits these days?",
+   "answers": [
+    {
+     "file": "notes/2026-10-29-meeting.md",
+     "anchor": "- Reorder seal kits when stock falls to 12",
+     "lines": [
+      8,
+      8
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "notes/2026-11-02-trial-summary.md",
+     "anchor": "- Keep at least 12 seal kits in stock.",
+     "lines": [
+      16,
+      16
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h64",
+   "kind": "temporal",
+   "question": "What went wrong with the logging service shortly after nine in the morning on 3 October?",
+   "answers": [
+    {
+     "file": "data/pump-service.log",
+     "anchor": "2026-10-03T09:12:07Z",
+     "lines": [
+      122,
+      127
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h65",
+   "kind": "temporal",
+   "question": "What warning did pump 6 raise in the afternoon of 3 October?",
+   "answers": [
+    {
+     "file": "data/pump-service.log",
+     "anchor": "2026-10-03T15:20:12Z",
+     "lines": [
+      373,
+      373
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h66",
+   "kind": "multihop",
+   "question": "What is the order email of the supplier we moved seal kits to?",
+   "answers": [
+    {
+     "file": "notes/2026-10-20-supplier-switch.md",
+     "anchor": "Decision: from today seal kits are ordered",
+     "lines": [
+      10,
+      11
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Penhale Seals",
+     "lines": [
+      23,
+      23
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h67",
+   "kind": "multihop",
+   "question": "Pump 1 hummed and would not start in late October; which manual part number replaces the component that failed?",
+   "answers": [
+    {
+     "file": "notes/2026-10-27-capacitor-check.md",
+     "anchor": "Pump 1 is more than 10 percent low",
+     "lines": [
+      16,
+      16
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "| HV-4040 |",
+     "lines": [
+      464,
+      464
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h68",
+   "kind": "multihop",
+   "question": "What does the only test in the shop workspace check, and in which file is it written?",
+   "answers": [
+    {
+     "file": "mixed/docs/setup-guide.md",
+     "anchor": "Run `cargo test` from the top of the folder.",
+     "lines": [
+      21,
+      24
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "mixed/crates/shop/tests/checkout_refund.rs",
+     "anchor": "/// Checking out more than the shelf",
+     "lines": [
+      4,
+      10
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "h69",
+   "kind": "decoy",
+   "question": "What is the motor speed of the AQ-40 in rpm?",
+   "answers": []
+  },
+  {
+   "id": "h70",
+   "kind": "decoy",
+   "question": "What is the shelf life of the citric acid descaling solution once mixed?",
+   "answers": []
+  },
+  {
+   "id": "h71",
+   "kind": "decoy",
+   "question": "What specific heat capacity does the textbook give for copper?",
+   "answers": []
+  },
+  {
+   "id": "h72",
+   "kind": "decoy",
+   "question": "How do you calculate the median absolute deviation?",
+   "answers": []
+  },
+  {
+   "id": "h73",
+   "kind": "decoy",
+   "question": "What is the phone number of supplier S014?",
+   "answers": []
+  },
+  {
+   "id": "h74",
+   "kind": "decoy",
+   "question": "Which orders were placed for part P-10301?",
+   "answers": []
+  },
+  {
+   "id": "h75",
+   "kind": "decoy",
+   "question": "On what date were the site A pumps descaled?",
+   "answers": []
+  },
+  {
+   "id": "h76",
+   "kind": "decoy",
+   "question": "How much does a replacement pressure vessel for the AQ-40T cost?",
+   "answers": []
+  },
+  {
+   "id": "h77",
+   "kind": "decoy",
+   "question": "Which function in the shop crate adds sales tax to a checkout?",
+   "answers": []
+  },
+  {
+   "id": "h78",
+   "kind": "decoy",
+   "question": "What flow did pump 5 give at site B?",
+   "answers": []
+  },
+  {
+   "id": "h79",
+   "kind": "decoy",
+   "question": "What Biot number does the tea in worked example 1.6 have?",
+   "answers": []
+  },
+  {
+   "id": "h80",
+   "kind": "decoy",
+   "question": "How many lines did the pump service log record on 4 October?",
+   "answers": []
+  }
+ ]
+}

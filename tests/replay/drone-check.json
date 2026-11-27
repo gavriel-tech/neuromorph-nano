@@ -1,0 +1,25 @@
+{
+  "note": "Hand reading of the request's drone on 20 questions of the large set's tuning fold (the first four ids of each kind with answers), program c1, 2026-11-17. parts: whether the parts name the things the question asks about, none lost and none made mostly of frame words (I, am, supposed, worked out, given, after, anyway). kind: whether the request's kind fits the question (a value question read as value; a trace question worded 'how does' read as explain is accepted, both add the callee relation). Written by the replay builder; the question text is read from the recordings, not repeated here.",
+  "judged": [
+    {"id": "loc03", "parts": true, "kind": true, "note": "frame words glued to two parts (worked out, given), the five named things all present"},
+    {"id": "loc04", "parts": true, "kind": true, "note": "decide glued to folder"},
+    {"id": "loc05", "parts": true, "kind": true, "note": "putting piece below its content-free mass"},
+    {"id": "loc06", "parts": true, "kind": true, "note": "tool call split into two parts, before glued"},
+    {"id": "val01", "parts": true, "kind": false, "note": "worded which version: read as locate, so no relation to what it reads"},
+    {"id": "val03", "parts": true, "kind": false, "note": "worded what fixed score: read as explain (callees), not value"},
+    {"id": "val04", "parts": true, "kind": true, "note": ""},
+    {"id": "val08", "parts": false, "kind": false, "note": "worded what is the biggest: read as explain; file dropped from the size part"},
+    {"id": "exp01", "parts": false, "kind": true, "note": "refinement, pack size and reranking limits merged with raise, lower and question"},
+    {"id": "exp04", "parts": false, "kind": true, "note": "one long part with frame words (worked out) holds the cut, strong, drone and flag"},
+    {"id": "exp05", "parts": true, "kind": true, "note": ""},
+    {"id": "exp10", "parts": false, "kind": true, "note": "one part decide path test, below its content-free mass; test code and file lost"},
+    {"id": "trc03", "parts": true, "kind": true, "note": "read as explain; command line lost line, below content-free mass"},
+    {"id": "trc04", "parts": true, "kind": true, "note": "after glued to proposed diff"},
+    {"id": "trc05", "parts": false, "kind": true, "note": "a part of frame words only (ones always kept anyway); two parts below content-free mass"},
+    {"id": "trc06", "parts": true, "kind": true, "note": "time and up glued to the watcher part"},
+    {"id": "doc03", "parts": false, "kind": true, "note": "digits, code length and wrong tries merged into one part; code dropped"},
+    {"id": "doc04", "parts": false, "kind": true, "note": "parts are mostly I, am, supposed; both below content-free mass"},
+    {"id": "doc05", "parts": false, "kind": true, "note": "licence, models, distributed and made merged into one part"},
+    {"id": "doc06", "parts": false, "kind": true, "note": "two parts of frame words (I open, learn about); design files split"}
+  ]
+}

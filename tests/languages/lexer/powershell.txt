@@ -1,0 +1,56 @@
+=== variable
+$x = 1
+---
+$x = 1
+=== line comment
+# comment
+$y
+---
+$y
+=== block comment
+<# block
+comment #>
+$z
+---
+$z
+=== doubled single quote
+'it''s'
+---
+$S
+=== backtick escapes in double quotes
+"a `"quoted`" b"
+---
+$S
+=== here-string holding quotes
+@"
+line "x"
+"@
+$a
+---
+$S $a
+=== single-quoted here-string
+@'
+$notvar
+'@
+---
+$S
+=== function with a dash in its name
+function Get-Item { }
+---
+function Get-Item { }
+=== comparison operator
+$a -eq $b
+---
+$a - eq $b
+=== type constraint
+[string]$Name
+---
+[ string ] $Name
+=== command, then a comment
+Write-Host "x"; # c
+---
+Write-Host $S ;
+=== drive-qualified variable
+$env:PATH
+---
+$env : PATH

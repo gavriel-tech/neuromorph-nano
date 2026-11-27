@@ -1,0 +1,12 @@
+[project]
+name = "inventory"
+version = "1.2.0"
+dependencies = [
+    "requests>=2.31",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

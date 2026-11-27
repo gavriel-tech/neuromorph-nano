@@ -1,0 +1,212 @@
+Chapter 2: Simple Statistics
+============================
+
+This chapter shows how to describe a set of numbers with a few well chosen summaries. It
+covers the centre of a data set, its spread and its shape, how to spot values that do not
+fit, and how to measure whether two quantities move together. The examples use small data
+sets so that every step can be checked by hand.
+
+Throughout the chapter a running example is used: the flow rate of twelve pumps of the
+same model, measured on a test bench in litres per minute. The readings, sorted from
+lowest to highest, are 36, 37, 38, 38, 39, 39, 39, 40, 40, 41, 42 and 47.
+
+2.1 Data and variables
+
+A data set is a collection of observations, and each observation records one or more
+variables. A variable is any quantity or quality that can differ from one observation to
+the next, such as the flow rate of a pump, the colour of a car or the number of faults
+found in a week.
+
+Variables are numerical when they are counts or measurements, and categorical when they
+place an observation in a group. Numerical variables are discrete when they can only take
+separate values, like a count of faults, and continuous when they can take any value in a
+range, like a temperature.
+
+The kind of variable decides which summaries make sense. An average colour means nothing,
+but the most common colour does. Most of this chapter deals with numerical variables.
+
+2.2 Measures of centre
+
+A measure of centre is a single number that stands for a typical value of the data. There
+are three in common use, and each has its strengths.
+
+2.2.1 The mean
+
+The mean is the sum of the values divided by how many there are. It is what most people
+call the average. For the pump readings the sum is 476 and there are twelve readings, so
+the mean is 476 / 12, about 39.7 litres per minute.
+
+The mean uses every value, which makes it efficient, but it is pulled towards extreme
+values. The single high reading of 47 raises the mean of the pump data by more than half
+a litre per minute.
+
+2.2.2 The median
+
+The median is the middle value when the data are sorted. With an odd number of values it
+is the one in the middle. With an even number it is the mean of the two middle values.
+
+The pump data have twelve values, so the median is the mean of the sixth and seventh
+values, which are both 39. The median is therefore 39 litres per minute.
+
+The median is not affected by how extreme the largest or smallest values are. If the
+reading of 47 were 70 instead, the median would still be 39 while the mean would rise to
+about 41.6. For this reason the median is preferred for data with a long tail, such as
+house prices or repair times.
+
+2.2.3 The mode
+
+The mode is the value that occurs most often. In the pump data the value 39 occurs three
+times, more than any other, so the mode is 39.
+
+A data set can have more than one mode, or none at all if every value is different. The
+mode is the only measure of centre that works for categorical data.
+
+2.3 Measures of spread
+
+Two data sets can have the same centre and still be very different. A spread measure says
+how far the values tend to lie from the centre.
+
+2.3.1 Range and interquartile range
+
+The range is the largest value minus the smallest. For the pump data it is 47 minus 36,
+which is 11 litres per minute. The range is simple but depends entirely on the two most
+extreme values.
+
+The quartiles split sorted data into four parts with equal counts. The lower quartile,
+written Q1, has a quarter of the values below it, and the upper quartile, written Q3, has
+a quarter above it. The interquartile range, or IQR, is Q3 minus Q1, and it measures the
+spread of the middle half of the data.
+
+There are several slightly different rules for finding quartiles. In this book Q1 is the
+median of the lower half of the data and Q3 is the median of the upper half. For the pump
+data the lower half is 36, 37, 38, 38, 39, 39, with median 38, and the upper half is 39,
+40, 40, 41, 42, 47, with median 40.5. The IQR is therefore 2.5 litres per minute.
+
+2.3.2 Variance and standard deviation
+
+The variance is the mean of the squared distances from the mean. For a sample, the sum of
+squared distances is divided by one less than the number of values, which gives a better
+estimate of the spread of the whole population the sample came from.
+
+The standard deviation is the square root of the variance. It is in the same units as the
+data, which makes it easier to read than the variance. For the pump data the sample
+standard deviation is about 2.8 litres per minute.
+
+To compute a sample standard deviation by hand, first find the mean, then subtract it
+from each value and square the result, then add the squares, divide by the number of
+values minus one, and finally take the square root.
+
+For data that are roughly bell shaped, about two thirds of the values lie within one
+standard deviation of the mean and about 95 percent within two standard deviations.
+
+2.4 The shape of a distribution
+
+A distribution is symmetric when its left and right halves are mirror images, as with
+many measurement errors. It is skewed to the right when it has a long tail of high
+values, and skewed to the left when the long tail is of low values.
+
+Skew shows itself in the relation between the mean and the median. In a right skewed
+distribution the mean is larger than the median, because the tail drags the mean upwards.
+The pump data are slightly right skewed: the mean of 39.7 is above the median of 39.
+
+A histogram is the usual way to see the shape. The range of the data is divided into
+equal intervals, called bins, and a bar is drawn over each bin with a height equal to the
+number of values in it. Too few bins hide the shape; too many make it ragged. Between
+five and fifteen bins suits most small data sets.
+
+2.5 Outliers
+
+An outlier is a value that lies far from the rest of the data. It may be a recording
+mistake, a fault in the thing measured, or a true but rare value, and the right response
+is different in each case.
+
+A common rule marks a value as an outlier when it lies more than 1.5 times the IQR below
+Q1 or above Q3. For the pump data, 1.5 times the IQR is 3.75, so the fences are 38 minus
+3.75 and 40.5 plus 3.75, that is 34.25 and 44.25. The reading of 47 lies above the upper
+fence and is an outlier.
+
+Never delete an outlier only because it is inconvenient. Check where it came from first.
+In the pump example the reading of 47 turned out to come from a bench whose flow meter
+had not been zeroed, so it was a measuring fault and could be set aside with a note
+saying why.
+
+2.6 Correlation
+
+When two numerical variables are measured on the same observations, it is natural to ask
+whether they move together. A scatter plot, with one variable on each axis and one point
+per observation, is the first thing to draw.
+
+The correlation coefficient, written r, measures how closely the points lie to a straight
+line. It runs from minus one to plus one. A value near plus one means that high values of
+one variable go with high values of the other; a value near minus one means that high
+values go with low values; a value near zero means there is no straight line pattern.
+
+Correlation is not causation. Two variables can be strongly correlated because a third
+variable drives both of them. Ice cream sales and sunburn cases rise together, but both
+are driven by sunny weather, and neither causes the other.
+
+A correlation coefficient also misses curved patterns. Points that lie on a perfect U
+shape can have a correlation near zero. Always look at the scatter plot before trusting
+the number.
+
+2.7 Samples and bias
+
+A population is the whole group that a question is about, and a sample is the part of it
+that is actually measured. Statistics from a good sample give good estimates of the
+population, but only if the sample is chosen well.
+
+A sample is biased when the way it is chosen makes some members of the population more
+likely to be included than others in a way linked to what is being measured. Testing only
+the pumps that come back for repair, for example, would give a poor picture of the flow
+of pumps in general.
+
+The surest guard against bias is random selection, in which every member of the
+population has the same chance of being chosen. Larger random samples give estimates that
+vary less from one sample to the next, but a large biased sample is still biased.
+
+2.8 Reporting summary statistics
+
+A summary is only useful if the reader can tell what it is. Always state which measure of
+centre and which measure of spread are given, the units, and the number of observations
+behind them. A line such as "median 39 L/min, IQR 2.5 L/min, twelve pumps" tells the
+reader far more than "average about 40".
+
+Round summaries to a sensible number of figures. As a guide, give the mean and standard
+deviation to one more decimal place than the raw data. Giving the mean of the pump
+readings as 39.666667 suggests a precision that the bench cannot deliver.
+
+When outliers have been set aside, say how many and why. When data are missing, say how
+many observations are missing and whether there is any reason to think they differ from
+the rest.
+
+A five number summary lists the minimum, Q1, median, Q3 and maximum. For the pump data it
+is 36, 38, 39, 40.5 and 47. It is the basis of the box plot, in which a box runs from Q1
+to Q3 with a line at the median, and whiskers reach out to the most extreme values that
+are not outliers.
+
+Summary
+-------
+
+The mean, median and mode describe the centre of a data set; the median resists extreme
+values and the mode suits categorical data. The range, interquartile range and standard
+deviation describe the spread. The relation between mean and median hints at skew, and a
+histogram shows the shape directly. The 1.5 IQR rule flags possible outliers, which
+should be checked, not deleted. The correlation coefficient measures straight line
+association but says nothing about cause. Good estimates need samples chosen at random.
+
+Exercises
+---------
+
+Exercise A. Find the mean, median and mode of the values 4, 8, 6, 5, 8 and 9.
+
+Exercise B. A second batch of twelve pumps gives readings with a mean of 39.5 and a
+standard deviation of 0.9. Compare its consistency with the first batch.
+
+Exercise C. Explain why the median repair time is a better summary than the mean repair
+time for a workshop report.
+
+Exercise D. Using the 1.5 IQR rule, decide whether a reading of 35 would count as an
+outlier in the pump data.
+
+Exercise E. Give an example of two quantities that are correlated because of a third
+quantity.

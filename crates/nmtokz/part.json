@@ -1,0 +1,25 @@
+{
+  "id": "nmtokz",
+  "kind": "other",
+  "version": 1,
+  "parent": "nmengn",
+  "ports_in": [],
+  "ports_out": [],
+  "deps": [],
+  "config_schema": {},
+  "config_default": {},
+  "subcomponents": [
+    {"id": "nmtokz.model", "version": 1, "hash": "5891ff8863dc62604e67aa323cbaaf773258135c4939113b4ed0503a5ff44f3b"},
+    {"id": "nmtokz.normalize", "version": 1, "hash": "d878aa1ef19c16c77bdbb1b3810b52fb113e1022c4493a3baf11d076ccf188de"},
+    {"id": "nmtokz.split", "version": 1, "hash": "cda1af604c1eb8caa0943260b9742d96d59509599d63391afefa28393708524a"},
+    {"id": "nmtokz.added", "version": 1, "hash": "9d513d5d218d79356b7520120c2c0b80070e68b7f0f45f60452a5b022767fed7"},
+    {"id": "nmtokz.unicode_data", "version": 1, "hash": "ce4a6a2a0579643089bc9dccff99d6f75775146641ba5c05f19823ac678e0d27"},
+    {"id": "nmtokz.unicode_marks", "version": 1, "hash": "21091f926f2f08fb5f4725644c3c398d5b883d262f0e4256f067be2f7bdefcf3"},
+    {"id": "nmtokz.json", "version": 1, "hash": "3a98f6b60f0973c5642898ff120a3cf96ce00568946284074cb223dff95bb392"},
+    {"id": "nmtokz.error", "version": 1, "hash": "9b4c232608d1b6cc68f77edbc3c5271700e410475c532e33f413af56a2e1775d"},
+    {"id": "nmtokz.check", "version": 1, "hash": "95329e82dcd0d7567d34dfc37aa6f7d522b15fa1b2e053c406ca5d24682e3147"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "54a9d05cc56ca8cee080dcb7f988336c040f45a301a140cecb27842e7e0c1433"
+}

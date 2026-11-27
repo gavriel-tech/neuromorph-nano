@@ -1,0 +1,20 @@
+{
+  // Personal settings of this machine. Comments of every shape stay where they are.
+  "permissions": {
+    "allow": ["Bash(git status)", "Read(./docs/**)"], /* trailing block comment */
+    "deny": []
+  },
+  "hooks": {
+    /* a colleague's formatter, kept as is */
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [ { "type": "command", "command": "prettier --write \"$CLAUDE_FILE\"" } ]
+      },
+    ],
+    "Stop": [ { "hooks": [ { "type": "command", "command": "say done", "timeout": 3 } ] } ],
+    // a hand-written Nano gate, not managed by setup
+    "SessionStart": [ { "hooks": [ { "type": "command", "command": "C:\\Tools\\neuromorph-nano.exe hook stop --root ." } ] } ]
+  },
+  "env": { "RUST_LOG": "warn" }, // trailing comma after this object
+}

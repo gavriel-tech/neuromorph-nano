@@ -1,0 +1,301 @@
+part_no,name,category,stock,unit_price,supplier_id,bin,last_counted
+P-10001,Bush 3/4 inch nitrile,bearing,159,25.53,S012,D-13,2026-08-02
+P-10002,Nut 10 mm stainless,fastener,188,27.07,S004,C-08,2026-08-15
+P-10003,Non-return valve 10 mm EPDM,valve,134,13.83,S020,A-17,2026-09-22
+P-10004,Ball valve 3/4 inch zinc plated,valve,106,31.44,S026,B-05,2026-09-14
+P-10005,Hose 8 mm stainless,hose,75,17.52,S019,C-08,2026-08-19
+P-10006,Terminal block 1 inch EPDM,electrical,175,25.40,S007,B-06,2026-08-18
+P-10007,Seal washer 3/4 inch brass,seal,174,11.17,S012,C-11,2026-08-24
+P-10008,Thrust washer 12 mm EPDM,bearing,110,25.63,S030,B-12,2026-09-27
+P-10009,Hex bolt 10 mm stainless,fastener,100,30.02,S026,D-13,2026-09-03
+P-10010,Hose clamp 6 mm steel,hose,195,22.69,S028,D-06,2026-08-22
+P-10011,Ball bearing 22 mm EPDM,bearing,239,5.26,S013,A-13,2026-09-10
+P-10012,"AQ-40 shaft seal kit, 12 mm",seal,15,19.10,S022,A-03,2026-10-29
+P-10013,Ball valve 22 mm stainless,valve,27,17.78,S003,C-11,2026-08-15
+P-10014,Union 10 mm nitrile,fitting,103,21.68,S026,A-20,2026-08-03
+P-10015,Hose 12 mm stainless,hose,6,29.59,S013,D-15,2026-08-20
+P-10016,Hose tail 1/2 inch nitrile,hose,22,10.20,S005,B-13,2026-08-07
+P-10017,Hose tail 28 mm zinc plated,hose,80,5.90,S011,D-17,2026-08-12
+P-10018,Union 1 inch zinc plated,fitting,143,22.13,S023,C-07,2026-09-08
+P-10019,Screw 1/2 inch nylon,fastener,166,23.12,S028,B-14,2026-09-11
+P-10020,"AQ-40 impeller, brass, 7 vane",pump spare,4,46.00,S031,A-05,2026-09-24
+P-10021,Hose clamp 3/4 inch brass,hose,23,19.41,S027,B-02,2026-09-02
+P-10022,Float valve 1/2 inch brass,valve,24,18.02,S026,C-10,2026-08-18
+P-10023,Float valve 10 mm zinc plated,valve,227,23.46,S022,D-18,2026-08-27
+P-10024,Stud 8 mm nylon,fastener,97,5.46,S023,B-07,2026-08-06
+P-10025,Hex bolt 1/2 inch brass,fastener,178,6.76,S026,D-15,2026-08-01
+P-10026,Nipple 12 mm zinc plated,fitting,203,27.52,S025,A-20,2026-08-08
+P-10027,Relay 3/4 inch zinc plated,electrical,123,26.77,S016,A-09,2026-08-08
+P-10028,Ball valve 1/2 inch nylon,valve,75,28.07,S007,B-08,2026-08-17
+P-10029,Non-return valve 1 inch EPDM,valve,34,17.04,S011,A-11,2026-08-06
+P-10030,Float valve 8 mm nitrile,valve,113,17.15,S017,A-08,2026-08-11
+P-10031,Union 6 mm nitrile,fitting,19,6.11,S010,A-17,2026-08-18
+P-10032,Hose clamp 1/2 inch EPDM,hose,129,30.35,S008,A-03,2026-08-16
+P-10033,Terminal block 3/4 inch zinc plated,electrical,234,36.64,S013,B-05,2026-08-07
+P-10034,O-ring 1/2 inch brass,seal,85,20.15,S010,D-08,2026-09-07
+P-10035,Bush 1/2 inch nylon,bearing,177,16.88,S005,B-06,2026-08-25
+P-10036,Lip seal 1 inch EPDM,seal,62,3.41,S028,D-15,2026-09-27
+P-10037,Lip seal 6 mm EPDM,seal,182,8.31,S030,B-10,2026-08-19
+P-10038,O-ring 1/2 inch nitrile,seal,116,18.40,S029,B-09,2026-09-06
+P-10039,Ball valve 6 mm brass,valve,184,36.96,S010,A-15,2026-08-11
+P-10040,Motor run capacitor 16 microfarad,electrical,5,12.75,S033,C-02,2026-10-27
+P-10041,Washer 15 mm stainless,fastener,152,12.41,S018,D-02,2026-08-06
+P-10042,Screw 6 mm brass,fastener,145,7.40,S019,A-19,2026-08-14
+P-10043,Hose tail 22 mm zinc plated,hose,201,7.83,S023,D-04,2026-09-21
+P-10044,Reducer 10 mm steel,fitting,132,39.03,S009,A-04,2026-09-14
+P-10045,Gate valve 22 mm EPDM,valve,229,2.66,S028,B-06,2026-09-21
+P-10046,Ball bearing 8 mm zinc plated,bearing,88,26.84,S020,B-07,2026-09-09
+P-10047,Bush 8 mm nylon,bearing,176,20.34,S004,A-01,2026-08-01
+P-10048,Relay 1 inch EPDM,electrical,196,36.49,S009,C-16,2026-09-02
+P-10049,Non-return valve 12 mm nitrile,valve,28,21.85,S027,A-15,2026-08-14
+P-10050,AQ-40 flow sensor,pump spare,2,38.20,S031,A-06,2026-09-24
+P-10051,Hose tail 1/2 inch EPDM,hose,29,30.97,S018,B-07,2026-09-22
+P-10052,Nipple 1/2 inch nylon,fitting,49,21.00,S030,D-01,2026-08-26
+P-10053,Hose clamp 1/2 inch stainless,hose,231,8.76,S001,B-15,2026-08-10
+P-10054,"Non-return valve, 12 mm, EPDM",valve,106,3.15,S007,B-08,2026-08-28
+P-10055,Thrust washer 1 inch brass,bearing,246,38.50,S009,A-18,2026-08-03
+P-10056,Tee 8 mm nitrile,fitting,135,27.87,S003,C-14,2026-09-02
+P-10057,Thrust washer 15 mm stainless,bearing,121,26.51,S014,C-13,2026-08-27
+P-10058,Gasket 1 inch nitrile,seal,100,14.96,S001,B-13,2026-08-23
+P-10059,Lip seal 28 mm brass,seal,150,16.34,S022,B-18,2026-08-15
+P-10060,Tee 15 mm brass,fitting,134,7.31,S020,A-20,2026-08-06
+P-10061,Float valve 10 mm nylon,valve,114,15.80,S018,B-18,2026-08-26
+P-10062,Nipple 8 mm EPDM,fitting,181,28.83,S012,A-15,2026-09-18
+P-10063,Washer 10 mm zinc plated,fastener,83,8.22,S009,D-07,2026-08-02
+P-10064,Nipple 1 inch steel,fitting,243,13.82,S006,C-08,2026-08-11
+P-10065,Thrust washer 10 mm nylon,bearing,2,7.55,S014,D-01,2026-09-12
+P-10066,Gasket 10 mm nylon,seal,31,31.32,S024,D-04,2026-08-04
+P-10067,Elbow 3/4 inch brass,fitting,125,5.00,S026,D-20,2026-09-27
+P-10068,Float valve 28 mm brass,valve,34,4.77,S024,B-08,2026-08-04
+P-10069,Screw 22 mm nitrile,fastener,216,21.85,S023,C-09,2026-09-07
+P-10070,Seal washer 6 mm steel,seal,149,20.24,S020,A-13,2026-08-10
+P-10071,Hose clamp 10 mm stainless,hose,95,14.48,S030,B-01,2026-08-03
+P-10072,Stud 8 mm nylon,fastener,183,25.47,S019,B-04,2026-09-25
+P-10073,Gasket 10 mm EPDM,seal,250,15.05,S006,D-12,2026-09-24
+P-10074,Hose tail 3/4 inch zinc plated,hose,43,8.91,S024,A-20,2026-09-13
+P-10075,Lip seal 10 mm brass,seal,83,7.90,S007,B-05,2026-08-16
+P-10076,Cable gland 1/2 inch brass,electrical,116,1.81,S011,C-06,2026-09-27
+P-10077,Seal washer 10 mm brass,seal,204,10.79,S023,B-10,2026-08-06
+P-10078,Elbow 12 mm zinc plated,fitting,67,1.97,S014,D-17,2026-08-23
+P-10079,Seal washer 6 mm stainless,seal,182,38.67,S007,B-09,2026-08-06
+P-10080,Elbow 12 mm EPDM,fitting,220,6.00,S007,C-08,2026-08-23
+P-10081,Nipple 12 mm nitrile,fitting,10,2.38,S021,C-04,2026-08-15
+P-10082,Float valve 1 inch zinc plated,valve,62,27.67,S010,A-09,2026-08-07
+P-10083,Hose tail 22 mm nitrile,hose,75,35.62,S020,D-19,2026-08-18
+P-10084,Thrust washer 28 mm EPDM,bearing,245,35.25,S022,B-16,2026-08-11
+P-10085,Hose 6 mm EPDM,hose,148,18.98,S007,D-13,2026-08-12
+P-10086,Bush 12 mm steel,bearing,20,14.13,S003,D-13,2026-09-11
+P-10087,Float valve 28 mm brass,valve,199,2.98,S030,A-06,2026-08-16
+P-10088,"Pressure gauge 0-10 bar, 63 mm",gauge,0,21.40,S035,B-11,2026-09-24
+P-10089,Gasket 3/4 inch zinc plated,seal,216,23.70,S021,B-04,2026-08-11
+P-10090,O-ring 3/4 inch EPDM,seal,182,6.76,S027,C-05,2026-08-13
+P-10091,Bush 3/4 inch nitrile,bearing,204,4.08,S030,B-05,2026-09-03
+P-10092,Screw 15 mm zinc plated,fastener,227,34.48,S006,B-06,2026-09-02
+P-10093,Ball valve 3/4 inch stainless,valve,194,20.67,S023,D-10,2026-09-21
+P-10094,Float valve 28 mm stainless,valve,68,25.95,S027,C-14,2026-09-15
+P-10095,Hose clamp 3/4 inch stainless,hose,214,15.43,S018,A-11,2026-08-15
+P-10096,Relay 22 mm zinc plated,electrical,191,15.18,S008,A-15,2026-09-18
+P-10097,Ball bearing 3/4 inch nylon,bearing,164,13.56,S010,B-07,2026-09-03
+P-10098,Nut 3/4 inch stainless,fastener,180,6.49,S014,D-15,2026-08-05
+P-10099,Hose tail 8 mm nylon,hose,81,7.04,S010,B-11,2026-09-20
+P-10100,Tee 10 mm brass,fitting,161,29.96,S021,A-12,2026-08-21
+P-10101,Hose 1/2 inch stainless,hose,235,31.58,S005,C-09,2026-09-01
+P-10102,Elbow 12 mm brass,fitting,240,4.33,S029,A-05,2026-08-07
+P-10103,Lip seal 10 mm brass,seal,250,37.80,S013,B-03,2026-09-17
+P-10104,Hose clamp 1 inch nitrile,hose,242,4.01,S015,C-18,2026-08-12
+P-10105,Stud 28 mm nylon,fastener,38,24.51,S020,A-18,2026-09-07
+P-10106,Tee 6 mm EPDM,fitting,136,15.93,S012,D-20,2026-08-06
+P-10107,O-ring 1/2 inch zinc plated,seal,128,29.02,S018,C-17,2026-08-21
+P-10108,Washer 6 mm brass,fastener,165,39.22,S018,C-11,2026-08-07
+P-10109,Washer 3/4 inch stainless,fastener,45,18.45,S003,B-20,2026-09-13
+P-10110,Fuse 28 mm nylon,electrical,192,4.03,S015,C-14,2026-08-10
+P-10111,Bush 1 inch steel,bearing,107,24.80,S005,A-15,2026-09-09
+P-10112,Hex bolt 6 mm EPDM,fastener,154,31.17,S028,A-13,2026-08-18
+P-10113,Union 6 mm EPDM,fitting,240,22.46,S002,C-04,2026-08-23
+P-10114,Reducer 10 mm steel,fitting,207,32.31,S003,A-01,2026-09-05
+P-10115,Terminal block 1/2 inch nitrile,electrical,138,26.31,S023,B-19,2026-09-17
+P-10116,Ball bearing 1 inch EPDM,bearing,128,19.90,S016,B-14,2026-09-06
+P-10117,O-ring 10 mm brass,seal,170,19.44,S003,B-09,2026-09-14
+P-10118,Washer 22 mm nylon,fastener,96,34.39,S025,A-07,2026-08-03
+P-10119,Cable gland 1/2 inch nylon,electrical,188,29.66,S013,B-08,2026-09-24
+P-10120,Screw 22 mm nylon,fastener,115,38.15,S001,C-07,2026-09-21
+P-10121,Seal washer 8 mm nitrile,seal,212,29.54,S021,C-01,2026-09-25
+P-10122,Cable 15 mm zinc plated,electrical,158,20.83,S005,A-18,2026-09-20
+P-10123,Gasket 1/2 inch nitrile,seal,78,29.00,S017,A-02,2026-09-01
+P-10124,Bush 12 mm EPDM,bearing,189,8.50,S028,A-17,2026-08-12
+P-10125,Terminal block 6 mm EPDM,electrical,115,30.73,S021,D-10,2026-08-11
+P-10126,Reducer 1 inch nitrile,fitting,177,21.23,S001,D-10,2026-08-21
+P-10127,Bush 10 mm brass,bearing,11,23.57,S022,D-14,2026-09-05
+P-10128,Hose clamp 28 mm stainless,hose,81,34.30,S009,A-03,2026-09-07
+P-10129,Hose 12 mm nitrile,hose,191,36.30,S021,D-04,2026-09-14
+P-10130,Nipple 28 mm brass,fitting,71,32.68,S003,B-11,2026-09-28
+P-10131,Gasket 1/2 inch brass,seal,36,32.88,S030,D-08,2026-08-07
+P-10132,Hose tail 15 mm EPDM,hose,137,0.72,S020,B-05,2026-08-13
+P-10133,Bush 28 mm brass,bearing,161,33.88,S008,B-13,2026-08-16
+P-10134,Fuse 1 inch stainless,electrical,32,27.92,S020,B-16,2026-08-24
+P-10135,Nut 1 inch nylon,fastener,127,11.39,S024,D-07,2026-08-10
+P-10136,Bush 22 mm zinc plated,bearing,151,35.21,S016,C-20,2026-08-27
+P-10137,Lip seal 10 mm nitrile,seal,85,9.39,S017,A-19,2026-08-03
+P-10138,Hose clamp 28 mm brass,hose,201,14.32,S027,D-14,2026-08-02
+P-10139,Relay 3/4 inch nitrile,electrical,129,20.69,S024,A-12,2026-09-02
+P-10140,Seal washer 22 mm brass,seal,139,12.20,S023,A-12,2026-09-19
+P-10141,Cable 1 inch zinc plated,electrical,33,22.41,S026,B-10,2026-09-12
+P-10142,"Inlet cap O-ring, 52 mm",seal,40,0.85,S014,A-14,2026-09-24
+P-10143,Hose tail 1/2 inch brass,hose,194,37.15,S022,C-03,2026-08-02
+P-10144,"Ball bearing, 12 mm, EPDM",bearing,212,8.10,S015,D-01,2026-08-14
+P-10145,Terminal block 22 mm stainless,electrical,61,18.38,S022,B-17,2026-09-08
+P-10146,"Hose tail, 10 mm, zinc plated",hose,90,17.48,S017,D-17,2026-09-26
+P-10147,Stud 1 inch EPDM,fastener,173,28.46,S029,D-03,2026-08-07
+P-10148,Elbow 3/4 inch steel,fitting,164,27.10,S012,B-08,2026-09-27
+P-10149,Bush 6 mm stainless,bearing,234,4.56,S007,A-05,2026-09-24
+P-10150,Nipple 6 mm nitrile,fitting,160,37.41,S022,C-11,2026-08-24
+P-10151,Cable 15 mm stainless,electrical,66,4.12,S018,A-14,2026-09-23
+P-10152,Screw 12 mm steel,fastener,68,8.84,S021,B-11,2026-08-07
+P-10153,Reducer 3/4 inch stainless,fitting,238,2.66,S002,D-03,2026-08-25
+P-10154,Ball valve 12 mm nylon,valve,36,33.42,S013,A-15,2026-08-19
+P-10155,Gate valve 8 mm nitrile,valve,117,13.68,S014,D-08,2026-09-19
+P-10156,Nut 10 mm nitrile,fastener,185,26.64,S006,A-09,2026-08-02
+P-10157,Washer 15 mm steel,fastener,154,17.74,S014,D-13,2026-08-10
+P-10158,Ball bearing 8 mm nylon,bearing,128,5.71,S019,A-19,2026-08-15
+P-10159,Lip seal 8 mm nylon,seal,234,12.31,S006,B-14,2026-09-23
+P-10160,Bush 12 mm nylon,bearing,87,8.30,S002,B-15,2026-08-20
+P-10161,Hose tail 1 inch brass,hose,222,38.34,S004,A-16,2026-08-07
+P-10162,Cable gland 8 mm brass,electrical,159,20.66,S021,C-03,2026-09-16
+P-10163,Nipple 8 mm brass,fitting,27,33.80,S004,B-12,2026-08-14
+P-10164,Tee 3/4 inch nylon,fitting,85,29.24,S008,A-19,2026-08-18
+P-10165,Seal washer 28 mm steel,seal,228,17.67,S023,A-09,2026-08-27
+P-10166,Ball bearing 6 mm nitrile,bearing,54,25.77,S020,A-18,2026-09-09
+P-10167,Bush 3/4 inch stainless,bearing,161,36.99,S007,B-02,2026-08-25
+P-10168,Ball bearing 6 mm stainless,bearing,238,22.69,S030,B-11,2026-09-11
+P-10169,Nipple 6 mm nylon,fitting,223,13.23,S030,B-06,2026-09-21
+P-10170,Float valve 10 mm nylon,valve,47,36.32,S020,D-01,2026-09-22
+P-10171,Stud 22 mm zinc plated,fastener,51,18.16,S020,A-01,2026-08-26
+P-10172,Cable 3/4 inch stainless,electrical,46,16.69,S017,B-07,2026-08-02
+P-10173,Union 22 mm nitrile,fitting,61,10.24,S012,D-10,2026-08-03
+P-10174,Gate valve 3/4 inch nylon,valve,246,34.61,S018,D-10,2026-08-26
+P-10175,"Hose clamp 1"" stainless",hose,120,0.95,S038,D-09,2026-09-24
+P-10176,Non-return valve 28 mm zinc plated,valve,241,36.56,S007,D-19,2026-09-05
+P-10177,Reducer 3/4 inch zinc plated,fitting,238,27.70,S015,B-11,2026-08-07
+P-10178,Screw 1 inch steel,fastener,122,6.03,S022,B-11,2026-09-04
+P-10179,Lip seal 12 mm EPDM,seal,128,7.56,S004,A-13,2026-08-28
+P-10180,Nipple 15 mm zinc plated,fitting,190,8.19,S007,B-19,2026-08-22
+P-10181,Elbow 1 inch brass,fitting,250,36.54,S028,A-14,2026-08-27
+P-10182,Nipple 8 mm brass,fitting,74,34.08,S021,B-11,2026-08-20
+P-10183,O-ring 12 mm nitrile,seal,135,13.23,S024,C-08,2026-08-06
+P-10184,Terminal block 12 mm nylon,electrical,18,4.86,S017,C-10,2026-08-21
+P-10185,Seal washer 8 mm stainless,seal,60,17.71,S024,D-02,2026-08-18
+P-10186,Non-return valve 8 mm steel,valve,10,38.90,S025,A-05,2026-08-05
+P-10187,"Gate valve, 28 mm, steel",valve,8,0.68,S021,B-07,2026-09-16
+P-10188,O-ring 15 mm EPDM,seal,45,33.61,S007,A-11,2026-08-05
+P-10189,Non-return valve 22 mm nitrile,valve,168,22.64,S016,C-06,2026-09-13
+P-10190,Hose clamp 6 mm zinc plated,hose,78,28.12,S027,B-16,2026-08-04
+P-10191,Elbow 12 mm nylon,fitting,220,32.10,S017,D-20,2026-09-15
+P-10192,Gate valve 12 mm zinc plated,valve,162,10.99,S006,A-15,2026-08-26
+P-10193,Hose tail 6 mm stainless,hose,40,10.74,S027,A-03,2026-09-04
+P-10194,Thrust washer 10 mm nylon,bearing,128,1.84,S008,B-05,2026-08-17
+P-10195,Fuse 3/4 inch stainless,electrical,208,18.87,S024,C-05,2026-09-18
+P-10196,Nut 1 inch brass,fastener,3,5.65,S006,B-10,2026-08-20
+P-10197,Hose tail 1 inch brass,hose,91,38.37,S004,C-07,2026-08-22
+P-10198,Hose 3/4 inch EPDM,hose,204,33.18,S011,B-06,2026-09-03
+P-10199,Thrust washer 12 mm nitrile,bearing,102,20.37,S028,B-06,2026-09-03
+P-10200,Hose tail 15 mm zinc plated,hose,105,20.05,S026,D-10,2026-09-01
+P-10201,Washer 28 mm stainless,fastener,193,39.73,S026,C-18,2026-09-06
+P-10202,Ball bearing 6 mm nitrile,bearing,238,38.23,S002,C-18,2026-08-07
+P-10203,Citric acid descaler 1 kg,consumable,0,4.40,S036,E-01,2026-10-23
+P-10204,Hose tail 15 mm nylon,hose,101,28.21,S022,B-09,2026-08-13
+P-10205,Hose 3/4 inch nylon,hose,21,22.23,S020,D-03,2026-09-03
+P-10206,Tee 10 mm stainless,fitting,76,4.39,S020,D-16,2026-09-07
+P-10207,Union 10 mm steel,fitting,29,14.82,S026,A-04,2026-08-09
+P-10208,Terminal block 28 mm brass,electrical,94,18.57,S005,B-11,2026-08-25
+P-10209,Gate valve 1/2 inch nitrile,valve,32,23.64,S026,D-11,2026-08-08
+P-10210,Stud 22 mm nitrile,fastener,124,34.23,S029,A-05,2026-08-02
+P-10211,Screw 22 mm brass,fastener,94,39.47,S017,A-14,2026-08-08
+P-10212,"Hose, 22 mm, nitrile",hose,30,25.89,S021,D-02,2026-08-15
+P-10213,Hose clamp 1/2 inch zinc plated,hose,238,7.70,S005,D-12,2026-09-07
+P-10214,Bush 6 mm steel,bearing,167,31.88,S019,B-18,2026-08-02
+P-10215,Cable 12 mm EPDM,electrical,77,29.65,S017,B-04,2026-08-18
+P-10216,Seal washer 10 mm zinc plated,seal,178,38.07,S001,D-10,2026-08-23
+P-10217,O-ring 12 mm stainless,seal,210,21.09,S025,C-05,2026-08-08
+P-10218,Reducer 1/2 inch nylon,fitting,127,9.35,S003,B-12,2026-08-17
+P-10219,"Test gauge 0-6 bar, glycerine filled",gauge,3,34.90,S035,B-12,2026-09-24
+P-10220,Relay 3/4 inch nitrile,electrical,243,0.88,S006,C-03,2026-09-15
+P-10221,Thrust washer 8 mm EPDM,bearing,71,9.52,S013,C-01,2026-09-01
+P-10222,Hose tail 12 mm zinc plated,hose,209,27.06,S013,B-09,2026-09-21
+P-10223,Ball bearing 3/4 inch nitrile,bearing,10,17.55,S012,C-04,2026-09-01
+P-10224,Tee 8 mm steel,fitting,101,37.33,S005,B-15,2026-08-07
+P-10225,Nipple 1 inch stainless,fitting,224,31.24,S013,A-08,2026-09-21
+P-10226,Gate valve 28 mm nitrile,valve,140,3.11,S025,B-12,2026-08-15
+P-10227,Fuse 10 mm brass,electrical,207,10.66,S025,D-13,2026-09-09
+P-10228,Elbow 1/2 inch nitrile,fitting,150,38.02,S015,D-07,2026-09-09
+P-10229,Relay 1/2 inch stainless,electrical,67,10.42,S018,B-20,2026-09-11
+P-10230,Elbow 12 mm steel,fitting,167,11.03,S008,D-12,2026-09-23
+P-10231,Nut 1 inch EPDM,fastener,10,36.68,S023,B-06,2026-09-17
+P-10232,Non-return valve 15 mm EPDM,valve,24,17.88,S018,C-18,2026-08-10
+P-10233,Relay 28 mm stainless,electrical,28,27.90,S019,A-02,2026-08-10
+P-10234,Ball bearing 10 mm EPDM,bearing,207,16.55,S007,B-01,2026-08-10
+P-10235,Nipple 28 mm EPDM,fitting,131,35.67,S020,C-13,2026-08-10
+P-10236,Hose clamp 12 mm steel,hose,80,4.62,S026,C-13,2026-09-25
+P-10237,Terminal block 12 mm brass,electrical,73,30.66,S026,B-14,2026-09-05
+P-10238,Hose 8 mm stainless,hose,66,36.30,S030,B-17,2026-09-05
+P-10239,Stud 6 mm zinc plated,fastener,14,8.59,S014,C-14,2026-09-13
+P-10240,Nut 15 mm stainless,fastener,223,37.01,S022,A-05,2026-08-22
+P-10241,Fuse 1/2 inch zinc plated,electrical,18,15.37,S013,B-11,2026-08-25
+P-10242,Lip seal 1/2 inch nylon,seal,209,26.02,S005,D-20,2026-08-13
+P-10243,Lip seal 10 mm brass,seal,152,21.12,S029,D-16,2026-08-05
+P-10244,Hose tail 3/4 inch nylon,hose,99,3.40,S018,C-09,2026-08-16
+P-10245,Fuse 1 inch steel,electrical,203,11.90,S008,B-11,2026-09-04
+P-10246,Tee 1 inch stainless,fitting,228,10.59,S014,D-06,2026-09-16
+P-10247,Gasket 28 mm stainless,seal,146,15.59,S013,C-19,2026-09-26
+P-10248,Washer 6 mm nylon,fastener,11,27.32,S024,B-18,2026-08-11
+P-10249,Hose tail 1 inch stainless,hose,29,2.57,S011,C-19,2026-09-22
+P-10250,"Rubber feet, set of four",pump spare,0,7.30,S031,A-07,2026-09-24
+P-10251,Ball valve 10 mm zinc plated,valve,73,6.14,S024,C-01,2026-08-09
+P-10252,Gasket 3/4 inch steel,seal,129,5.48,S009,B-20,2026-08-07
+P-10253,Hose clamp 22 mm nitrile,hose,125,18.83,S028,C-04,2026-08-20
+P-10254,Hose 1 inch brass,hose,118,27.46,S020,A-16,2026-08-11
+P-10255,Seal washer 15 mm brass,seal,22,33.32,S008,B-13,2026-09-28
+P-10256,Thrust washer 22 mm brass,bearing,71,32.18,S022,D-10,2026-08-05
+P-10257,Cable 15 mm brass,electrical,139,36.54,S021,D-02,2026-08-16
+P-10258,"Terminal block, 1 inch, EPDM",electrical,36,31.04,S022,A-16,2026-09-20
+P-10259,Cable 6 mm brass,electrical,80,13.18,S026,A-05,2026-08-11
+P-10260,Gate valve 15 mm brass,valve,169,13.91,S021,A-14,2026-08-19
+P-10261,Float valve 1/2 inch EPDM,valve,30,2.18,S010,B-18,2026-09-22
+P-10262,Reducer 8 mm zinc plated,fitting,96,4.82,S009,D-02,2026-09-05
+P-10263,Tee 8 mm nitrile,fitting,225,35.30,S029,C-15,2026-08-15
+P-10264,Bush 1 inch nylon,bearing,3,8.49,S008,D-14,2026-08-28
+P-10265,Ball bearing 15 mm nitrile,bearing,162,19.99,S023,C-12,2026-09-26
+P-10266,Lithium bearing grease 400 g,consumable,9,6.80,S036,E-02,2026-09-24
+P-10267,Ball bearing 8 mm steel,bearing,121,16.94,S014,A-07,2026-08-11
+P-10268,Union 1 inch nitrile,fitting,233,1.51,S012,D-18,2026-08-03
+P-10269,Tee 12 mm EPDM,fitting,36,38.20,S025,B-06,2026-09-27
+P-10270,Relay 1/2 inch stainless,electrical,149,27.36,S020,D-11,2026-09-09
+P-10271,Gate valve 8 mm steel,valve,119,36.45,S025,B-13,2026-08-24
+P-10272,Non-return valve 15 mm nitrile,valve,118,7.68,S019,D-19,2026-09-05
+P-10273,Float valve 22 mm zinc plated,valve,92,32.70,S008,D-12,2026-08-08
+P-10274,Union 3/4 inch nylon,fitting,37,33.28,S028,C-02,2026-08-28
+P-10275,Ball valve 3/4 inch nitrile,valve,60,30.57,S014,D-19,2026-09-15
+P-10276,Hose 1 inch nylon,hose,78,17.23,S005,D-15,2026-09-11
+P-10277,Lip seal 12 mm nylon,seal,1,15.07,S010,D-02,2026-09-21
+P-10278,Thrust washer 1/2 inch brass,bearing,88,23.23,S007,D-09,2026-08-03
+P-10279,Washer 28 mm nylon,fastener,148,28.00,S006,C-08,2026-08-14
+P-10280,Float valve 3/4 inch stainless,valve,29,24.23,S015,C-12,2026-08-01
+P-10281,Ball bearing 1 inch nitrile,bearing,104,14.19,S027,D-13,2026-09-08
+P-10282,Cable gland 22 mm nylon,electrical,135,21.76,S001,A-16,2026-08-17
+P-10283,Nut 8 mm stainless,fastener,36,18.13,S023,D-15,2026-08-24
+P-10284,"Nut, 22 mm, stainless",fastener,48,3.35,S004,C-07,2026-09-07
+P-10285,Cable 3/4 inch nylon,electrical,36,0.80,S023,A-18,2026-09-21
+P-10286,Tee 3/4 inch stainless,fitting,25,28.86,S022,A-06,2026-09-28
+P-10287,Hose tail 10 mm zinc plated,hose,35,19.81,S005,D-13,2026-08-13
+P-10288,Ball bearing 1 inch nylon,bearing,241,9.11,S025,C-14,2026-09-19
+P-10289,Lip seal 10 mm zinc plated,seal,237,3.03,S007,A-16,2026-08-21
+P-10290,Fuse 22 mm brass,electrical,83,38.37,S025,B-18,2026-08-02
+P-10291,"Contact thermometer, digital",tool,1,189.00,S040,F-01,2026-09-24
+P-10292,Hose 12 mm zinc plated,hose,171,9.73,S020,C-11,2026-09-27
+P-10293,Ball valve 3/4 inch stainless,valve,154,15.10,S003,C-18,2026-09-15
+P-10294,Hose 10 mm zinc plated,hose,88,12.30,S019,C-19,2026-08-02
+P-10295,Float valve 1/2 inch nitrile,valve,248,38.00,S019,D-01,2026-09-21
+P-10296,Nut 8 mm brass,fastener,119,39.43,S028,D-18,2026-08-03
+P-10297,Ball bearing 10 mm brass,bearing,249,5.75,S012,A-08,2026-08-04
+P-10298,Float valve 1/2 inch stainless,valve,74,21.93,S017,B-03,2026-09-22
+P-10299,Ball bearing 1 inch stainless,bearing,73,27.93,S004,A-03,2026-09-14
+P-10300,Fuse 22 mm EPDM,electrical,197,0.22,S022,D-13,2026-08-20

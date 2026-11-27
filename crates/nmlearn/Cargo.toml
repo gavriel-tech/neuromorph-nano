@@ -1,0 +1,19 @@
+[package]
+name = "nmlearn"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Learning units, readouts, learned adapter cartridges and preferences"
+
+[dependencies]
+nmbrain = { path = "../nmbrain" }
+nmhash = { path = "../nmhash" }
+nmjson = { path = "../nmjson" }
+nmsafe = { path = "../nmsafe" }
+nmtype = { path = "../nmtype" }
+
+[lints]
+workspace = true

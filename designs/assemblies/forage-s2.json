@@ -1,0 +1,568 @@
+{
+  "note": "Execution assembly for foraging (PLAN 4d item 12; S2 review 2026-11-07): the graph the organism runs for one question. Topology is data: nmapi::forage only binds components to these node ids by kind. Per tentacle: assignment node (tentacle), drone tip (conditional on an assignment), pipeline; plan node and river mailbox inside the Core Brain. The five-node tentacle of 4d item 5 replaces the three-node form at S5.",
+  "version": 1,
+  "edges": [
+    {
+      "from": "nmbrain.stack#plan",
+      "from_port": "plan",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.unit#t0",
+      "to_port": "plan"
+    },
+    {
+      "from": "nmpod.unit#t0",
+      "from_port": "assignment",
+      "mode": {"kind": "conditional", "predicate": "assigned"},
+      "to": "nmpod.unit#d0",
+      "to_port": "assignment"
+    },
+    {
+      "from": "nmpod.unit#d0",
+      "from_port": "findings",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.pipeline#t0",
+      "to_port": "findings"
+    },
+    {
+      "from": "nmpod.pipeline#t0",
+      "from_port": "packets",
+      "mode": {"bound": 256, "kind": "buffered"},
+      "to": "nmbrain.rivers#b0",
+      "to_port": "in"
+    },
+    {
+      "from": "nmbrain.stack#plan",
+      "from_port": "plan",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.unit#t1",
+      "to_port": "plan"
+    },
+    {
+      "from": "nmpod.unit#t1",
+      "from_port": "assignment",
+      "mode": {"kind": "conditional", "predicate": "assigned"},
+      "to": "nmpod.unit#d1",
+      "to_port": "assignment"
+    },
+    {
+      "from": "nmpod.unit#d1",
+      "from_port": "findings",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.pipeline#t1",
+      "to_port": "findings"
+    },
+    {
+      "from": "nmpod.pipeline#t1",
+      "from_port": "packets",
+      "mode": {"bound": 256, "kind": "buffered"},
+      "to": "nmbrain.rivers#b0",
+      "to_port": "in"
+    },
+    {
+      "from": "nmbrain.stack#plan",
+      "from_port": "plan",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.unit#t2",
+      "to_port": "plan"
+    },
+    {
+      "from": "nmpod.unit#t2",
+      "from_port": "assignment",
+      "mode": {"kind": "conditional", "predicate": "assigned"},
+      "to": "nmpod.unit#d2",
+      "to_port": "assignment"
+    },
+    {
+      "from": "nmpod.unit#d2",
+      "from_port": "findings",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.pipeline#t2",
+      "to_port": "findings"
+    },
+    {
+      "from": "nmpod.pipeline#t2",
+      "from_port": "packets",
+      "mode": {"bound": 256, "kind": "buffered"},
+      "to": "nmbrain.rivers#b0",
+      "to_port": "in"
+    },
+    {
+      "from": "nmbrain.stack#plan",
+      "from_port": "plan",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.unit#t3",
+      "to_port": "plan"
+    },
+    {
+      "from": "nmpod.unit#t3",
+      "from_port": "assignment",
+      "mode": {"kind": "conditional", "predicate": "assigned"},
+      "to": "nmpod.unit#d3",
+      "to_port": "assignment"
+    },
+    {
+      "from": "nmpod.unit#d3",
+      "from_port": "findings",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.pipeline#t3",
+      "to_port": "findings"
+    },
+    {
+      "from": "nmpod.pipeline#t3",
+      "from_port": "packets",
+      "mode": {"bound": 256, "kind": "buffered"},
+      "to": "nmbrain.rivers#b0",
+      "to_port": "in"
+    },
+    {
+      "from": "nmbrain.stack#plan",
+      "from_port": "plan",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.unit#t4",
+      "to_port": "plan"
+    },
+    {
+      "from": "nmpod.unit#t4",
+      "from_port": "assignment",
+      "mode": {"kind": "conditional", "predicate": "assigned"},
+      "to": "nmpod.unit#d4",
+      "to_port": "assignment"
+    },
+    {
+      "from": "nmpod.unit#d4",
+      "from_port": "findings",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.pipeline#t4",
+      "to_port": "findings"
+    },
+    {
+      "from": "nmpod.pipeline#t4",
+      "from_port": "packets",
+      "mode": {"bound": 256, "kind": "buffered"},
+      "to": "nmbrain.rivers#b0",
+      "to_port": "in"
+    },
+    {
+      "from": "nmbrain.stack#plan",
+      "from_port": "plan",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.unit#t5",
+      "to_port": "plan"
+    },
+    {
+      "from": "nmpod.unit#t5",
+      "from_port": "assignment",
+      "mode": {"kind": "conditional", "predicate": "assigned"},
+      "to": "nmpod.unit#d5",
+      "to_port": "assignment"
+    },
+    {
+      "from": "nmpod.unit#d5",
+      "from_port": "findings",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.pipeline#t5",
+      "to_port": "findings"
+    },
+    {
+      "from": "nmpod.pipeline#t5",
+      "from_port": "packets",
+      "mode": {"bound": 256, "kind": "buffered"},
+      "to": "nmbrain.rivers#b0",
+      "to_port": "in"
+    },
+    {
+      "from": "nmbrain.stack#plan",
+      "from_port": "plan",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.unit#t6",
+      "to_port": "plan"
+    },
+    {
+      "from": "nmpod.unit#t6",
+      "from_port": "assignment",
+      "mode": {"kind": "conditional", "predicate": "assigned"},
+      "to": "nmpod.unit#d6",
+      "to_port": "assignment"
+    },
+    {
+      "from": "nmpod.unit#d6",
+      "from_port": "findings",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.pipeline#t6",
+      "to_port": "findings"
+    },
+    {
+      "from": "nmpod.pipeline#t6",
+      "from_port": "packets",
+      "mode": {"bound": 256, "kind": "buffered"},
+      "to": "nmbrain.rivers#b0",
+      "to_port": "in"
+    },
+    {
+      "from": "nmbrain.stack#plan",
+      "from_port": "plan",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.unit#t7",
+      "to_port": "plan"
+    },
+    {
+      "from": "nmpod.unit#t7",
+      "from_port": "assignment",
+      "mode": {"kind": "conditional", "predicate": "assigned"},
+      "to": "nmpod.unit#d7",
+      "to_port": "assignment"
+    },
+    {
+      "from": "nmpod.unit#d7",
+      "from_port": "findings",
+      "mode": {"kind": "direct"},
+      "to": "nmpod.pipeline#t7",
+      "to_port": "findings"
+    },
+    {
+      "from": "nmpod.pipeline#t7",
+      "from_port": "packets",
+      "mode": {"bound": 256, "kind": "buffered"},
+      "to": "nmbrain.rivers#b0",
+      "to_port": "in"
+    }
+  ],
+  "nodes": [
+    {
+      "config": {},
+      "id": "nmapi#n0",
+      "kind": "organism",
+      "parent": null,
+      "ports_in": [],
+      "ports_out": []
+    },
+    {
+      "config": {},
+      "id": "nmbrain.stack#b0",
+      "kind": "brain",
+      "parent": "nmapi#n0",
+      "ports_in": [],
+      "ports_out": []
+    },
+    {
+      "config": {},
+      "id": "nmpod.pod#p0",
+      "kind": "neuropod",
+      "parent": "nmapi#n0",
+      "ports_in": [],
+      "ports_out": []
+    },
+    {
+      "config": {},
+      "id": "nmbrain.stack#plan",
+      "kind": "routing",
+      "parent": "nmbrain.stack#b0",
+      "ports_in": [
+        {"kind": "json", "name": "task", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "plan", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmbrain.rivers#b0",
+      "kind": "brain",
+      "parent": "nmbrain.stack#b0",
+      "ports_in": [
+        {"kind": "packets", "name": "in", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "packets", "name": "out", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#t0",
+      "kind": "tentacle",
+      "parent": "nmpod.pod#p0",
+      "ports_in": [
+        {"kind": "json", "name": "plan", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#d0",
+      "kind": "drone",
+      "parent": "nmpod.unit#t0",
+      "ports_in": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "findings", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.pipeline#t0",
+      "kind": "other",
+      "parent": "nmpod.unit#t0",
+      "ports_in": [
+        {"kind": "json", "name": "findings", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "packets", "name": "packets", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#t1",
+      "kind": "tentacle",
+      "parent": "nmpod.pod#p0",
+      "ports_in": [
+        {"kind": "json", "name": "plan", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#d1",
+      "kind": "drone",
+      "parent": "nmpod.unit#t1",
+      "ports_in": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "findings", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.pipeline#t1",
+      "kind": "other",
+      "parent": "nmpod.unit#t1",
+      "ports_in": [
+        {"kind": "json", "name": "findings", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "packets", "name": "packets", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#t2",
+      "kind": "tentacle",
+      "parent": "nmpod.pod#p0",
+      "ports_in": [
+        {"kind": "json", "name": "plan", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#d2",
+      "kind": "drone",
+      "parent": "nmpod.unit#t2",
+      "ports_in": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "findings", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.pipeline#t2",
+      "kind": "other",
+      "parent": "nmpod.unit#t2",
+      "ports_in": [
+        {"kind": "json", "name": "findings", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "packets", "name": "packets", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#t3",
+      "kind": "tentacle",
+      "parent": "nmpod.pod#p0",
+      "ports_in": [
+        {"kind": "json", "name": "plan", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#d3",
+      "kind": "drone",
+      "parent": "nmpod.unit#t3",
+      "ports_in": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "findings", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.pipeline#t3",
+      "kind": "other",
+      "parent": "nmpod.unit#t3",
+      "ports_in": [
+        {"kind": "json", "name": "findings", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "packets", "name": "packets", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#t4",
+      "kind": "tentacle",
+      "parent": "nmpod.pod#p0",
+      "ports_in": [
+        {"kind": "json", "name": "plan", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#d4",
+      "kind": "drone",
+      "parent": "nmpod.unit#t4",
+      "ports_in": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "findings", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.pipeline#t4",
+      "kind": "other",
+      "parent": "nmpod.unit#t4",
+      "ports_in": [
+        {"kind": "json", "name": "findings", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "packets", "name": "packets", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#t5",
+      "kind": "tentacle",
+      "parent": "nmpod.pod#p0",
+      "ports_in": [
+        {"kind": "json", "name": "plan", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#d5",
+      "kind": "drone",
+      "parent": "nmpod.unit#t5",
+      "ports_in": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "findings", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.pipeline#t5",
+      "kind": "other",
+      "parent": "nmpod.unit#t5",
+      "ports_in": [
+        {"kind": "json", "name": "findings", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "packets", "name": "packets", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#t6",
+      "kind": "tentacle",
+      "parent": "nmpod.pod#p0",
+      "ports_in": [
+        {"kind": "json", "name": "plan", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#d6",
+      "kind": "drone",
+      "parent": "nmpod.unit#t6",
+      "ports_in": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "findings", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.pipeline#t6",
+      "kind": "other",
+      "parent": "nmpod.unit#t6",
+      "ports_in": [
+        {"kind": "json", "name": "findings", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "packets", "name": "packets", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#t7",
+      "kind": "tentacle",
+      "parent": "nmpod.pod#p0",
+      "ports_in": [
+        {"kind": "json", "name": "plan", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.unit#d7",
+      "kind": "drone",
+      "parent": "nmpod.unit#t7",
+      "ports_in": [
+        {"kind": "json", "name": "assignment", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "json", "name": "findings", "required": true}
+      ]
+    },
+    {
+      "config": {},
+      "id": "nmpod.pipeline#t7",
+      "kind": "other",
+      "parent": "nmpod.unit#t7",
+      "ports_in": [
+        {"kind": "json", "name": "findings", "required": true}
+      ],
+      "ports_out": [
+        {"kind": "packets", "name": "packets", "required": true}
+      ]
+    }
+  ]
+}

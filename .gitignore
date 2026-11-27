@@ -1,0 +1,47 @@
+# Engine build output and disposable work (2026-11-15).
+/target/
+/scratch/
+# Model files stay out of git; the weight cards (part.json with the hashes) and READMEs are tracked.
+/weights/*/files/
+**/target/
+# User state written by the engine (2026-11-15): never committed.
+/settings.json
+/memory/
+/runs/
+# Launcher copy written by setup: a build artifact, never committed.
+/bin/
+# Learned and run-time state, and test output (never committed).
+/muscle/
+# Learned units, their registry and the plug file (2026-11-26).
+/units/
+# The cartridge sources the user added, and files waiting for their import checks (2026-11-26).
+/cartridge-sources.json
+/library/incoming/
+/incoming/
+# The cartridge library and this machine's hardware description (user state).
+/library/
+/tests/section-checks/
+/tests/claude-code-sessions/
+
+# Local-only material: never committed, never uploaded, never studied.
+/private/
+
+# Insider notes: kept on this machine, not part of the project. Research, design, plans, audits,
+# release drafts and the private agent rules (internal/agents/), organized 2026-11-26.
+internal/
+# Loads the private agent rules into local Claude Code sessions (never published).
+/CLAUDE.local.md
+
+# Large dev set materials: regenerated from commit df3c66b (git archive) and checked against tests/dev-large/LOCK.txt
+tests/dev-large/material-code/
+tests/dev-large/material-docs/
+__pycache__/
+/exports/
+
+# Private design drafts written by helper branches; moved into internal/ at merge.
+docs-internal-drafts/
+
+# The mirrors of the user's own backup repositories and their restore copies (2026-11-26).
+/backups/
+/backup-repos.json
+/dist/

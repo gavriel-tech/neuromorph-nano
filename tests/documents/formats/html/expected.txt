@@ -1,0 +1,33 @@
+# AQ-40 Quick Care Guide
+
+This page sums up the routine care of the AQ-40 pump. The full procedures are in the service manual.
+
+## Cleaning the strainer
+
+Clean the inlet strainer every three months, or sooner on dirty water & after a flood.
+
+1. Switch the pump off at the isolator.
+2. Close the inlet valve and unscrew the strainer cap.
+3. Rinse the mesh under running water.
+
+> Never run the pump with the strainer removed.
+
+## Spare parts
+
+Common spare parts
+
+| Part | Number | Interval |
+| --- | --- | --- |
+| Strainer mesh | P-10031 | 2 years |
+| Shaft seal kit | P-10044 | as needed |
+
+### Ordering
+
+Order parts by number from your dealer.
+
+Give the serial number of the pump.
+
+```
+Serial label:  AQ40-2026-001234
+Location:      under the terminal box
+```

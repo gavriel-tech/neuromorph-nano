@@ -1,0 +1,20 @@
+{
+  "id": "nmffi",
+  "kind": "other",
+  "version": 1,
+  "parent": "nmengn",
+  "ports_in": [],
+  "ports_out": [],
+  "deps": [],
+  "config_schema": {},
+  "config_default": {},
+  "subcomponents": [
+    {"id": "nmffi.dynlib", "version": 1, "hash": "e4fb1d45faa8b2485a3e1848674e0a9a2eea0a82fb2eb5e1a01dd7fb3a257ffb"},
+    {"id": "nmffi.cuda", "version": 1, "hash": "0bccdf655fe68729bc5679ad0f34289211f4e915a1e3559f4308f1736b91c55a"},
+    {"id": "nmffi.prof", "version": 1, "hash": "cbae6c751607430219b9e0ca03afc29ff4b048b7826ac3ca99f9c4730fd9b6bc"},
+    {"id": "nmffi.http", "version": 1, "hash": "a49bd282f73b1b32786beb1a142458de0d21d9747e40281407c442d8ca79f3e4"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "82fb9b0ede6f92ddec0d0240847d2017de52fe805f4ec4364e09730f63aa28d5"
+}

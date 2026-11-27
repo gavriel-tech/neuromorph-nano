@@ -1,0 +1,9 @@
+{
+  "name": "taskboard",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "build": "tsc -b packages/core packages/web",
+    "test": "vitest run"
+  }
+}

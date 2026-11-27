@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "note": "Compare fixtures for lifecycle changes (PLAN 4c nmnte::lifecycle, Compare phase; S5 review note: the S6 second-assembly change must list its fixture). Each fixture names the change it serves, the input both the old and the new component receive, and what the Step Check compares. Fixtures are written before the change runs and are not edited after a result.",
+  "fixtures": [
+    {
+      "change": "assembly:qwen3-reference->qwen3-split-attention",
+      "slot": "nmbrain.slot#writer",
+      "text": "Hello, EMMA. [0]",
+      "source": "golden/qwen3-0.6b-r1/inputs.json prompt 0 (the recorded prompt, so the reference side is also checked against the golden)",
+      "compare": "last-position logits of the old and new assembly: max absolute difference against the golden prompt0 atol, cosine, argmax equality",
+      "added": "2026-11-07 23:35 UTC, before the change ran"
+    }
+  ]
+}

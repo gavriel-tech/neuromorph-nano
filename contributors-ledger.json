@@ -1,0 +1,38 @@
+{
+    "schema":  "neuromorph-nano-contributor-ledger/1",
+    "scope":  "neuromorph-nano-only",
+    "payout_model":  "dynamic-periodic-neuromorph-nano-licensing-profit-distribution",
+    "status":  "active-reward-distribution-not-corporate-equity",
+    "allocation_proposed":  {
+                                "gavriel_technologies_pct":  55.0,
+                                "contributors_pool_pct":  30.0,
+                                "investors_pct":  15.0
+                            },
+    "minimum_pool_threshold_pct":  0.25,
+    "policy":  "CONTRIBUTOR_POOL.md",
+    "human_controllers_only":  true,
+    "entries":  [
+                    {
+                        "id":  "v0.1.0-baseline",
+                        "date":  "2026-11-26",
+                        "pr":  null,
+                        "commit":  "v0.1.0",
+                        "contributor_name":  "Luis Jake Gabriel III",
+                        "contributor_github":  "gavriel-tech",
+                        "category":  "founding-organism-baseline",
+                        "summary":  "Founding architecture and v0.1.0 implementation: 21 zero-dependency Rust crates, 12 multi-arch CUDA fatbins, 4 parameter-mapped base cartridges, 25 MCP tools, continuous learning engine, and 11-page local interface.",
+                        "active":  true,
+                        "audited_by":  "Luis Jake Gabriel III",
+                        "functional_lines":  207457,
+                        "weighted_units":  390642
+                    }
+                ],
+    "metric":  "folder-weighted-surviving-production-code",
+    "folder_weights":  {
+                           "rust-engine":  2,
+                           "cuda-kernels":  2,
+                           "cartridge-and-pmap":  2,
+                           "interface-ux":  1,
+                           "tooling":  0.5
+                       }
+}

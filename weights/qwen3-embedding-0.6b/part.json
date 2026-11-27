@@ -1,0 +1,28 @@
+{
+  "id": "weight-opnwgt-basewt-qwen3-embedding-0.6b",
+  "level": "9-weight",
+  "kind": "wgtset",
+  "label": "qwen3-embedding-0.6b",
+  "purpose": "Qwen3-Embedding-0.6B as released: retrieval embeddings as its model card specifies (text followed by <|endoftext|>, the final-normed hidden state of that last token, L2-normalised; queries carry the card's instruction prefix); the embedder slot's engine in the mini (2026-11-09), cut into clusters by NPCS. Its tensors are stored without the `model.` prefix; the engine maps them to the canonical names when it opens the population (the file is unchanged).",
+  "weights": {
+    "origin": "https://huggingface.co/Qwen/Qwen3-Embedding-0.6B",
+    "licence": "apache-2.0",
+    "revision": "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3",
+    "sha256": "0437e45c94563b09e13cb7a64478fc406947a93cb34a7e05870fc8dcd48e23fd",
+    "main_file": "files/model.safetensors",
+    "bytes": 1191586416,
+    "files": 12,
+    "manifest": "INTEGRITY.md (Weights): one SHA-256 row per file",
+    "location": "weights/qwen3-embedding-0.6b/files",
+    "derived_from": null
+  },
+  "state": {
+    "status": "in use",
+    "read_only": true,
+    "base": "base weights: used exactly as released, nothing added or edited"
+  },
+  "owner": "Gavriel Technologies",
+  "version": "97b0c614be4d77ee51c0cef4e5f07c00f9eb65b3",
+  "hash": "0437e45c94563b09e13cb7a64478fc406947a93cb34a7e05870fc8dcd48e23fd",
+  "copied": "2026-11-09 from the EMMA weight shelf (library/9-weight/opnwgt/basewt/qwen3-embedding-0.6b/files), every file hash-identical to it and to its 2026-11-01 download record; the download tool's .cache folder left out"
+}

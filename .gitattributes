@@ -1,0 +1,39 @@
+# Line endings and binary files.
+#
+# Goal: a fresh clone is byte-identical to the working tree it was committed from. Part cards
+# (crates/*/part.json) hold the SHA-256 of each source file, the engine reference recordings in
+# tests/engine-reference/ are compared byte for byte, and MANIFEST.sha256 files list raw hashes.
+# Any line-ending conversion on commit or checkout would change those bytes and break
+# `check cards`, the fingerprint and the parity self-tests.
+#
+# The tree today has LF and CRLF files side by side (including Rust sources and reference inputs
+# that contain CRLF bytes on purpose), so a normalising rule such as `text=auto eol=lf` would
+# rewrite some of them. No conversion is the only rule that keeps every file as it is.
+
+# No conversion for any file. This also overrides `core.autocrlf=true` set on this machine.
+* -text
+
+# Binary: never converted, never diffed or merged as text.
+# Engine reference recordings (tokenizer bytes, token ids, tensors). Some `.u8` files are
+# decoded text with CRLF bytes; they must stay exactly as recorded.
+*.u8 binary
+*.i32 binary
+*.f16 binary
+*.f32 binary
+*.bin binary
+# Prebuilt GPU kernels, embedded into nmffi at build time.
+*.fatbin binary
+# Model weights and muscle memory packs (normally outside git; listed so they are never converted).
+*.safetensors binary
+*.nmmusc binary
+# Images and fonts used by the interface.
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

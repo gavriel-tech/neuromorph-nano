@@ -1,0 +1,26 @@
+{
+  "id": "nmnpcs",
+  "kind": "other",
+  "version": 1,
+  "parent": "nmapi",
+  "ports_in": [{"name": "card", "kind": "json", "required": true}],
+  "ports_out": [{"name": "clusters", "kind": "refs", "required": true}],
+  "deps": ["nmjson", "nmhash", "nmtype"],
+  "config_schema": {},
+  "config_default": {"recording":false},
+  "subcomponents": [
+    {"id": "nmnpcs.acquire", "version": 1, "hash": "baa69b6488afb69e635a50568263fe232f721efa39803d3077afbde87f5d2855"},
+    {"id": "nmnpcs.decompose", "version": 1, "hash": "e37010418417cbf3ca49fd2d177b2934c11d152d67bcc75026c84bcd8d3df4b5"},
+    {"id": "nmnpcs.compat", "version": 1, "hash": "09118e8bb22b9019c5a5beecca32b9526496122185a36729698fe175671d5dbd"},
+    {"id": "nmnpcs.provision", "version": 1, "hash": "71396b80cc077f9d9b742f073e25f5ddecbd6935c29ee46afdd21099af9eda1e"},
+    {"id": "nmnpcs.lifecycle", "version": 1, "hash": "b7fe800f9533897b01171a8e6e08fd8c7b30c84d42af7a7c58ba2215c2c2b2c6"},
+    {"id": "nmnpcs.parmap", "version": 1, "hash": "15ae2bf14c421e636edaff47b80b6eb975ef6dfc7ba2f955e54de85a945bf5db"},
+    {"id": "nmnpcs.inspect", "version": 1, "hash": "4029cf1d6d5f16dfd31172d11dde4a7669d15dad89ee730ee6c3eb15358b9cf7"},
+    {"id": "nmnpcs.atlas", "version": 1, "hash": "474c0af357b79c3ab57fe4e6d776c074af235cd46d51ada7d6aba6779541b64f"},
+    {"id": "nmnpcs.compare", "version": 1, "hash": "093e40b0f93af5ad01ec1683f171855c3f4acc09502d6c4e0bf7ce5f108130f8"},
+    {"id": "nmnpcs.cartridge", "version": 1, "hash": "73590844638e9a7ed358fbce34383c5d55bef21521dbf246cfb7ac5ac08f69b6"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "61b5557c854fe1c48d8478da8b359d04c54f21617cd802f1ee9fe59468726daf"
+}

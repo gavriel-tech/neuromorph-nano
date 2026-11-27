@@ -1,0 +1,15 @@
+a.start	-
+a.prompt	-
+a.fail	-
+a.edit.pre	-
+a.edit.post	-
+a.pass	-
+a.stop	-
+b.start	-
+b.fail	Neuromorph Nano memory: cargo-test shop failed the same way before (E0308 at crates/shop/src/lib.rs:18, mismatched types). The change that fixed it then is at crates/shop/src/lib.rs:18; cargo-test shop passed after it (verified once, evidence direct). Those lines are unchanged since.
+b.other	-
+b.again	-
+b.build	-
+b.stop	-
+ledger	outcome fixed verified direct check crates/shop/src/lib.rs:18 failure=cargo-test shop E0308 crates/shop/src/lib.rs:18 mismatched types
+ledger	primed failure-fix PostToolUseFailure quiet crates/shop/src/lib.rs:18 from=memory

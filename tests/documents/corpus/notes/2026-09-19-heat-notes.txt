@@ -1,0 +1,11 @@
+Motor housing temperatures, 19 September
+
+Measured the housing surface with the contact thermometer after two hours of running.
+Pumps 1 to 5: between 52 and 58 C. Pump 6: 61 C.
+Room was at 24 C.
+
+Pump 6 sits closest to the wall, so its fan has less space. The manual asks for 10 cm around the
+fan cover and pump 6 has about 6 cm. Moving it out next week.
+
+Rough check with the convection formula from chapter 1 of the textbook: with h around 40 the
+housing loses about 200 W at these temperatures, which is about right for a 550 W motor.

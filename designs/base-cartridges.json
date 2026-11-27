@@ -1,0 +1,38 @@
+{
+  "note": "The base cartridge each MicroModel serves. The files come from the official cartridge library named below (base/<role>/<role>-base.cartridge) and are checked against these SHA-256 sums before they are kept; the drive keeps the serving version. `check nmcore.library.served` verifies that the settings name these versions, that the files on the shelf have these SHA-256 sums, that each label names this parent, and that the compensation is on or off as listed.",
+  "library_repository": "gavriel-tech/neuromorph-nano-cartridges",
+  "serving": {
+    "qwen3-embedding-0.6b": {
+      "cartridge": "embedder-base",
+      "version": 4,
+      "sha256": "832d6da1373986a00a209062d66ecaac94150d184195c3b46bb495abc00e8f9e",
+      "parent": "embedder-base@3",
+      "compensation": null,
+      "backup_commit": "77112a5"
+    },
+    "qwen3-reranker-0.6b": {
+      "cartridge": "reranker-base",
+      "version": 5,
+      "sha256": "a27c4cea53bc3047a651cb57ed17bc8765ce567b200c9c5e790545fa4ca22ece",
+      "parent": "reranker-base@4",
+      "compensation": null,
+      "backup_commit": "31ebc5b"
+    },
+    "qwen3-1.7b": {
+      "cartridge": "writer-base",
+      "version": 4,
+      "sha256": "4e89d9cc9b6d249a54bb4aa83c1a9ec9c2b70839b8c10ec332c4f75761940c29",
+      "parent": "writer-base@3",
+      "compensation": null,
+      "backup_commit": "b17ab0b"
+    },
+    "qwen3-0.6b": {
+      "cartridge": "reader-base",
+      "version": 3,
+      "sha256": "1600e60eaca2c252fae04f2f45defbf52987aca5f324542d4f973e940a97acd4",
+      "parent": "reader-base@2",
+      "compensation": null,
+      "backup_commit": "c44a41c"
+    }
+  }
+}

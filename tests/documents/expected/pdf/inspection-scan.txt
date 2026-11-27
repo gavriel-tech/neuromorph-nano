@@ -1,0 +1,9 @@
+--- page 1 ---
+Pressure vessel inspection record
+This record is kept with the AQ-40 service file. The inspection of the pressure vessel is carried out once a year by the installer, who checks the air charge, the membrane and the mounting bracket.
+The next page is a scanned copy of the paper form signed at the last visit. It is a picture only and holds no text that a reader can take from it.
+--- page 2 ---
+
+--- page 3 ---
+Notes after the inspection
+The air charge was found at 1.3 bar and was raised to the correct value. The membrane showed no sign of wear. The mounting bracket bolts were tightened to 10 N m.

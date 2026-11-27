@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "date": "2026-11-10",
+  "note": "Muscle memory and G3 pattern recognition, first form (step P8; specification 3 and 5.3). Read by nmmusc::Policy; a missing file or field keeps the fallback in code (gate z 1.96, withdrawal z 1.96, store dir muscle). The two z values are fixed test gates; every other operating number is derived at run time from the behaviour log, as described in the rule fields.",
+  "store": {
+    "dir": "muscle",
+    "file": "<fingerprint>.nmmusc plus index.json",
+    "refused_under": ["memory", "weights", "units"],
+    "content": "behavioural only; sensory items refused (nmmusc-sensory-refused)"
+  },
+  "miner": {
+    "method": "contiguous chunks scored by compression gain, occurrences times (length - 1) minus (length + 1); idea from Stitch, arXiv 2211.16605",
+    "recurrence_rule": "occurrences >= 2 and M * P(Poisson(E) >= occurrences) < 1, E from the log's own symbol frequencies, M the distinct chunks examined in the pass; gain > 0"
+  },
+  "gate": {
+    "estimator": "split means: traces with the chunk against traces without, Welch standard error",
+    "z": 1.96,
+    "min_per_group": 2
+  },
+  "withdrawal": {
+    "rule": "change rule (2026-11-18, T-042): Page's CUSUM of (promotion gain / 2 - gain) scaled by promotion gain / per-use variance is the log likelihood ratio of 'gains nothing' against 'still gains'; withdraw when it passes ln(n (n + 1) / alpha), alpha = P(Z > z), n the uses; the per-use variance pools the promotion's (se^2 * with_n) with the observed uses'",
+    "z": 1.96
+  },
+  "pack": {
+    "format_version": 1,
+    "payload": "alphabet indices at the smallest width (1, 2 or 4 bytes) that holds the pack's alphabet",
+    "vectors": "reserved section for encoded behavioural vectors, empty in the first form"
+  }
+}

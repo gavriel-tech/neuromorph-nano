@@ -1,0 +1,63 @@
+{
+  "recall_floor": "0.9",
+  "read": [
+    "third_party/blob.dat",
+    "include/ringbuf.h",
+    "kernels/reduce.cu",
+    "kernels/scale.cu",
+    "kernels/scale.cuh",
+    "src/main.c",
+    "src/ringbuf.c"
+  ],
+  "skipped": [
+    {"path": ".gitignore", "reason": "hidden file"},
+    {"path": "package-lock.json", "reason": "lock file (generated): not read"},
+    {"path": "docs/viewer.min.js", "reason": "minified file (generated): not read"},
+    {"path": "src/config.local.h", "reason": "ignored by .gitignore"}
+  ],
+  "definitions": [
+    {"file": "include/ringbuf.h", "name": "RINGBUF_H", "kind": "macro", "line": 4, "end": 4, "parent": ""},
+    {"file": "include/ringbuf.h", "name": "RB_CAPACITY", "kind": "macro", "line": 8, "end": 8, "parent": ""},
+    {"file": "include/ringbuf.h", "name": "RB_MASK", "kind": "macro", "line": 9, "end": 9, "parent": ""},
+    {"file": "include/ringbuf.h", "name": "RB_FULL", "kind": "macro", "line": 10, "end": 11, "parent": ""},
+    {"file": "include/ringbuf.h", "name": "ringbuf", "kind": "struct", "line": 13, "end": 17, "parent": ""},
+    {"file": "include/ringbuf.h", "name": "ringbuf_t", "kind": "type", "line": 13, "end": 17, "parent": ""},
+    {"file": "include/ringbuf.h", "name": "rb_status", "kind": "type", "line": 19, "end": 23, "parent": ""},
+    {"file": "include/ringbuf.h", "name": "rb_visit_fn", "kind": "type", "line": 25, "end": 25, "parent": ""},
+    {"file": "include/ringbuf.h", "name": "rb_is_empty", "kind": "function", "line": 32, "end": 34, "parent": ""},
+    {"file": "src/ringbuf.c", "name": "STATUS_NAMES", "kind": "const", "line": 4, "end": 4, "parent": ""},
+    {"file": "src/ringbuf.c", "name": "rb_init", "kind": "function", "line": 6, "end": 8, "parent": ""},
+    {"file": "src/ringbuf.c", "name": "rb_push", "kind": "function", "line": 10, "end": 19, "parent": ""},
+    {"file": "src/ringbuf.c", "name": "rb_pop", "kind": "function", "line": 21, "end": 27, "parent": ""},
+    {"file": "src/ringbuf.c", "name": "rb_len", "kind": "function", "line": 29, "end": 32, "parent": ""},
+    {"file": "src/ringbuf.c", "name": "rb_each", "kind": "function", "line": 34, "end": 38, "parent": ""},
+    {"file": "src/ringbuf.c", "name": "rb_status_name", "kind": "function", "line": 40, "end": 42, "parent": ""},
+    {"file": "src/main.c", "name": "BATCH", "kind": "macro", "line": 6, "end": 6, "parent": ""},
+    {"file": "src/main.c", "name": "print_sample", "kind": "function", "line": 8, "end": 11, "parent": ""},
+    {"file": "src/main.c", "name": "main", "kind": "function", "line": 13, "end": 26, "parent": ""},
+    {"file": "kernels/scale.cuh", "name": "SCALE_BLOCK", "kind": "macro", "line": 3, "end": 3, "parent": ""},
+    {"file": "kernels/scale.cuh", "name": "CUDA_CHECK", "kind": "macro", "line": 4, "end": 11, "parent": ""},
+    {"file": "kernels/scale.cu", "name": "CLAMP_LIMIT", "kind": "const", "line": 6, "end": 6, "parent": ""},
+    {"file": "kernels/scale.cu", "name": "clamp_abs", "kind": "function", "line": 8, "end": 11, "parent": ""},
+    {"file": "kernels/scale.cu", "name": "scale_kernel", "kind": "function", "line": 13, "end": 18, "parent": ""},
+    {"file": "kernels/scale.cu", "name": "scale_on_device", "kind": "function", "line": 20, "end": 31, "parent": ""},
+    {"file": "kernels/reduce.cu", "name": "WARP", "kind": "macro", "line": 4, "end": 4, "parent": ""},
+    {"file": "kernels/reduce.cu", "name": "warp_sum", "kind": "function", "line": 7, "end": 12, "parent": ""},
+    {"file": "kernels/reduce.cu", "name": "block_sum", "kind": "function", "line": 14, "end": 29, "parent": ""},
+    {"file": "kernels/reduce.cu", "name": "sum_on_device", "kind": "function", "line": 31, "end": 48, "parent": ""}
+  ],
+  "imports": [
+    {"file": "include/ringbuf.h", "line": 6, "external": "stddef.h"},
+    {"file": "src/ringbuf.c", "line": 1, "to": "include/ringbuf.h"},
+    {"file": "src/ringbuf.c", "line": 2, "external": "string.h"},
+    {"file": "src/main.c", "line": 1, "external": "stdio.h"},
+    {"file": "src/main.c", "line": 2, "to": "include/ringbuf.h"},
+    {"file": "src/main.c", "line": 3, "to": "kernels/scale.cuh"},
+    {"file": "kernels/scale.cu", "line": 1, "external": "cstdio"},
+    {"file": "kernels/scale.cu", "line": 2, "external": "cuda_runtime.h"},
+    {"file": "kernels/scale.cu", "line": 3, "to": "kernels/scale.cuh"},
+    {"file": "kernels/reduce.cu", "line": 1, "external": "cuda_runtime.h"},
+    {"file": "kernels/reduce.cu", "line": 2, "to": "kernels/scale.cuh"}
+  ],
+  "packages": []
+}

@@ -1,0 +1,124 @@
+{
+ "note": "What the reader must do with each file of formats/encodings/: read it (decoder, encoding, decoded text equal to text.txt) or skip it with the reason.",
+ "text": "text.txt",
+ "files": [
+  {
+   "path": "utf8.txt",
+   "decoder": "text",
+   "encoding": "utf-8"
+  },
+  {
+   "path": "utf8-bom.txt",
+   "decoder": "text",
+   "encoding": "utf-8-bom"
+  },
+  {
+   "path": "utf16le.txt",
+   "decoder": "text",
+   "encoding": "utf-16le"
+  },
+  {
+   "path": "utf16be.txt",
+   "decoder": "text",
+   "encoding": "utf-16be"
+  },
+  {
+   "path": "utf16le-nobom.txt",
+   "decoder": "text",
+   "encoding": "utf-16le"
+  },
+  {
+   "path": "cp1252.txt",
+   "decoder": "text",
+   "encoding": "windows-1252"
+  },
+  {
+   "path": "notes",
+   "decoder": "text",
+   "encoding": "utf-8"
+  },
+  {
+   "path": "README.md",
+   "decoder": "markdown",
+   "encoding": "utf-8",
+   "own_text": true
+  },
+  {
+   "path": "blob.dat",
+   "decoder": "raw",
+   "encoding": "binary",
+   "general": "binary",
+   "own_text": true
+  },
+  {
+   "path": "picture.png",
+   "decoder": "raw",
+   "encoding": "binary",
+   "general": "binary",
+   "own_text": true
+  },
+  {
+   "path": "report.pdf",
+   "decoder": "raw",
+   "encoding": "utf-8",
+   "general": "raw",
+   "own_text": true
+  },
+  {
+   "path": "disguised.txt",
+   "decoder": "raw",
+   "encoding": "utf-8",
+   "general": "raw",
+   "own_text": true
+  },
+  {
+   "path": "letter.docx",
+   "decoder": "raw",
+   "encoding": "binary",
+   "general": "binary",
+   "own_text": true
+  },
+  {
+   "path": "archive.txt",
+   "decoder": "raw",
+   "encoding": "binary",
+   "general": "binary",
+   "own_text": true
+  },
+  {
+   "path": "tool.exe",
+   "decoder": "raw",
+   "encoding": "binary",
+   "general": "binary",
+   "own_text": true
+  },
+  {
+   "path": "Cargo.lock",
+   "skip": "lock file (generated): not read"
+  },
+  {
+   "path": "app.min.js",
+   "skip": "minified file (generated): not read"
+  },
+  {
+   "path": ".env",
+   "skip": "secret store (.env): never read"
+  },
+  {
+   "path": "big.txt",
+   "skip": "too large: over 512 KB"
+  },
+  {
+   "path": "expected.json",
+   "decoder": "json",
+   "encoding": "utf-8",
+   "own_text": true
+  },
+  {
+   "path": "text.txt",
+   "decoder": "text",
+   "encoding": "utf-8",
+   "own_text": true
+  }
+ ]
+}

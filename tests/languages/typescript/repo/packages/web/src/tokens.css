@@ -1,0 +1,5 @@
+/* Colour tokens shared by every page. */
+:root {
+  --ink: #1d1d1f;
+  --paper: #fbfbf8;
+}

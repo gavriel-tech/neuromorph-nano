@@ -1,0 +1,1 @@
+#define TINY 1

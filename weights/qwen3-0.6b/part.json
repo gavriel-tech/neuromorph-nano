@@ -1,0 +1,39 @@
+{
+  "id": "weight-opnwgt-basewt-qwen3-0.6b",
+  "level": "9-weight",
+  "kind": "wgtset",
+  "label": "qwen3-0.6b",
+  "purpose": "Qwen3-0.6B base weights: the one base population for every role in the mini (embedder, reranker, router, writer), cut into clusters by NPCS; parity reference tests/engine-reference/qwen3-0.6b/.",
+  "weights": {
+    "origin": "https://huggingface.co/Qwen/Qwen3-0.6B",
+    "licence": "apache-2.0",
+    "revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "sha256": "f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b",
+    "main_file": "files/model.safetensors",
+    "bytes": 1503300328,
+    "files": 21,
+    "manifest": "INTEGRITY.md (Weights): one SHA-256 row per file",
+    "location": "weights/qwen3-0.6b/files",
+    "derived_from": null
+  },
+  "state": {
+    "status": "in use",
+    "read_only": true,
+    "base": "base weights: used exactly as released, nothing added or edited (Luis Jake Gabriel III 2026-11-09)"
+  },
+  "owner": "Gavriel Technologies",
+  "version": "c1899de289a04d12100db370d81485cdf75e47ca",
+  "hash": "f47f71177f32bcd101b7573ec9171e6a57f4f4d31148d38e382306f42996874b",
+  "history": {
+    "purpose_before": "Qwen3-0.6B as released: fast dispatcher for the Neuromorph coordinator (tool selection and routing, native tool-call format); stack role in library/STACK-ROLES.md once qualified.",
+    "manifest_before": "emma-experiments/runs/9-weight/2026-11-02-qwen3-0.6b-download/qwen3-0.6b.manifest-2026-11-05.json",
+    "location_before": "library/9-weight/opnwgt/basewt/qwen3-0.6b/files",
+    "files_before": 10,
+    "state_before": {
+      "status": "candidate",
+      "read_only": true,
+      "downloaded": "2026-11-02 04:59 UTC, approved by Luis Jake Gabriel III 2026-11-02 04:53 UTC; pinned revision from eamm-lab assets/pretrained/qwen3-0.6b/source.json; SHA-256 matches that record"
+    }
+  },
+  "card_text_updated": "2026-11-09: descriptive fields brought up to date; main_file, sha256, bytes, revision unchanged"
+}

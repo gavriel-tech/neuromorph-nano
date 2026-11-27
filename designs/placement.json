@@ -1,0 +1,11 @@
+{
+  "note": "Measured per shape class by `nano-lab run s6 place` (S6 gate 6): milliseconds per job on each device, second pass, kept per machine (card name and memory in MB; Roadmap Phase 4.6, 2026-11-25), so a different card starts from neutral and measures its own. Placement::choose reads this machine's table; re-measured runs append new reports and rewrite it, other machines' tables kept.",
+  "machines": {
+    "NVIDIA GeForce GTX 1650|4095": {
+      "shapes": {
+        "embed/t16": {"cpu_ms": 457.36, "gpu_ms": 99.83},
+        "rerank/t64": {"cpu_ms": 788.83, "gpu_ms": 116.60}
+      }
+    }
+  }
+}

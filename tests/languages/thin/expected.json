@@ -1,0 +1,35 @@
+{
+  "read": [
+    "app/Ledger.java",
+    "game/timer.lua",
+    "lib/backup.rb",
+    "scripts/release.sh",
+    "server/main.go",
+    "tools/checksum.zig"
+  ],
+  "skipped": [],
+  "definitions": [
+    {"file": "server/main.go", "name": "Store", "kind": "type", "line": 11, "end": 13, "parent": ""},
+    {"file": "server/main.go", "name": "Add", "kind": "function", "line": 16, "end": 19, "parent": "Store"},
+    {"file": "server/main.go", "name": "handler", "kind": "function", "line": 21, "end": 26, "parent": ""},
+    {"file": "server/main.go", "name": "main", "kind": "function", "line": 28, "end": 31, "parent": ""},
+    {"file": "app/Ledger.java", "name": "Ledger", "kind": "class", "line": 7, "end": 26, "parent": ""},
+    {"file": "app/Ledger.java", "name": "Ledger", "kind": "method", "line": 11, "end": 13, "parent": "Ledger"},
+    {"file": "app/Ledger.java", "name": "balance", "kind": "method", "line": 15, "end": 17, "parent": "Ledger"},
+    {"file": "app/Ledger.java", "name": "withdraw", "kind": "method", "line": 19, "end": 25, "parent": "Ledger"},
+    {"file": "lib/backup.rb", "name": "Backup", "kind": "module", "line": 2, "end": 19, "parent": ""},
+    {"file": "lib/backup.rb", "name": "Rotator", "kind": "class", "line": 5, "end": 14, "parent": "Backup"},
+    {"file": "lib/backup.rb", "name": "initialize", "kind": "method", "line": 6, "end": 8, "parent": "Rotator"},
+    {"file": "lib/backup.rb", "name": "prune", "kind": "method", "line": 10, "end": 13, "parent": "Rotator"},
+    {"file": "lib/backup.rb", "name": "stamp", "kind": "method", "line": 16, "end": 18, "parent": "Backup"},
+    {"file": "scripts/release.sh", "name": "check_clean", "kind": "function", "line": 7, "end": 12, "parent": ""},
+    {"file": "scripts/release.sh", "name": "make_archive", "kind": "function", "line": 14, "end": 18, "parent": ""},
+    {"file": "game/timer.lua", "name": "clamp", "kind": "function", "line": 6, "end": 10, "parent": ""},
+    {"file": "game/timer.lua", "name": "new", "kind": "function", "line": 12, "end": 14, "parent": ""},
+    {"file": "game/timer.lua", "name": "step", "kind": "function", "line": 16, "end": 19, "parent": ""},
+    {"file": "tools/checksum.zig", "name": "adler32", "kind": "function", "line": 6, "end": 14, "parent": ""},
+    {"file": "tools/checksum.zig", "name": "hexDigit", "kind": "function", "line": 16, "end": 18, "parent": ""}
+  ],
+  "imports": [],
+  "packages": []
+}

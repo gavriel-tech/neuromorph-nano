@@ -1,0 +1,845 @@
+{
+ "note": "Development set for the PDF reader: questions over tests/documents/pdf/ whose answers sit in the printed manual (one column, two columns, Microsoft Print to PDF, and the encrypted copies, any of which counts); line numbers are lines of the derived text.",
+ "questions": [
+  {
+   "id": "p01",
+   "kind": "procedure",
+   "question": "What should I do with the isolator key while I work on the pump?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "keep the key with you while you work",
+     "lines": [
+      12,
+      12
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "keep the key with you while you work",
+     "lines": [
+      12,
+      12
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "keep the key with you while you work",
+     "lines": [
+      7,
+      7
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "keep the key with you while you work",
+     "lines": [
+      12,
+      12
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "keep the key with you while you work",
+     "lines": [
+      12,
+      12
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "keep the key with you while you work",
+     "lines": [
+      12,
+      12
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "keep the key with you while you work",
+     "lines": [
+      12,
+      12
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p02",
+   "kind": "lookup",
+   "question": "How long can the pump run without water before the shaft seal is destroyed?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "Running without water for more than 20 seconds",
+     "lines": [
+      16,
+      16
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "Running without water for more than 20 seconds",
+     "lines": [
+      15,
+      15
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "Running without water for more than 20 seconds",
+     "lines": [
+      11,
+      11
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "Running without water for more than 20 seconds",
+     "lines": [
+      16,
+      16
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "Running without water for more than 20 seconds",
+     "lines": [
+      16,
+      16
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "Running without water for more than 20 seconds",
+     "lines": [
+      16,
+      16
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "Running without water for more than 20 seconds",
+     "lines": [
+      16,
+      16
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p03",
+   "kind": "lookup",
+   "question": "Within how many days must missing items or transport damage be reported?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "report it to the dealer within seven",
+     "lines": [
+      28,
+      28
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "report it to the dealer within seven",
+     "lines": [
+      28,
+      28
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "report it to the dealer within seven",
+     "lines": [
+      19,
+      19
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "report it to the dealer within seven",
+     "lines": [
+      28,
+      28
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "report it to the dealer within seven",
+     "lines": [
+      28,
+      28
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "report it to the dealer within seven",
+     "lines": [
+      28,
+      28
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "report it to the dealer within seven",
+     "lines": [
+      28,
+      28
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p04",
+   "kind": "table",
+   "question": "What type of shaft seal does the pump use?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "Shaft seal type",
+     "lines": [
+      47,
+      47
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "Shaft seal type",
+     "lines": [
+      46,
+      46
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "Shaft seal type",
+     "lines": [
+      23,
+      23
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "Shaft seal type",
+     "lines": [
+      47,
+      47
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "Shaft seal type",
+     "lines": [
+      47,
+      47
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "Shaft seal type",
+     "lines": [
+      47,
+      47
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "Shaft seal type",
+     "lines": [
+      47,
+      47
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p05",
+   "kind": "lookup",
+   "question": "What torque should the M8 mounting bolts be tightened to?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "tighten them to 12 N m",
+     "lines": [
+      76,
+      76
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "tighten them to 12 N m",
+     "lines": [
+      75,
+      75
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "tighten them to 12 N m",
+     "lines": [
+      41,
+      41
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "tighten them to 12 N m",
+     "lines": [
+      76,
+      76
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "tighten them to 12 N m",
+     "lines": [
+      76,
+      76
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "tighten them to 12 N m",
+     "lines": [
+      76,
+      76
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "tighten them to 12 N m",
+     "lines": [
+      76,
+      76
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p06",
+   "kind": "procedure",
+   "question": "How quickly should the pressure rise when the pump is primed?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "Within 60 seconds the pressure should rise",
+     "lines": [
+      97,
+      97
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "Within 60 seconds the pressure should rise",
+     "lines": [
+      96,
+      96
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "Within 60 seconds the pressure should rise",
+     "lines": [
+      57,
+      57
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "Within 60 seconds the pressure should rise",
+     "lines": [
+      97,
+      97
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "Within 60 seconds the pressure should rise",
+     "lines": [
+      97,
+      97
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "Within 60 seconds the pressure should rise",
+     "lines": [
+      97,
+      97
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "Within 60 seconds the pressure should rise",
+     "lines": [
+      97,
+      97
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p07",
+   "kind": "table",
+   "question": "How often should the motor bearings be greased?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "Grease the motor bearings",
+     "lines": [
+      118,
+      118
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "Grease the motor bearings",
+     "lines": [
+      116,
+      116
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "Grease the motor bearings",
+     "lines": [
+      71,
+      71
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "Grease the motor bearings",
+     "lines": [
+      118,
+      118
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "Grease the motor bearings",
+     "lines": [
+      118,
+      118
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "Grease the motor bearings",
+     "lines": [
+      118,
+      118
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "Grease the motor bearings",
+     "lines": [
+      118,
+      118
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p08",
+   "kind": "procedure",
+   "question": "How long should the descaling solution stay in the pump?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "Leave the solution in the pump for 45 minutes",
+     "lines": [
+      133,
+      133
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "Leave the solution in the pump for 45 minutes",
+     "lines": [
+      131,
+      131
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "Leave the solution in the pump for 45 minutes",
+     "lines": [
+      79,
+      79
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "Leave the solution in the pump for 45 minutes",
+     "lines": [
+      133,
+      133
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "Leave the solution in the pump for 45 minutes",
+     "lines": [
+      133,
+      133
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "Leave the solution in the pump for 45 minutes",
+     "lines": [
+      133,
+      133
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "Leave the solution in the pump for 45 minutes",
+     "lines": [
+      133,
+      133
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p09",
+   "kind": "lookup",
+   "question": "What running hours value does the example control unit settings file show?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "hours = 1240",
+     "lines": [
+      249,
+      249
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "hours = 1240",
+     "lines": [
+      246,
+      246
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "hours = 1240",
+     "lines": [
+      152,
+      152
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "hours = 1240",
+     "lines": [
+      249,
+      249
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "hours = 1240",
+     "lines": [
+      249,
+      249
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "hours = 1240",
+     "lines": [
+      249,
+      249
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "hours = 1240",
+     "lines": [
+      249,
+      249
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p10",
+   "kind": "define",
+   "question": "What does cavitation sound like?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "It sounds like gravel in the pump",
+     "lines": [
+      254,
+      254
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "It sounds like gravel in the pump",
+     "lines": [
+      251,
+      251
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "It sounds like gravel in the pump",
+     "lines": [
+      154,
+      154
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "It sounds like gravel in the pump",
+     "lines": [
+      254,
+      254
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "It sounds like gravel in the pump",
+     "lines": [
+      254,
+      254
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "It sounds like gravel in the pump",
+     "lines": [
+      254,
+      254
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "It sounds like gravel in the pump",
+     "lines": [
+      254,
+      254
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p11",
+   "kind": "define",
+   "question": "What is the volute?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "the spiral shaped body of the pump",
+     "lines": [
+      261,
+      261
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "the spiral shaped body of the pump",
+     "lines": [
+      257,
+      257
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "the spiral shaped body of the pump",
+     "lines": [
+      161,
+      161
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "the spiral shaped body of the pump",
+     "lines": [
+      261,
+      261
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "the spiral shaped body of the pump",
+     "lines": [
+      261,
+      261
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "the spiral shaped body of the pump",
+     "lines": [
+      261,
+      261
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "the spiral shaped body of the pump",
+     "lines": [
+      261,
+      261
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "p12",
+   "kind": "procedure",
+   "question": "How are parts that fail under warranty returned?",
+   "answers": [
+    {
+     "file": "manual-1col.pdf",
+     "anchor": "Parts that fail under warranty are returned through the dealer",
+     "lines": [
+      251,
+      251
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-2col.pdf",
+     "anchor": "Parts that fail under warranty are returned through the dealer",
+     "lines": [
+      248,
+      248
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-msprint.pdf",
+     "anchor": "Parts that fail under warranty are returned through the dealer",
+     "lines": [
+      152,
+      152
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-40.pdf",
+     "anchor": "Parts that fail under warranty are returned through the dealer",
+     "lines": [
+      251,
+      251
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-rc4-128.pdf",
+     "anchor": "Parts that fail under warranty are returned through the dealer",
+     "lines": [
+      251,
+      251
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-128.pdf",
+     "anchor": "Parts that fail under warranty are returned through the dealer",
+     "lines": [
+      251,
+      251
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual-1col-locked-aes-256.pdf",
+     "anchor": "Parts that fail under warranty are returned through the dealer",
+     "lines": [
+      251,
+      251
+     ],
+     "match": "lines"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "date": "2026-11-22",
+  "note": "MicroModel chains of the Core Brain (guide 4.1; step P7). Read by nmbrain::chain::ChainBook and validated with named faults. Each chain is an ordered list of nodes; a node names its role (one of the four slots router, embedder, reranker, writer, or a decision, reasoning or verifier node), the fields of its controlled input (takes, in order) and the one field it emits. Seed fields every chain starts with: task (the task description) and parts (the parts handed up by G2). The chain's output field is the refined final output; every other field and every hop stays in the internal log. A reasoning node collaborates and never emits the output field. Version 2 (Stage 5 WP-C2, Luis's decision of 2026-11-22: keep the four chain names, re-express the hops in the Nano's own jobs, keep the earlier version in history): every node also names the Nano job it serves and the MicroModel that serves it (job and micromodel, read by the routing record and the interface; the roles, inputs and outputs are unchanged, so every chain check and node binding of version 1 still holds). Designs: Luis Jake Gabriel III, Gavriel Technologies.",
+  "seeds": ["task", "parts"],
+  "roles": ["router", "embedder", "reranker", "writer", "decision", "reasoning", "verifier"],
+  "jobs": {
+    "router": {"job": "drone_sense", "micromodel": "reader", "what": "the drones' read of the request and the pieces at the reader's first layers: kind, aspects, relations and the jobs to route"},
+    "embedder": {"job": "embed_recall", "micromodel": "embedder", "what": "meaning recall and the embedder's meaning read of code against code close calls (routing record)"},
+    "reranker": {"job": "judge_close", "micromodel": "judge", "what": "the judge's close calls and pair reads (prose duels, leader-only close call), calibrated by content-free reads"},
+    "reasoning": {"job": "relation_read", "micromodel": "reader", "what": "the reader's joint read of related pieces (definition and use, ties), the label readout"},
+    "writer": {"job": "writer_synth", "micromodel": "writer", "what": "the writer's notes, summaries and outline (at idle) and its synthesis"},
+    "verifier": {"job": "verify", "micromodel": "judge", "what": "sufficiency: does the set answer the request (one-word judgement)"},
+    "decision": {"job": "g2_select", "micromodel": "none", "what": "G2's gate and selection: settle, withhold, or order more reading"}
+  },
+  "chains": [
+    {
+      "kind": "locate-code",
+      "description": "find where a symbol, file, definition or module is located in the code base and which parts call or use it",
+      "output": "answer",
+      "nodes": [
+        {"role": "router", "job": "drone_sense", "micromodel": "reader", "takes": ["task"], "emits": "jobs"},
+        {"role": "embedder", "job": "embed_recall", "micromodel": "embedder", "takes": ["task", "parts"], "emits": "near"},
+        {"role": "reranker", "job": "judge_close", "micromodel": "judge", "takes": ["task", "near"], "emits": "ranked"},
+        {"role": "writer", "job": "writer_synth", "micromodel": "writer", "takes": ["task", "ranked"], "emits": "answer"}
+      ]
+    },
+    {
+      "kind": "explain-code",
+      "description": "explain how and why a piece of code works, what a component does and how its parts relate",
+      "output": "answer",
+      "nodes": [
+        {"role": "embedder", "job": "embed_recall", "micromodel": "embedder", "takes": ["task", "parts"], "emits": "near"},
+        {"role": "reranker", "job": "judge_close", "micromodel": "judge", "takes": ["task", "near"], "emits": "ranked"},
+        {"role": "reasoning", "job": "relation_read", "micromodel": "reader", "takes": ["task", "ranked"], "emits": "reasoning"},
+        {"role": "writer", "job": "writer_synth", "micromodel": "writer", "takes": ["task", "ranked", "reasoning"], "emits": "answer"},
+        {"role": "verifier", "job": "verify", "micromodel": "judge", "takes": ["answer", "ranked"], "emits": "verdict"}
+      ]
+    },
+    {
+      "kind": "propose-edit",
+      "description": "propose a change, fix, addition or refactor to the code and state what it touches",
+      "output": "draft",
+      "nodes": [
+        {"role": "router", "job": "drone_sense", "micromodel": "reader", "takes": ["task"], "emits": "jobs"},
+        {"role": "reranker", "job": "judge_close", "micromodel": "judge", "takes": ["task", "parts"], "emits": "ranked"},
+        {"role": "reasoning", "job": "relation_read", "micromodel": "reader", "takes": ["task", "ranked", "jobs"], "emits": "reasoning"},
+        {"role": "writer", "job": "writer_synth", "micromodel": "writer", "takes": ["task", "ranked", "reasoning"], "emits": "draft"},
+        {"role": "verifier", "job": "verify", "micromodel": "judge", "takes": ["draft", "ranked"], "emits": "verdict"}
+      ]
+    },
+    {
+      "kind": "verify-answer",
+      "description": "check whether a claim, answer or result is supported by the code, its tests or its build output",
+      "output": "disposition",
+      "nodes": [
+        {"role": "reranker", "job": "judge_close", "micromodel": "judge", "takes": ["task", "parts"], "emits": "ranked"},
+        {"role": "verifier", "job": "verify", "micromodel": "judge", "takes": ["task", "ranked"], "emits": "verdict"},
+        {"role": "decision", "job": "g2_select", "micromodel": "none", "takes": ["task", "verdict"], "emits": "disposition"}
+      ]
+    }
+  ]
+}

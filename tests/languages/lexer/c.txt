@@ -1,0 +1,50 @@
+=== system include
+#include <stdio.h>
+---
+# include < stdio . h >
+=== macro
+#define N 10
+---
+# define N 10
+=== function
+int main(void) { return 0; }
+---
+int main ( void ) { return 0 ; }
+=== character literal of a quote
+char c = '\'';
+---
+char c = $S ;
+=== format string and a line comment
+printf("%d\n", x); // tail
+---
+printf ( $S , x ) ;
+=== block comment over lines
+/* multi
+line */ y
+---
+y
+=== arrow member access
+a->b
+---
+a -> b
+=== division
+x = y / z;
+---
+x = y / z ;
+=== float literal
+float f = 1.5f;
+---
+float f = 1.5f ;
+=== struct
+struct s { int a; };
+---
+struct s { int a ; } ;
+=== escaped backslash before the closing quote
+"a\\" "b"
+---
+$S $S
+=== macro continued on the next line
+#define M(x) \
+  ((x) + 1)
+---
+# define M ( x ) \ ( ( x ) + 1 )

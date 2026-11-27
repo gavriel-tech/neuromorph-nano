@@ -1,0 +1,12 @@
+caller	Neuromorph Nano: this edit changes the signature line of checkout in crates/shop/src/lib.rs; checkout is called at crates/shop/tests/checkout_refund.rs:8 (searched crates/shop, read now).
+body-edit	-
+compact	Neuromorph Nano, from this session's record before the conversation was compacted: task: "make checkout reject zero units"; edited: crates/shop/src/lib.rs:15; failing: cargo-test shop (E0308 at crates/shop/src/lib.rs:15); no passing build or test since the last change: crates/shop/src/lib.rs.
+resume	-
+clear	-
+startup.quiet	-
+startup.on	Neuromorph Nano: the previous Claude Code session in this project left open: failing cargo-test shop (E0308 at crates/shop/src/lib.rs:15); changed with no passing build or test since: crates/shop/src/lib.rs.
+open-loop.quiet	-
+open-loop.on	Neuromorph Nano: changed this turn and not verified since: crates/shop/src/lib.rs (line 7). No build or test ran after them.
+open-loop.again	-
+open-loop.passed	-
+open-loop.failed	Neuromorph Nano: changed this turn and not verified since: crates/shop/src/lib.rs (line 8). The last check after them, cargo-test shop, failed (E0308 at crates/shop/src/lib.rs:8).

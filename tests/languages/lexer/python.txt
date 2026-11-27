@@ -1,0 +1,125 @@
+=== assignment
+x = 1
+---
+x = 1
+=== comment line
+# comment
+y = 2
+---
+y = 2
+=== floor division is not a comment
+a // b
+---
+a / / b
+=== escaped quote
+s = 'it\'s'
+---
+s = $S
+=== hash inside a string
+s = "a # not comment"
+---
+s = $S
+=== triple double quotes over lines
+"""doc
+string"""
+z
+---
+$S z
+=== triple single quotes holding a quote
+'''it's'''
+---
+$S
+=== raw string
+r"\d+"
+---
+$S
+=== raw string with an escaped quote
+r"a\"b"
+---
+$S
+=== bytes
+b'\x00'
+---
+$S
+=== f-string
+f"{x}"
+---
+$S
+=== f-string with the same quotes inside a field
+f"{d["k"]}"
+---
+$S
+=== f-string with doubled braces
+f"{{x}}"
+---
+$S
+=== f-string with a nested format field
+f"{v:>{w}}"
+---
+$S
+=== raw bytes
+rb"\n"
+---
+$S
+=== upper-case prefix
+F'{a}'
+---
+$S
+=== decorator and class
+@dataclass
+class A:
+---
+@ dataclass class A :
+=== annotated function
+def f(x: int) -> str:
+---
+def f ( x : int ) -> str :
+=== async function
+async def g():
+---
+async def g ( ) :
+=== lambda
+key=lambda t: t[1]
+---
+key = lambda t : t [ 1 ]
+=== assignment expression
+if (n := len(a)) > 10:
+---
+if ( n : = len ( a ) ) > 10 :
+=== name made of prefix letters
+rate = br
+---
+rate = br
+=== adjacent strings
+"a" "b"
+---
+$S $S
+=== comment after code
+x = 1  # one
+---
+x = 1
+=== hash in a string, then a comment
+s = "#"  # c
+---
+s = $S
+=== line continuation
+total = a + \
+    b
+---
+total = a + \ b
+=== other triple quotes inside triple quotes
+"""a '''b''' c"""
+---
+$S
+=== unicode prefix
+u"ü"
+---
+$S
+=== numbers
+1_000 + 0xff + 1.5e-3
+---
+1_000 + 0xff + 1.5e - 3
+=== dictionary comprehension
+{k: v for k, v in d.items()}
+---
+{ k : v for k , v in d . items ( ) }

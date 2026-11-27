@@ -1,0 +1,16 @@
+{
+  "note": "The Core Brain part every composed forage assembly shares: structural parents, the brain's plan node, G1 and the river mailbox. nmnte::compose adds one tentacle template per tentacle the composition row asks for. 2026-11-10 (step P4 first form, one tentacle system): G1 (nmbrain.g1#g1) is the convergence point of the tentacles' g0_tx reports and the only path between tentacles; it takes the plan for the question and hands over to the river mailbox and the reduce step. It sits under the brain's stack node because the Integrity Validator admits a tentacle's outgoing edge only into the Core Brain side. G2 is not yet a node on this path. No tentacle owns weights; one central copy is used by reference (specification addition 2026-11-10 08:00 UTC).",
+  "version": 1,
+  "nodes": [
+    {"id": "nmapi#n0", "kind": "organism", "parent": null, "ports_in": [], "ports_out": [], "config": {}},
+    {"id": "nmbrain.stack#b0", "kind": "brain", "parent": "nmapi#n0", "ports_in": [], "ports_out": [], "config": {}},
+    {"id": "nmpod.pod#p0", "kind": "neuropod", "parent": "nmapi#n0", "ports_in": [], "ports_out": [], "config": {}},
+    {"id": "nmbrain.stack#plan", "kind": "routing", "parent": "nmbrain.stack#b0", "ports_in": [{"name": "task", "kind": "json", "required": true}], "ports_out": [{"name": "plan", "kind": "json", "required": true}], "config": {}},
+    {"id": "nmbrain.g1#g1", "kind": "routing", "parent": "nmbrain.stack#b0", "ports_in": [{"name": "plan", "kind": "json", "required": true}, {"name": "packets", "kind": "packets", "required": true}], "ports_out": [{"name": "packets", "kind": "packets", "required": true}], "config": {"role": "G1, the coordinating communicator over every tentacle's g0_tx"}},
+    {"id": "nmbrain.rivers#b0", "kind": "brain", "parent": "nmbrain.stack#b0", "ports_in": [{"name": "in", "kind": "packets", "required": true}], "ports_out": [{"name": "out", "kind": "packets", "required": true}], "config": {}}
+  ],
+  "edges": [
+    {"from": "nmbrain.stack#plan", "from_port": "plan", "to": "nmbrain.g1#g1", "to_port": "plan", "mode": {"kind": "direct"}},
+    {"from": "nmbrain.g1#g1", "from_port": "packets", "to": "nmbrain.rivers#b0", "to_port": "in", "mode": {"kind": "buffered", "bound": 256}}
+  ]
+}

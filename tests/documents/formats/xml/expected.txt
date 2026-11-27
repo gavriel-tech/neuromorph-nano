@@ -1,0 +1,18 @@
+# AQ-40 Quick Reference
+
+## Start up
+
+Fill the volute with clean water through the priming hole before the first start.
+
+Open the outlet valve one turn and switch on.
+
+## Limits
+
+limit: name=pressure; value=6; unit=bar
+limit: name=temperature; value=40; unit=C
+
+### Dry running
+
+Never run the pump dry for more than twenty seconds.
+
+revision: date=2026-10-01, by=service

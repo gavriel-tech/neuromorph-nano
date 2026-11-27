@@ -1,0 +1,67 @@
+[package]
+name = "nmsafe"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Safetensors ranges and quantization"
+
+[dependencies]
+nmtype = { path = "../nmtype" }  # run-time folder finder for the section check only
+
+# Source: in-house engine, Gavriel Technologies (see THIRD_PARTY_NOTICES.md). The copied code keeps the lint set it was written and checked
+# under (its expect attributes name those lints), so that set is repeated here;
+# unsafe stays forbidden.
+[lints.rust]
+rust_2018_idioms = { level = "warn", priority = -1 }
+unsafe_code = "forbid"
+unsafe_op_in_unsafe_fn = "deny"
+missing_docs = "warn"
+unreachable_pub = "warn"
+missing_debug_implementations = "warn"
+unused_qualifications = "warn"
+unused_lifetimes = "warn"
+redundant_lifetimes = "warn"
+trivial_numeric_casts = "warn"
+non_ascii_idents = "deny"
+
+[lints.clippy]
+correctness = { level = "deny", priority = -1 }
+suspicious  = { level = "warn", priority = -1 }
+complexity  = { level = "warn", priority = -1 }
+perf        = { level = "warn", priority = -1 }
+style       = { level = "warn", priority = -1 }
+pedantic    = { level = "warn", priority = -1 }
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+unwrap_used = "deny"
+expect_used = "warn"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+dbg_macro = "deny"
+print_stdout = "warn"
+print_stderr = "warn"
+exit = "deny"
+mem_forget = "deny"
+undocumented_unsafe_blocks = "deny"
+multiple_unsafe_ops_per_block = "deny"
+missing_safety_doc = "deny"
+unnecessary_safety_comment = "warn"
+unnecessary_safety_doc = "warn"
+allow_attributes = "warn"
+allow_attributes_without_reason = "deny"
+as_conversions = "warn"
+as_pointer_underscore = "warn"
+ptr_as_ptr = "warn"
+missing_assert_message = "warn"
+string_slice = "warn"
+clone_on_ref_ptr = "warn"
+map_err_ignore = "warn"
+unused_result_ok = "warn"
+large_futures = "warn"
+await_holding_lock = "deny"
+float_cmp = "deny"
+too_long_first_doc_paragraph = "warn"

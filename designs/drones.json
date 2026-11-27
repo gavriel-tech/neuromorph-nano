@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "note": "Drone reader sets (2026-11-10, step P0 of docs/2026-11-10-neumor-plan-whole-architecture.md; design by Luis Jake Gabriel III): per population the attention heads, as [layer, head] with global head numbers, that read a tentacle window. `default` serves every tentacle; `tentacles` may give a lens (by name, nmsubs::lens::NAMES) its own set. Read by nmengn::kvstore::drone_set; the tentacle pass encodes and keeps chunks through the highest layer any set reads. Checked by `neuromorph-nano check designs`. The qwen3-0.6b default is the 16 heads the E2 runbook rule chose on the CX1 development half (runs/2026-11-10-neumor-note-e2-head-probe.md), equal to nmengn::kvstore::DRONE_HEADS_QWEN3_0_6B, which stays the stated fallback and what the locked E3.3 and G1 runners read.",
+  "note_version_2": "2026-11-10 (tentacle core A8, docs/2026-11-10-neumor-design-tentacle-core-v1.md section 2.3 and section 5): per population `read_mode` (`exact`: the question posed after the window, the only mode built; `scan`: keys-only fast scan, not built), `source` (the record the set was selected on) and `verification` (the set the tentacle core's re-read uses: `default` or its own list of [layer, head]). Per-tentacle sets stay allowed under `tentacles` (each a list of [layer, head]); none is written until a lens has enough questions to validate on a held-out fold, so every tentacle reads with the default set. The default set is unchanged from version 1.",
+  "populations": {
+    "qwen3-0.6b": {
+      "source": "runs/2026-11-10-neumor-note-e2-head-probe.md",
+      "read_mode": "exact",
+      "verification": "default",
+      "default": [[13, 6], [14, 6], [13, 14], [16, 8], [13, 15], [14, 14], [14, 13], [17, 1], [13, 7], [16, 13], [8, 4], [17, 12], [12, 0], [11, 11], [17, 13], [17, 11]],
+      "tentacles": {"words": [[11, 3], [17, 0], [10, 4], [14, 12], [17, 1], [14, 8], [16, 7], [16, 10], [9, 4], [9, 5], [13, 14], [14, 14], [17, 11], [17, 12], [13, 6], [16, 8]]}
+    }
+  }
+}

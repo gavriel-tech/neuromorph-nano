@@ -1,0 +1,22 @@
+[package]
+name = "nmengn"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Neural engine over Qwen3 on CPU and GPU: assemblies, decode, adapters, engine reference"
+
+[dependencies]
+nmffi = { path = "../nmffi" }
+nmhash = { path = "../nmhash" }
+nmjson = { path = "../nmjson" }
+nmnpcs = { path = "../nmnpcs" }
+nmnte = { path = "../nmnte" }
+nmsafe = { path = "../nmsafe" }
+nmtokz = { path = "../nmtokz" }
+nmtype = { path = "../nmtype" }
+
+[lints]
+workspace = true

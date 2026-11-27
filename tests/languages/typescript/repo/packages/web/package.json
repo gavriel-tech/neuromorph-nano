@@ -1,0 +1,8 @@
+{
+  "name": "@taskboard/web",
+  "version": "0.3.0",
+  "dependencies": {
+    "@taskboard/core": "0.3.0",
+    "react": "^18.3.1"
+  }
+}

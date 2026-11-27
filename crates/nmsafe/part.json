@@ -1,0 +1,23 @@
+{
+  "id": "nmsafe",
+  "kind": "other",
+  "version": 1,
+  "parent": "nmengn",
+  "ports_in": [],
+  "ports_out": [],
+  "deps": [],
+  "config_schema": {},
+  "config_default": {},
+  "subcomponents": [
+    {"id": "nmsafe.tensors", "version": 1, "hash": "fa21aa26b4bc174a1ff56025db17a942edc3c3545ea7a4da0640e3128ffde9da"},
+    {"id": "nmsafe.numeric", "version": 1, "hash": "520f9fd805addda71390f11a80b5e03d3495ba88b76bc95e7a196e304d30adca"},
+    {"id": "nmsafe.affine", "version": 1, "hash": "20a1b9d8163f89c47383fd904004ffebce4069c260b0f14990020bba0e3a28ef"},
+    {"id": "nmsafe.experts", "version": 1, "hash": "2f2b8904189fe3d3f14cdbb2e8166446eacf62df8c5880320a6c1f2f23b5c7dd"},
+    {"id": "nmsafe.json", "version": 1, "hash": "3a98f6b60f0973c5642898ff120a3cf96ce00568946284074cb223dff95bb392"},
+    {"id": "nmsafe.error", "version": 1, "hash": "86d5cba547fc576fefa6bd8d93debf051aa66f288534683c4a30eeaa9817c389"},
+    {"id": "nmsafe.check", "version": 1, "hash": "f0d17e7b8a462614a9d841e614e24e8aafe3a1072db16905ead0872aa75ccfa1"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "5d883ceb2c76d0b3bd105ae2b1015823bada457ae494d6f7edbe896e6609ffaf"
+}

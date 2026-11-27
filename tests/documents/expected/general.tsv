@@ -1,0 +1,34 @@
+briefing.pptx	container	container
+briefing.pptx![Content_Types].xml	xml	member
+briefing.pptx!ppt/presentation.xml	xml	member
+briefing.pptx!ppt/slides/slide1.xml	xml	member
+briefing.pptx!ppt/slides/slide2.xml	xml	member
+budget.xlsx	container	container
+budget.xlsx![Content_Types].xml	xml	member
+budget.xlsx!xl/sharedStrings.xml	xml	member
+budget.xlsx!xl/workbook.xml	xml	member
+budget.xlsx!xl/worksheets/sheet1.xml	xml	member
+field-notes.zip	container	container
+field-notes.zip!data/rain-gauge.csv	csv	member
+field-notes.zip!notes/2026-10-03-owl-survey.md	markdown	member
+field-notes.zip!photos/mast.jpg	skip	member holds no text (image, font or binary part)
+handbook.docx	container	container
+handbook.docx![Content_Types].xml	xml	member
+handbook.docx!_rels/.rels	skip	hidden file
+handbook.docx!docProps/core.xml	xml	member
+handbook.docx!word/document.xml	xml	member
+legacy.doc	raw	raw
+locked.zip	container	container
+locked.zip!passwords-not-here.txt	skip	encrypted member: name only
+logs.tar	container	container
+logs.tar!config/station.json	json	member
+logs.tar!logs/generator.log	log	member
+memo.txt.gz	text	gzip
+nested.zip	container	container
+nested.zip!parts/inner.zip	container	container
+nested.zip!parts/inner.zip!inventory.txt	text	member
+nested.zip!readme.txt	text	member
+station-config.tgz	container	container
+station-config.tgz!config/sensors.yaml	yaml	member
+strings.resources	raw	binary
+unknown.bin	raw	binary

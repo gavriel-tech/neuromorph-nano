@@ -1,0 +1,371 @@
+{
+  "version": 1,
+  "date": "2026-11-10",
+  "note": "Scoreboard, first form (2026-11-10; Gavriel Technologies; direction of Luis Jake Gabriel III: assemble the whole system first, then improve the part measured worst, with the state of every part visible at a glance; plan section 11). One row per part of the specification (docs/2026-11-10-neumor-guide-how-it-works.md). state: absent, first form or refined. measurement: the latest measured value with the record it came from (none when there is no measurement); target: the value with its source; direction: higher or lower is better. Distance to target: (target - value) / target when higher is better, (value - target) / value when lower is better, 0 when met; no distance without both a measured value and a target. A target marked proposed was written with this seed from the nearest recorded figure and is for the planning session to confirm. depends_on and plan_order give the dependency order of absent parts. Seeded 2026-11-10 03:45 UTC from the plan document's dated lines and the records in runs/. Rendered by nmtool::scoreboard (a new runs/scoreboard-<utc ms>.md each run). 2026-11-10 05:20 UTC: rows tentacle-core, g0_tx, data-classes, core-brain-chains, g2, g3, muscle-memory, cartridges and preference-layer set to first form after the merge and the tentacle core first form, each with its record; g1 gained the loop measurement.",
+  "parts": [
+    {
+      "id": "drones",
+      "part": "Drones (attention-head readers per tentacle)",
+      "spec": "2.1",
+      "state": "first form",
+      "measurement": {
+        "value": 17,
+        "text": "right chunk first inside its own window by the drone heads, 17 of 30 (development half)",
+        "record": "runs/G1-dev-1794259937977.txt; runs/2026-11-10-neumor-note-g1-result.md"
+      },
+      "target": {
+        "value": 19,
+        "text": "19 of 30, the level the same heads reach on short windows (E2)",
+        "source": "proposed; runs/E2-dev-1794245540149.txt via plan section 8 (2026-11-10 03:00 UTC)"
+      },
+      "direction": "higher",
+      "depends_on": [],
+      "plan_step": "P0 done; P3",
+      "plan_order": 3
+    },
+    {
+      "id": "tentacle-core",
+      "part": "Tentacle core (neural assembly per tentacle with provisioned weights)",
+      "spec": "2.2",
+      "state": "first form",
+      "measurement": {
+        "value": null,
+        "text": "first form 2026-11-10 (behind --tentacle-core): right chunk first inside its window 3 of 6 (control 4), first across all windows 2 of 6 (control 2), forwarded first 2 of 6 (control 4), arm 4.3 s against 26.9 s per question; first 6 development questions only, so no value against the 30-question target",
+        "record": "runs/TC1-dev-1794286894513.txt; runs/2026-11-10-neumor-note-tentacle-core-first-form.md"
+      },
+      "target": {
+        "value": null,
+        "text": "in-tentacle yes or no check puts the right chunk first inside its window on more than 17 of 30, with the single-window control arm",
+        "source": "plan section 5, step P3"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "drones",
+        "windows"
+      ],
+      "plan_step": "P3",
+      "plan_order": 3
+    },
+    {
+      "id": "windows",
+      "part": "Context windows (full 12,000-token window per tentacle over the whole code base)",
+      "spec": "2.3",
+      "state": "first form",
+      "measurement": {
+        "value": 29,
+        "text": "right code in some window (reach), 29 of 30; windows read one after another, not in parallel",
+        "record": "runs/G1-dev-1794259937977.txt; runs/2026-11-10-neumor-note-g1-result.md"
+      },
+      "target": {
+        "value": 30,
+        "text": "30 of 30 reach, windows read in parallel",
+        "source": "proposed; parallel reading from spec 2.3 and plan step P4"
+      },
+      "direction": "higher",
+      "depends_on": [],
+      "plan_step": "P2, P4",
+      "plan_order": 2
+    },
+    {
+      "id": "g0_tx",
+      "part": "G0 per tentacle (g0_tx: encoded read kept quantized in RAM, typed report)",
+      "spec": "2.4",
+      "state": "first form",
+      "measurement": {
+        "value": null,
+        "text": "first form 2026-11-10: one typed report per tentacle per question through its g0_tx (calibrated confidence, no-information flag against the anchor baseline, next spans); 0.17 of the windows report no information per question (6 questions)",
+        "record": "runs/TC1-dev-1794286894513.txt; runs/2026-11-10-neumor-note-tentacle-core-first-form.md"
+      },
+      "target": {
+        "value": null,
+        "text": "typed compressed report with calibrated confidence and a no-information answer",
+        "source": "plan section 4 item 4, step P3"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "tentacle-core"
+      ],
+      "plan_step": "P3",
+      "plan_order": 3
+    },
+    {
+      "id": "g1",
+      "part": "G1 coordinating communicator",
+      "spec": "3",
+      "state": "first form",
+      "measurement": {
+        "value": 26,
+        "text": "forwarded reach (right code among its tentacle's best 6, then judged), 26 of 30; map and five-rule coordinator run once after reading, no rounds; 2026-11-10: the G1 loop in rounds with each g0_tx runs behind --tentacle-core: 2 rounds per question, gate 0, right chunk forwarded 4 of 6 (control 5 of 6) on the first 6 development questions; 2026-11-10 09:41 UTC (refinement step 1, processor replay of the 30 saved development scans): under the Globalized Context Stack rule (queue, evidence set) the right chunk is forwarded in round 1 on 26 of 30 and first on 12 (first form 26 and 12), and held by G1 for G2 (forwarded or queued, nothing dropped) on 29 of 30 (first form 26); the fitted evidence combination gave 24 and 12 out of fold",
+        "record": "runs/G1-dev-1794259937977.txt; runs/2026-11-10-neumor-note-g1-result.md; runs/TC1-dev-1794286894513.txt; runs/2026-11-10-neumor-note-tentacle-core-first-form.md; runs/TR1-replay-1794302617209.txt; runs/TR2-served-1794302777258.txt"
+      },
+      "target": {
+        "value": 29,
+        "text": "forwarded reach equal to window reach (29 of 30) by rounds with each g0_tx",
+        "source": "proposed; plan step P6"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "g0_tx"
+      ],
+      "plan_step": "P6",
+      "plan_order": 6
+    },
+    {
+      "id": "g2",
+      "part": "G2 whole-context comprehension and upstream selection",
+      "spec": "3",
+      "state": "first form",
+      "measurement": {
+        "value": 0.528,
+        "text": "chain choice on the 72-case in-crate set: G2 0.528, keyword router 0.333 (weak evidence, set written with the chains); served behind --brain-chains, escalation 4 of 12",
+        "record": "runs/2026-11-10-neumor-note-p7-chains-g2-first-form.md; runs/2026-11-10-neumor-note-core-brain-side-first-form.md"
+      },
+      "target": {
+        "value": null,
+        "text": "routing accuracy above the keyword table",
+        "source": "plan step P7"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "g1",
+        "core-brain-chains"
+      ],
+      "plan_step": "P7",
+      "plan_order": 7
+    },
+    {
+      "id": "g3",
+      "part": "G3 pattern recognition",
+      "spec": "3",
+      "state": "first form",
+      "measurement": {
+        "value": null,
+        "text": "behaviour log in service behind --brain-chains (82 symbols for 12 questions); miner ranks planted chunks first and second on synthetic logs; 13 recurring candidates, 0 promotable on 17 real sequences",
+        "record": "runs/2026-11-10-neumor-note-p8-first-form.md; runs/2026-11-10-neumor-note-core-brain-side-first-form.md"
+      },
+      "target": {
+        "value": null,
+        "text": "recurring behavioural patterns found with their measured effect (M1)",
+        "source": "plan step P8"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "g2",
+        "data-classes"
+      ],
+      "plan_step": "P8",
+      "plan_order": 8
+    },
+    {
+      "id": "core-brain-chains",
+      "part": "Core Brain MicroModel chains",
+      "spec": "4.1",
+      "state": "first form",
+      "measurement": {
+        "value": null,
+        "text": "first form 2026-11-10 (behind --brain-chains): chains as data with a runner, three formation modes; served path runs G2 then a chain per question in 0.331 ms mean; chain output keeps the control's first cited line first on 3 of 9 replaced answers",
+        "record": "runs/2026-11-10-neumor-note-p7-chains-g2-first-form.md; runs/2026-11-10-neumor-note-core-brain-side-first-form.md"
+      },
+      "target": {
+        "value": null,
+        "text": "chain definition as data and a chain runner; part test per chain",
+        "source": "plan step P7"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "data-classes"
+      ],
+      "plan_step": "P7",
+      "plan_order": 7
+    },
+    {
+      "id": "data-classes",
+      "part": "Data classes and in-house messages",
+      "spec": "5.1, 5.2",
+      "state": "first form",
+      "measurement": {
+        "value": 72,
+        "text": "B0: 72 of 72 hand-overs correct (36 accepted, 36 wrong-class refused); C1 first half exact for all 5 kinds; in service at the tentacle core (sensory packets at chain input, behavioural envelopes at the message channel, 0 refused) and the Core Brain side",
+        "record": "runs/2026-11-10-neumor-note-p5-first-form.md; runs/TC1-dev-1794286894513.txt; runs/2026-11-10-neumor-note-tentacle-core-first-form.md; runs/2026-11-10-neumor-note-core-brain-side-first-form.md"
+      },
+      "target": {
+        "value": null,
+        "text": "B0: every wrong-kind hand-over refused; C1: every message step reads back exactly",
+        "source": "plan step P5"
+      },
+      "direction": "higher",
+      "depends_on": [],
+      "plan_step": "P5",
+      "plan_order": 5
+    },
+    {
+      "id": "muscle-memory",
+      "part": "Muscle memory",
+      "spec": "5.3",
+      "state": "first form",
+      "measurement": {
+        "value": null,
+        "text": "packs under muscle/ (1.1 to 3.8 kB), round trip exact, sensory and wrong base refused; a planted pack reloaded through G3 in service: G2 accepted 3 of 4 steps; gain reproduction not yet measured",
+        "record": "runs/2026-11-10-neumor-note-p8-first-form.md; runs/2026-11-10-neumor-note-core-brain-side-first-form.md"
+      },
+      "target": {
+        "value": null,
+        "text": "a reloaded pack reproduces its measured gain (M1, M2)",
+        "source": "plan step P8"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "g3",
+        "data-classes"
+      ],
+      "plan_step": "P8",
+      "plan_order": 8
+    },
+    {
+      "id": "selective-quantized",
+      "part": "Selective quantized execution of open weights",
+      "spec": "6",
+      "state": "absent",
+      "measurement": {
+        "value": null,
+        "text": "none as specified; related: reads encode through layer 17 only (1.23 ms per token against 2.31 for all 28 layers)",
+        "record": "runs/P1-S1-encode-1794280520685.txt"
+      },
+      "target": {
+        "value": null,
+        "text": "a part loads and runs only the pieces it needs, quantized",
+        "source": "spec 6 (2026-11-10 03:08 UTC); no plan step assigned"
+      },
+      "direction": "lower",
+      "depends_on": [],
+      "plan_step": "none assigned",
+      "plan_order": 9
+    },
+    {
+      "id": "cartridges",
+      "part": "Cartridges",
+      "spec": "6",
+      "state": "first form",
+      "measurement": {
+        "value": null,
+        "text": "ten learning units list as cartridges, mismatches refused; per-request selection in service behind --brain-chains, active set empty on the processor (no slot engine bound)",
+        "record": "runs/2026-11-10-neumor-note-p9-cartridges-preferences-first-form.md; runs/2026-11-10-neumor-note-core-brain-side-first-form.md"
+      },
+      "target": {
+        "value": null,
+        "text": "labelled cartridges that plug in and stack",
+        "source": "plan step P9"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "learning-in-service"
+      ],
+      "plan_step": "P9",
+      "plan_order": 9
+    },
+    {
+      "id": "preference-layer",
+      "part": "Preference layer",
+      "spec": "6",
+      "state": "first form",
+      "measurement": {
+        "value": null,
+        "text": "store under preferences/, recall 24 of 24 on a constructed set (common answer 16); in service behind --brain-chains: one feedback verdict written and recalled into the next question's writer hops",
+        "record": "runs/2026-11-10-neumor-note-p9-cartridges-preferences-first-form.md; runs/2026-11-10-neumor-note-core-brain-side-first-form.md"
+      },
+      "target": {
+        "value": null,
+        "text": "preference pairs collected from feedback",
+        "source": "plan step P9"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "learning-in-service"
+      ],
+      "plan_step": "P9",
+      "plan_order": 9
+    },
+    {
+      "id": "memory-system",
+      "part": "Memory system",
+      "spec": "7",
+      "state": "first form",
+      "measurement": {
+        "value": 8,
+        "text": "M1 sealed: 8 of 19 reworded questions with memory against 7 off; never worse on C1",
+        "record": "runs/2026-11-09-M1-episodic-memory.md"
+      },
+      "target": {
+        "value": null,
+        "text": "none recorded; the next measure named there is recall by meaning on a new sealed set",
+        "source": "runs/2026-11-09-M1-episodic-memory.md"
+      },
+      "direction": "higher",
+      "depends_on": [],
+      "plan_step": "none (works)",
+      "plan_order": 1
+    },
+    {
+      "id": "learning-in-service",
+      "part": "Learning in service",
+      "spec": "6",
+      "state": "absent",
+      "measurement": {
+        "value": null,
+        "text": "none in service; offline, unit lwu-readout-002 ranks the definition first on 48 of 52 held-out cases against 22 for the base, accepted and inactive",
+        "record": "runs/2026-11-08-S11-r4-learner.md"
+      },
+      "target": {
+        "value": null,
+        "text": "a fitted unit passes its Step Check and improves a held-out measure in the served path",
+        "source": "plan step P9"
+      },
+      "direction": "higher",
+      "depends_on": [
+        "memory-system"
+      ],
+      "plan_step": "P9",
+      "plan_order": 9
+    },
+    {
+      "id": "speed",
+      "part": "Speed (time per question, warm state)",
+      "spec": "1 (minimal latency after comprehension)",
+      "state": "first form",
+      "measurement": {
+        "value": 212.8,
+        "text": "212.8 s per question with the tentacle pass on",
+        "record": "runs/G1-dev-1794259937977.txt; runs/2026-11-10-neumor-note-g1-result.md"
+      },
+      "target": {
+        "value": 30,
+        "text": "at most 30 s per question with warm state",
+        "source": "plan section 9 (2026-11-10 03:27 UTC)"
+      },
+      "direction": "lower",
+      "depends_on": [],
+      "plan_step": "P2",
+      "plan_order": 2
+    },
+    {
+      "id": "comprehension",
+      "part": "Comprehension (right code first in the pack)",
+      "spec": "1 (maximal comprehension of large context)",
+      "state": "first form",
+      "measurement": {
+        "value": 16,
+        "text": "right code first in the pack with the tentacle pass, 16 of 30 (15 without)",
+        "record": "runs/G1-dev-1794259937977.txt; runs/2026-11-10-neumor-note-g1-result.md"
+      },
+      "target": {
+        "value": 20,
+        "text": "at least 20 of 30",
+        "source": "plan section 9 (2026-11-10 03:27 UTC)"
+      },
+      "direction": "higher",
+      "depends_on": [],
+      "plan_step": "P3 to P10",
+      "plan_order": 10
+    }
+  ]
+}

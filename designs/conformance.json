@@ -1,0 +1,546 @@
+{
+  "version": 1,
+  "date": "2026-11-10",
+  "note": "Conformance rules, first form (2026-11-10; Gavriel Technologies; direction of Luis Jake Gabriel III: the work must not go in circles or revert to conventional architectures, and every step is judged by whether performance improved and whether the system moved closer to the specification). Each rule names the specification section it protects (docs/2026-11-10-neumor-guide-how-it-works.md), how it is detected from the repository itself (source text, design files, assemblies; never from prose claims), the detector that runs it (nmtool::conformance), and the known violations it tolerates today (stand_ins), each with a recorded reason and the plan step that removes it (docs/2026-11-10-neumor-plan-whole-architecture.md section 5). recorded_state is the state written when the rule was added; the runner prints the live state beside it. A rule with must_pass_now true fails the run when it finds a violation that no stand-in covers, so a recorded stand-in does not block and a new violation does. Run: nmtool::conformance::cli.",
+  "rules": [
+    {
+      "id": "C-BLOCK",
+      "protects": "1 (no conventional transformer block as a structural unit); 8.4 (no regression to conventional architectures)",
+      "detect": "Every string literal in the served path (crates/nmapi/src) that names an engine assembly under designs/assemblies is a bound assembly. Each is followed through its base chain; it is the released layer order when its note, or its base's note, carries a mark of the reference generator (run s6 assemblies). Each such binding is a violation unless a stand-in records why.",
+      "detector": "block",
+      "must_pass_now": true,
+      "recorded_state": "fail (stand-in)",
+      "params": {
+        "served_paths": [
+          "crates/nmapi/src"
+        ],
+        "assembly_dir": "designs/assemblies",
+        "conventional_marks": [
+          "the released layer order",
+          "Written by `nano-lab run s6 assemblies`"
+        ]
+      },
+      "stand_ins": [
+        {
+          "key": "qwen3-reference",
+          "reason": "2026-11-10: still bound by the shared sensory path that encodes each chunk once for every tentacle (layers 0 to the deepest drone layer in the released order, kept by content key) and by the Core Brain's exact reading paths; each tentacle's drone reads run through its own generated assembly (tentacle-t<n>, nmapi::tentacle_body). Along any one path the released order is the only order that keeps the weights' meaning without training (tentacle core design 1.1); the encoder is a candidate to move into a shared sensory module next.",
+          "step": "tentacle bodies, then the shared sensory module"
+        },
+        {
+          "key": "qwen3-embedding",
+          "reason": "2026-11-10: released embedding MicroModel, bound whole as a role over the shared structure; it runs the released order because it is used only for what it was trained to do as released (the dense lane, the control arm's judge), not as a tentacle part. It moves into the anatomy when its readout is provisioned into a tentacle's verification module (tentacle core design 3.4).",
+          "step": "verification module"
+        },
+        {
+          "key": "qwen3-reranker",
+          "reason": "2026-11-10: released reranker MicroModel, bound whole as a role over the shared structure; it runs the released order because it is used only for what it was trained to do as released (the dense lane, the control arm's judge), not as a tentacle part. It moves into the anatomy when its readout is provisioned into a tentacle's verification module (tentacle core design 3.4).",
+          "step": "verification module"
+        }
+      ]
+    },
+    {
+      "id": "C-CORE",
+      "protects": "2.2 (every tentacle has a core that reasons over its drones' readings)",
+      "detect": "2026-11-10 (refinement step 1; directions of Luis Jake Gabriel III of 08:00 and 08:07 UTC): every tentacle has its core and drone tip as functions on the served path (the core type implements the g0_tx boundary and is built once per window, the tip's attention-head read is called), the cores hold the weights only by a shared reference (one central copy), no served file binds the set-aside per-tentacle assemblies, and those modules carry their set-aside mark. Before this date the rule required one bound assembly per tentacle (designs/assemblies/tentacle-t<n>.json), which placed a body of weights in each tentacle and is superseded.",
+      "detector": "core",
+      "must_pass_now": true,
+      "recorded_state": "pass (2026-11-10): every tentacle has its core and drone tip as functions and none owns a private copy of the weights; the per-tentacle assemblies are set aside, marked, unused and kept",
+      "params": {
+        "template": "designs/assemblies/tentacle.json",
+        "assembly_dir": "designs/assemblies",
+        "served_paths": [
+          "crates/nmapi/src"
+        ],
+        "tentacles": 8,
+        "core_file": "crates/nmapi/src/tentacle_core.rs",
+        "core_impl": "impl TentacleSide for TentacleCore",
+        "per_window": "TentacleCore::from_scan(",
+        "tip_call": "drone_read_logits(",
+        "shared_weights": "pub model: Option<Arc<Model>>",
+        "set_aside": [
+          "crates/nmengn/src/tentacle.rs",
+          "crates/nmapi/src/tentacle_body.rs"
+        ],
+        "set_aside_mark": "SET ASIDE",
+        "set_aside_calls": [
+          "tentacle_body::body_for(",
+          "tentacle_body::bodies(",
+          "nmengn::tentacle::assembly("
+        ]
+      },
+      "stand_ins_retired": [
+        {
+          "key": "tentacle-without-core",
+          "reason": "no tentacle has a neural core yet; built as tentacle core version 1",
+          "step": "P3",
+          "retired": "2026-11-10: every tentacle bound to its own assembly (nmapi::tentacle_body)"
+        },
+        {
+          "key": "tentacle-without-own-assembly:1",
+          "reason": "tentacle body assembly not generated or not bound yet (nmapi::tentacle_body); stand-in until `run tentacle assemblies` and `conform` prove it",
+          "step": "tentacle bodies",
+          "retired": "2026-11-10 (refinement step 1): the rule no longer requires per-tentacle assemblies; the weights are held centrally and the bodies are set aside"
+        },
+        {
+          "key": "tentacle-without-own-assembly:2",
+          "reason": "tentacle body assembly not generated or not bound yet (nmapi::tentacle_body); stand-in until `run tentacle assemblies` and `conform` prove it",
+          "step": "tentacle bodies",
+          "retired": "2026-11-10 (refinement step 1): the rule no longer requires per-tentacle assemblies; the weights are held centrally and the bodies are set aside"
+        },
+        {
+          "key": "tentacle-without-own-assembly:3",
+          "reason": "tentacle body assembly not generated or not bound yet (nmapi::tentacle_body); stand-in until `run tentacle assemblies` and `conform` prove it",
+          "step": "tentacle bodies",
+          "retired": "2026-11-10 (refinement step 1): the rule no longer requires per-tentacle assemblies; the weights are held centrally and the bodies are set aside"
+        },
+        {
+          "key": "tentacle-without-own-assembly:4",
+          "reason": "tentacle body assembly not generated or not bound yet (nmapi::tentacle_body); stand-in until `run tentacle assemblies` and `conform` prove it",
+          "step": "tentacle bodies",
+          "retired": "2026-11-10 (refinement step 1): the rule no longer requires per-tentacle assemblies; the weights are held centrally and the bodies are set aside"
+        },
+        {
+          "key": "tentacle-without-own-assembly:5",
+          "reason": "tentacle body assembly not generated or not bound yet (nmapi::tentacle_body); stand-in until `run tentacle assemblies` and `conform` prove it",
+          "step": "tentacle bodies",
+          "retired": "2026-11-10 (refinement step 1): the rule no longer requires per-tentacle assemblies; the weights are held centrally and the bodies are set aside"
+        },
+        {
+          "key": "tentacle-without-own-assembly:6",
+          "reason": "tentacle body assembly not generated or not bound yet (nmapi::tentacle_body); stand-in until `run tentacle assemblies` and `conform` prove it",
+          "step": "tentacle bodies",
+          "retired": "2026-11-10 (refinement step 1): the rule no longer requires per-tentacle assemblies; the weights are held centrally and the bodies are set aside"
+        },
+        {
+          "key": "tentacle-without-own-assembly:7",
+          "reason": "tentacle body assembly not generated or not bound yet (nmapi::tentacle_body); stand-in until `run tentacle assemblies` and `conform` prove it",
+          "step": "tentacle bodies",
+          "retired": "2026-11-10 (refinement step 1): the rule no longer requires per-tentacle assemblies; the weights are held centrally and the bodies are set aside"
+        },
+        {
+          "key": "tentacle-without-own-assembly:8",
+          "reason": "tentacle body assembly not generated or not bound yet (nmapi::tentacle_body); stand-in until `run tentacle assemblies` and `conform` prove it",
+          "step": "tentacle bodies",
+          "retired": "2026-11-10 (refinement step 1): the rule no longer requires per-tentacle assemblies; the weights are held centrally and the bodies are set aside"
+        },
+        {
+          "key": "bodies-not-bound",
+          "reason": "stand-in until the bodies are generated and bound",
+          "step": "tentacle bodies",
+          "retired": "2026-11-10 (refinement step 1): the rule no longer requires per-tentacle assemblies; the weights are held centrally and the bodies are set aside"
+        }
+      ],
+      "stand_ins": []
+    },
+    {
+      "id": "C-DRONE",
+      "protects": "2.1 (drones are attention-head readers chosen per tentacle); plan section 6 (the 16 fixed drone heads)",
+      "detect": "Each served file that reads drones calls the design reader (drone_set) and uses a DRONE_HEADS_ constant only as a stated fallback (an unwrap_or or fallback within the four lines before) or inside its section check; designs/drones.json gives every population a non-empty default set.",
+      "detector": "drone",
+      "must_pass_now": true,
+      "recorded_state": "pass",
+      "params": {
+        "served_files": [
+          "crates/nmapi/src/tentacle_pass.rs"
+        ],
+        "design": "designs/drones.json",
+        "reader_call": "drone_set(",
+        "constant_prefix": "DRONE_HEADS_"
+      },
+      "stand_ins": []
+    },
+    {
+      "id": "C-ONE-TENTACLE",
+      "protects": "2.2 (one tentacle system); plan section 3 row 5",
+      "detect": "Counts the tentacle systems in the source: each listed system whose file carries its mark, plus any other crate source file whose name contains tentacle. More than one is a violation keyed by the joined names. 2026-11-10 (refinement step 1): a source file whose module comment carries the set-aside mark (compiled, kept, used by no path: the per-tentacle assemblies crates/nmengn/src/tentacle.rs and crates/nmapi/src/tentacle_body.rs) is reported and not counted.",
+      "detector": "one_tentacle",
+      "must_pass_now": true,
+      "recorded_state": "fail (stand-in)",
+      "params": {
+        "systems": [
+          {
+            "name": "nmpod.unit",
+            "file": "crates/nmpod/src/unit.rs",
+            "mark": "Level::Tentacle"
+          },
+          {
+            "name": "tentacle_pass",
+            "file": "crates/nmapi/src/tentacle_pass.rs",
+            "mark": "Window"
+          },
+          {
+            "name": "tentacle_pass",
+            "file": "crates/nmapi/src/tentacle_core.rs",
+            "mark": "TentacleSide",
+            "note": "2026-11-10 05:25 UTC: the tentacle core of the windowed pass (built from its window scans, called from its read path behind Settings::core), part of the same system, not a third; the detector counts a named system once"
+          },
+          {
+            "name": "nmpod.unit",
+            "file": "crates/nmapi/src/tentacle_unit.rs",
+            "mark": "nmpod",
+            "note": "2026-11-10 (refinement step 1): the adapter that joins an nmpod tentacle unit to the tentacle core (the one tentacle system of step P4, behind --one-tentacle), part of the nmpod unit system, not another; counted once under that name"
+          }
+        ],
+        "name_mark": "tentacle",
+        "set_aside_mark": "SET ASIDE"
+      },
+      "stand_ins": [
+        {
+          "key": "nmpod.unit+tentacle_pass",
+          "reason": "two tentacle systems: the nmpod units and the windowed pass; merged into one",
+          "step": "P4"
+        }
+      ]
+    },
+    {
+      "id": "C-CROSS",
+      "protects": "2.1, 3 (tentacles never exchange directly; G1 is the sole path); law 2",
+      "detect": "(a) The existing gates are present in source: the Core Brain bypass relation, the window crossover gate, one window per chunk. (b) Every assembly edge under designs/assemblies is checked with the bypass relation (an end inside one tentacle and the other end in another tentacle, or outside the Core Brain). (c) Call-graph text search over the files that define or import the unit and window types, outside the coordinating level: a unit or window struct holding a field of a unit or window type, or a function taking two of them (self counts inside their impl).",
+      "detector": "cross",
+      "must_pass_now": true,
+      "recorded_state": "pass",
+      "params": {
+        "assembly_dir": "designs/assemblies",
+        "unit_types": [
+          {
+            "type": "Unit",
+            "defined": "crates/nmpod/src/unit.rs",
+            "module": "unit"
+          },
+          {
+            "type": "Window",
+            "defined": "crates/nmengn/src/kvstore.rs",
+            "module": "kvstore"
+          }
+        ],
+        "coordinating": [
+          "crates/nmbrain/",
+          "crates/nmapi/src/coordinator.rs"
+        ],
+        "gates": [
+          {
+            "name": "Core Brain bypass relation",
+            "file": "crates/nmnte/src/topology.rs",
+            "mark": "fn bypasses_brain"
+          },
+          {
+            "name": "window crossover gate",
+            "file": "crates/nmbrain/src/gmap.rs",
+            "mark": "crossover"
+          },
+          {
+            "name": "one window per chunk",
+            "file": "crates/nmsubs/src/lens.rs",
+            "mark": "no crossover"
+          }
+        ]
+      },
+      "stand_ins": []
+    },
+    {
+      "id": "C-CLASS",
+      "protects": "5.1 (sensory and behavioural data strictly segregated); 7 (separate stores)",
+      "detect": "Not checkable until the class tag type exists (tag_mark in tag_file). Then each store present in the repository must reference the class tag or the class wrapper types (a store that names neither accepts both classes).",
+      "detector": "class",
+      "must_pass_now": true,
+      "recorded_state": "fail (stand-in)",
+      "params": {
+        "tag_file": "crates/nmtype/src/class.rs",
+        "tag_mark": "enum DataClass",
+        "will_look_for": "a DataClass tag type in nmtype; then every store (memory system, muscle memory, written parameters) referencing the tag or the Sensory and Behavioural wrappers and refusing the other class",
+        "stores": [
+          {
+            "name": "memory system",
+            "dir": "crates/nmmem/src"
+          },
+          {
+            "name": "muscle memory",
+            "dir": "crates/nmmusc/src"
+          },
+          {
+            "name": "written parameters",
+            "dir": "crates/nmlearn/src"
+          }
+        ],
+        "store_marks": [
+          "DataClass",
+          "Behavioural<",
+          "Sensory<",
+          "WRONG_CLASS",
+          "class::guard"
+        ]
+      },
+      "stand_ins": [
+        {
+          "key": "store:memory system",
+          "reason": "the memory system predates the class tags; tags checked at every boundary",
+          "step": "P5"
+        },
+        {
+          "key": "store:written parameters",
+          "reason": "learning units and cartridges predate the class tags; tags checked at every boundary",
+          "step": "P5"
+        }
+      ]
+    },
+    {
+      "id": "C-MUSCLE",
+      "protects": "5.3 (muscle memory is behavioural only and a distinct store); 7",
+      "detect": "Nothing named muscle under memory/, weights/ or units/. Muscle-memory store sources (crate source paths containing a store mark) must refuse sensory items (the words sensory and refus in their text). No store and no misplacement: not yet checkable.",
+      "detector": "muscle",
+      "must_pass_now": true,
+      "recorded_state": "pass",
+      "params": {
+        "forbidden": [
+          "memory",
+          "weights",
+          "units"
+        ],
+        "name_mark": "muscle",
+        "store_marks": [
+          "nmmusc",
+          "muscle"
+        ]
+      },
+      "stand_ins": []
+    },
+    {
+      "id": "C-WEIGHTS",
+      "protects": "6 (released weights used unaltered); law 9",
+      "detect": "Cheap form, not a hash: every models/ row of INTEGRITY.md (a path in the models folder) is compared by file size and modification time against a cached record: the NPCS verification stamp under scratch/verified when it carries the same hash, else this check's own cache under scratch/conformance (seeded on first sight). The full hash check is check integrity, run by the planning session.",
+      "detector": "weights",
+      "must_pass_now": true,
+      "recorded_state": "pass",
+      "params": {
+        "integrity": "INTEGRITY.md",
+        "prefix": "models/",
+        "stamp_dir": "scratch/verified",
+        "cache": "scratch/conformance/weights-stat.json"
+      },
+      "stand_ins": []
+    },
+    {
+      "id": "C-NUMBERS",
+      "protects": "8.1 (operating numbers derived at run time); plan section 6",
+      "detect": "Each known fixed operating number of plan section 6 is looked up by its source pattern: derived when its derived pattern is present, fixed when only its fixed pattern is, not found when neither (renamed or removed: look again by hand). Exempt numbers are listed with the direction that keeps them.",
+      "detector": "numbers",
+      "must_pass_now": true,
+      "recorded_state": "fail (stand-in)",
+      "params": {
+        "constants": [
+          {
+            "id": "drone-heads",
+            "what": "the 16 drone heads",
+            "file": "crates/nmapi/src/tentacle_pass.rs",
+            "fixed": "DRONE_HEADS_QWEN3_0_6B",
+            "derived": "kvstore::drone_set("
+          },
+          {
+            "id": "base-model-name",
+            "what": "the hard-wired base model name",
+            "file": "crates/nmapi/src/neural.rs",
+            "fixed": "pub const POPULATION: &str =",
+            "derived": ""
+          },
+          {
+            "id": "lens-list-depth",
+            "what": "lens list depth (600)",
+            "file": "crates/nmsubs/src/lens.rs",
+            "fixed": "const LIST: usize =",
+            "derived": ""
+          },
+          {
+            "id": "lens-symbols",
+            "what": "lens symbol depth (20)",
+            "file": "crates/nmsubs/src/lens.rs",
+            "fixed": "const SYMBOLS: usize =",
+            "derived": ""
+          },
+          {
+            "id": "lens-recent",
+            "what": "lens recent-file depth (40)",
+            "file": "crates/nmsubs/src/lens.rs",
+            "fixed": "const RECENT: usize =",
+            "derived": ""
+          },
+          {
+            "id": "lens-files",
+            "what": "lens file depth (12)",
+            "file": "crates/nmsubs/src/lens.rs",
+            "fixed": "const FILES: usize =",
+            "derived": ""
+          },
+          {
+            "id": "role-input-cap",
+            "what": "role input cap of 192 tokens",
+            "file": "crates/nmengn/src/roles.rs",
+            "fixed": "pub const MAX_TOKENS: usize = 192",
+            "derived": ""
+          },
+          {
+            "id": "end-of-text-ids",
+            "what": "literal end-of-text token ids",
+            "file": "crates/nmengn/src/roles.rs",
+            "fixed": "15164",
+            "derived": ""
+          },
+          {
+            "id": "readout-width",
+            "what": "readout width 1024",
+            "file": "crates/nmapi/src/neural.rs",
+            "fixed": "1024.min(",
+            "derived": ""
+          },
+          {
+            "id": "coordinator-refine",
+            "what": "coordinator refine range (REFINE_BASE, REFINE_MAX)",
+            "file": "crates/nmapi/src/coordinator.rs",
+            "fixed": "pub const REFINE_MAX: usize =",
+            "derived": ""
+          },
+          {
+            "id": "coordinator-pack",
+            "what": "coordinator pack range (PACK_MIN, PACK_MAX)",
+            "file": "crates/nmapi/src/coordinator.rs",
+            "fixed": "pub const PACK_MAX: u32 =",
+            "derived": ""
+          },
+          {
+            "id": "learning-target",
+            "what": "the learning target layer",
+            "file": "crates/nmapi/src/learn.rs",
+            "fixed": "TARGET",
+            "derived": "role_node(\"learn_target\")"
+          },
+          {
+            "id": "rerank-cap",
+            "what": "rerank cap (RERANK_MAX)",
+            "file": "crates/nmapi/src/coordinator.rs",
+            "fixed": "pub const RERANK_MAX: usize =",
+            "derived": ""
+          },
+          {
+            "id": "neural-pack-cap",
+            "what": "neural pack cap (NEURAL_CAP)",
+            "file": "crates/nmbrain/src/synthesis.rs",
+            "fixed": "pub const NEURAL_CAP: usize =",
+            "derived": ""
+          }
+        ],
+        "exempt": [
+          {
+            "what": "12,000 tokens per tentacle window (nmsubs::lens::BUDGET)",
+            "why": "firm direction of Luis Jake Gabriel III, 2026-11-09; plan section 6"
+          },
+          {
+            "what": "test gates",
+            "why": "test gates stay fixed (Luis Jake Gabriel III, 2026-11-10)"
+          }
+        ]
+      },
+      "stand_ins": [
+        {
+          "key": "base-model-name",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P3, P4)"
+        },
+        {
+          "key": "lens-list-depth",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P4)"
+        },
+        {
+          "key": "lens-symbols",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P4)"
+        },
+        {
+          "key": "lens-recent",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P4)"
+        },
+        {
+          "key": "lens-files",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P4)"
+        },
+        {
+          "key": "role-input-cap",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P7)"
+        },
+        {
+          "key": "readout-width",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P9)"
+        },
+        {
+          "key": "coordinator-refine",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P6)"
+        },
+        {
+          "key": "coordinator-pack",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P6)"
+        },
+        {
+          "key": "rerank-cap",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P6)"
+        },
+        {
+          "key": "neural-pack-cap",
+          "reason": "fixed operating number of plan section 6, converted when its part is touched",
+          "step": "plan section 6 (P6)"
+        }
+      ]
+    },
+    {
+      "id": "C-DOWNLOAD",
+      "protects": "law 14 and rules.md standalone rule (nothing points outside the Nano folder)",
+      "detect": "No absolute path (a drive letter followed by a slash or backslash, or a user home folder; comment lines and a section check's fixtures from its fn check line on are skipped) in the code and configuration the Nano runs (crates source and manifests, designs, bin, .mcp.json, .cargo/config.toml, Cargo.toml); every Cargo path dependency resolves inside the folder; no top-level or second-level link leads outside. No earlier check for this existed, so this is the first.",
+      "detector": "download",
+      "must_pass_now": true,
+      "recorded_state": "pass",
+      "params": {
+        "scan": [
+          {
+            "path": "crates",
+            "ext": [
+              "rs",
+              "toml"
+            ]
+          },
+          {
+            "path": "designs",
+            "ext": [
+              "json"
+            ]
+          },
+          {
+            "path": "bin",
+            "ext": [
+              "cmd",
+              "ps1",
+              "sh"
+            ]
+          },
+          {
+            "path": ".mcp.json",
+            "ext": []
+          },
+          {
+            "path": ".cargo/config.toml",
+            "ext": []
+          },
+          {
+            "path": "Cargo.toml",
+            "ext": []
+          }
+        ]
+      },
+      "stand_ins": []
+    }
+  ]
+}

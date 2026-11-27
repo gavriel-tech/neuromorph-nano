@@ -1,0 +1,8 @@
+service log of bench hall B
+2026-10-03T09:12:38Z INFO bench2 pump=5 flow=40.1 lpm
+2026-10-03T09:12:40Z ERROR bench2 read failed: sensor timeout
+    at sensor.read (sensor.rs:88)
+    at bench.poll (bench.rs:41)
+2026-10-03T09:12:41.250Z WARN bench2 retry 1 of 3
+[2026-10-03 09:13:00] INFO bench2 sensor back
+2026-10-03 11:13:05+02:00 INFO bench1 pump=3 flow=41.0 lpm

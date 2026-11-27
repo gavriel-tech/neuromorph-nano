@@ -1,0 +1,21 @@
+[package]
+name = "nmbrain"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Core Brain lobes, slots and the Globalized Context Stack (GCX) layers"
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmlex = { path = "../nmlex" }
+nmtype = { path = "../nmtype" }
+
+[dev-dependencies]
+nmsubs = { path = "../nmsubs" }  # G1 whole-code-base layer size on this repository (tests only)
+nmtokz = { path = "../nmtokz" }  # its size in base-tokenizer tokens (tests only)
+
+[lints]
+workspace = true

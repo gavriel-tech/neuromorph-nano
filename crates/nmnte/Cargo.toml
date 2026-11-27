@@ -1,0 +1,16 @@
+[package]
+name = "nmnte"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "NTE executor and RNAM: graph, snapshots, scheduler, registry, lifecycle"
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmtype = { path = "../nmtype" }
+
+[lints]
+workspace = true

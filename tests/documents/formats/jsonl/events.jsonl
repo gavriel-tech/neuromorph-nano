@@ -1,0 +1,4 @@
+{"event_id": "E-101", "time": "2026-10-03T06:00:00Z", "kind": "start", "bench": "bench1"}
+{"event_id": "E-102", "time": "2026-10-03T09:12:40Z", "kind": "fault", "bench": "bench2", "code": "F3"}
+{"time": "2026-10-03T09:15:00Z", "kind": "note", "text": "operator reset bench2"}
+{"event_id": "E-104", "time": "2026-10-03T14:30:05Z", "kind": "fault", "bench": "bench1", "code": "F1"}

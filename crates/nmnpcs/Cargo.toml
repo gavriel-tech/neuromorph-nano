@@ -1,0 +1,17 @@
+[package]
+name = "nmnpcs"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "NPCS and the Parameter Map: weight cards and clusters"
+
+[dependencies]
+nmhash = { path = "../nmhash" }
+nmjson = { path = "../nmjson" }
+nmtype = { path = "../nmtype" }
+
+[lints]
+workspace = true

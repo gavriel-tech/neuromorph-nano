@@ -1,0 +1,165 @@
+{
+ "note": "Development set for general reading: questions over tests/documents/general/ whose answers sit inside containers (zip, Office files, tar, gzip) or binary files; file paths are container!member or the file itself, line numbers are lines of the derived text.",
+ "questions": [
+  {
+   "id": "g01",
+   "kind": "locate",
+   "question": "Where is the key to the generator shed kept?",
+   "answers": [
+    {
+     "file": "handbook.docx!word/document.xml",
+     "anchor": "generator shed key hangs",
+     "lines": [
+      7,
+      7
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "g02",
+   "kind": "lookup",
+   "question": "How long is the quote from Halden Instruments valid?",
+   "answers": [
+    {
+     "file": "budget.xlsx!xl/sharedStrings.xml",
+     "anchor": "valid until 30 April",
+     "lines": [
+      10,
+      10
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "g03",
+   "kind": "lookup",
+   "question": "When is the upper track closed in winter, and what reopens it?",
+   "answers": [
+    {
+     "file": "briefing.pptx!ppt/slides/slide2.xml",
+     "anchor": "upper track is closed",
+     "lines": [
+      3,
+      3
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "g04",
+   "kind": "lookup",
+   "question": "How many tawny owls were seen on the beech transect survey?",
+   "answers": [
+    {
+     "file": "field-notes.zip!notes/2026-10-03-owl-survey.md",
+     "anchor": "seven tawny owls",
+     "lines": [
+      4,
+      4
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "g05",
+   "kind": "table",
+   "question": "Which rain gauge recorded 41.5 mm, and on what date?",
+   "answers": [
+    {
+     "file": "field-notes.zip!data/rain-gauge.csv",
+     "anchor": "2026-10-11,G3,41.5",
+     "lines": [
+      4,
+      4
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "g06",
+   "kind": "temporal",
+   "question": "When was the generator fuel warning logged?",
+   "answers": [
+    {
+     "file": "logs.tar!logs/generator.log",
+     "anchor": "fuel below 20 percent",
+     "lines": [
+      2,
+      2
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "g07",
+   "kind": "lookup",
+   "question": "When was the wind mast calibrated?",
+   "answers": [
+    {
+     "file": "station-config.tgz!config/sensors.yaml",
+     "anchor": "calibrated: 2026-09-14",
+     "lines": [
+      3,
+      3
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "g08",
+   "kind": "lookup",
+   "question": "How often are the water filter cartridges replaced?",
+   "answers": [
+    {
+     "file": "memo.txt.gz",
+     "anchor": "changed every 90 days",
+     "lines": [
+      3,
+      3
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "g09",
+   "kind": "lookup",
+   "question": "At what times is the radio check with the valley base made?",
+   "answers": [
+    {
+     "file": "legacy.doc",
+     "anchor": "Radio check schedule",
+     "lines": [
+      7,
+      7
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "g10",
+   "kind": "locate",
+   "question": "Where is the first aid kit kept?",
+   "answers": [
+    {
+     "file": "strings.resources",
+     "anchor": "first aid kit is in the red cabinet",
+     "lines": [
+      10,
+      10
+     ],
+     "match": "lines"
+    }
+   ]
+  }
+ ]
+}

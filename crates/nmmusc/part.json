@@ -1,0 +1,30 @@
+{
+  "id": "nmmusc",
+  "kind": "other",
+  "version": 1,
+  "parent": "nmapi",
+  "ports_in": [{"name": "symbols", "kind": "json", "required": true}],
+  "ports_out": [{"name": "control", "kind": "json", "required": true}],
+  "deps": ["nmjson", "nmhash", "nmtype"],
+  "config_schema": {},
+  "config_default": {"store":"muscle"},
+  "subcomponents": [
+    {"id": "nmmusc.symbol", "version": 1, "hash": "97d839f41fedbc7aaa1747c84f41c3cb3ec636693f0fcecb0512eea3782669ea"},
+    {"id": "nmmusc.log", "version": 1, "hash": "f551ebe8acf8bf988953b309586de7f49ed4d3606104bd9418c0a91de02137c6"},
+    {"id": "nmmusc.miner", "version": 1, "hash": "c18aac5626bde780fb155580d2cc03f23bcf0b096f8d26890df27e1d0069b70e"},
+    {"id": "nmmusc.gain", "version": 1, "hash": "1b4184abf4711e10f78ec7f07d00fe5ce1d0d0c9aa2a918a44ce833fd63a18c3"},
+    {"id": "nmmusc.pack", "version": 1, "hash": "39b5ba79cd8d9cc33e10c9a735106341b19f4feccbfa29ecc3fb90bdb32bd9b7"},
+    {"id": "nmmusc.store", "version": 1, "hash": "21348f136d06beb110bc770c1ebbc1125a68dd94f03058a6b0a0f9f2086229b6"},
+    {"id": "nmmusc.reload", "version": 1, "hash": "400910248f954279668b549d8d9fbb0ccd351c25c414bd53959b44b67377ca9d"},
+    {"id": "nmmusc.withdraw", "version": 1, "hash": "5ddfaf884c88aa41f893aa3e03bb7696e6f09f2c721d77a89cd86a27dde3124a"},
+    {"id": "nmmusc.measure", "version": 1, "hash": "67ef7b47e3871f532595596bbc5e35fe4c360f117ab37719e200d13fb71ffe41"},
+    {"id": "nmmusc.priors", "version": 1, "hash": "6c3402d281031fdc3bd73850a8935a2d8f17d917ef9c5c6704f17de95e5c76b4"},
+    {"id": "nmmusc.config", "version": 1, "hash": "3d0de44faa9ab7e4ebb702483efe59439d69422f03c965c46c130d4e327e2dd0"},
+    {"id": "nmmusc.g3", "version": 1, "hash": "94b40849219bd154b5261c4d119a7a110bb22e43ff76501ec6a7987a09b17826"},
+    {"id": "nmmusc.sites", "version": 1, "hash": "05407473e3dc403da4fc02354311af57cba51299fbfaedb332b4b90d6de86d9e"},
+    {"id": "nmmusc.synth", "version": 1, "hash": "942376bb57059b7ba0d22a66785c6d6c6b1eef88d38afa562335b95b37666769"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "bde53005128dd1895fd7ece7188bb81295e3d44c2bbfd2317f656b44bdc0042c"
+}

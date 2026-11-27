@@ -1,0 +1,55 @@
+{
+ "below_floor": false,
+ "disk": {
+  "free_bytes": 6276120576,
+  "path": "C:\\neuromorph-nano",
+  "total_bytes": 1000169668608
+ },
+ "disk_floor_bytes": 4294967296,
+ "disk_floor_gb": 4,
+ "home": "C:\\neuromorph-nano",
+ "library_dir": "C:\\neuromorph-nano\\library",
+ "memory_dir": "C:\\neuromorph-nano\\memory",
+ "memory_dir_note": "The memory folder is fixed by the Nano's layout (<home>/memory, and memory/projects/<key> per project); one server may use another with serve --memory-dir.",
+ "memory_dirs": [
+  {
+   "path": "C:\\neuromorph-nano\\memory",
+   "project": "nano"
+  },
+  {
+   "path": "C:\\neuromorph-nano\\memory\\projects\\ab-nano-f915a313",
+   "project": "ab-nano-f915a313"
+  },
+  {
+   "path": "C:\\neuromorph-nano\\memory\\projects\\agy-test-repo-67300805",
+   "project": "agy-test-repo-67300805"
+  },
+  {
+   "path": "C:\\neuromorph-nano\\memory\\projects\\e1-repo-f7c3cd30",
+   "project": "e1-repo-f7c3cd30"
+  },
+  {
+   "path": "C:\\neuromorph-nano\\memory\\projects\\material-code-5270b394",
+   "project": "material-code-5270b394"
+  },
+  {
+   "path": "C:\\neuromorph-nano\\memory\\projects\\nmjson-0055a147",
+   "project": "nmjson-0055a147"
+  },
+  {
+   "path": "C:\\neuromorph-nano\\memory\\projects\\small-repo-d02ef857",
+   "project": "small-repo-d02ef857"
+  }
+ ],
+ "models_dir": "C:\\neuromorph-nano\\weights",
+ "projects_dir": "C:\\neuromorph-nano\\memory\\projects",
+ "settable": [
+  {
+   "default": 4,
+   "key": "storage.disk_floor_gb",
+   "max": 1000,
+   "min": 1,
+   "unit": "GB"
+  }
+ ]
+}

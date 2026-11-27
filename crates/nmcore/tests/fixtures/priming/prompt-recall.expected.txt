@@ -1,0 +1,21 @@
+a.start	-
+a.prompt	-
+a.pack	-
+a.read	-
+a.edit.pre	-
+a.edit.post	-
+a.pass	-
+a.stop	-
+a.thanks	-
+a.stop2	-
+b.start	-
+b.similar	Neuromorph Nano memory: an earlier question like this one, "where is the checkout total computed", was answered at crates/shop/src/lib.rs:13-19 (verified once, strongest evidence indirect). Those lines are unchanged since.
+b.unrelated	-
+b.similar.again	-
+c.start	-
+c.similar	Neuromorph Nano memory: an earlier question like this one, "where is the checkout total computed", was answered at crates/shop/src/lib.rs:13-19 (verified once, strongest evidence indirect). Those lines are unchanged since.
+outcome	outcome answered verified indirect check crates/shop/src/lib.rs:13-19 question=- ask=hashed
+recall.before	[in the ledger, not yet in the journal]
+import	imported into the memory journal: 3 events
+import.again	imported into the memory journal: 0 events
+recall.after	verified 1, refuted 0, strongest indirect

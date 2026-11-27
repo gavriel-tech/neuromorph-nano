@@ -1,0 +1,14 @@
+{
+  // Bench settings for the AQ-40 trial (comments are read past)
+  "site": "bench hall B",
+  "units": {"pressure": "bar", "flow": "lpm"},
+  "limits": {
+    "pressure_max": 6.0,
+    "temperature_max": 40
+  },
+  "benches": [
+    {"id": "bench1", "pump": 3, "notes": "new seal fitted 2026-10-01"},
+    {"id": "bench2", "pump": 5, "notes": "control unit replaced"},
+  ],
+  "operators": ["Ana", "Joe"]
+}

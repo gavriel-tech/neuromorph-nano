@@ -1,0 +1,25 @@
+[package]
+name = "nmffi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "CUDA driver and dynamic loading (the only crate with unsafe code)"
+
+# The one crate allowed to hold `unsafe` (PLAN section 3; ruling, 23:40 Finnish time,
+# 2026-11-07): the workspace forbids it, this crate denies it and allows it only on its two
+# FFI modules (`dynlib`, `cuda`), each `unsafe` block with a SAFETY comment.
+[lints.rust]
+unsafe_code = "deny"
+unsafe_op_in_unsafe_fn = "deny"
+
+[lints.clippy]
+correctness = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+dbg_macro = "deny"
+todo = "deny"
+undocumented_unsafe_blocks = "deny"
+multiple_unsafe_ops_per_block = "deny"
+missing_safety_doc = "deny"

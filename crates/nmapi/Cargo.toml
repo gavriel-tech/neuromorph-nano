@@ -1,0 +1,30 @@
+[package]
+name = "nmapi"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "MCP face and the organism: tools, forage, session, assemble, delta"
+
+[lints]
+workspace = true
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmhash = { path = "../nmhash" }
+nmlex = { path = "../nmlex" }
+nmtype = { path = "../nmtype" }
+nmnte = { path = "../nmnte" }
+nmsubs = { path = "../nmsubs" }
+nmpod = { path = "../nmpod" }
+nmtokz = { path = "../nmtokz" }
+nmbrain = { path = "../nmbrain" }
+nmmem = { path = "../nmmem" }
+nmnpcs = { path = "../nmnpcs" }
+nmengn = { path = "../nmengn" }
+nmlearn = { path = "../nmlearn" }
+nmtool = { path = "../nmtool" }
+nmmusc = { path = "../nmmusc" }
+nmffi = { path = "../nmffi" }

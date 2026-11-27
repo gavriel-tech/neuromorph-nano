@@ -1,0 +1,42 @@
+[package]
+name = "nmcore"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "The Neuromorph Nano program (neuromorph-nano) and its engine self-test"
+autobins = false
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmapi = { path = "../nmapi" }
+nmhash = { path = "../nmhash" }
+nmtype = { path = "../nmtype" }
+nmnte = { path = "../nmnte" }
+nmlex = { path = "../nmlex" }
+nmdoc = { path = "../nmdoc" }
+nmsubs = { path = "../nmsubs" }
+nmpod = { path = "../nmpod" }
+nmbrain = { path = "../nmbrain" }
+nmmem = { path = "../nmmem" }
+nmnpcs = { path = "../nmnpcs" }
+nmengn = { path = "../nmengn" }
+nmlearn = { path = "../nmlearn" }
+nmffi = { path = "../nmffi" }
+nmsafe = { path = "../nmsafe" }
+nmtokz = { path = "../nmtokz" }
+nmtool = { path = "../nmtool" }
+nmmusc = { path = "../nmmusc" }
+nmlab = { path = "../nmlab" }
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "neuromorph-nano"
+path = "src/bin/main.rs"
+
+[lints]
+workspace = true

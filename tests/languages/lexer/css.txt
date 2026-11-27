@@ -1,0 +1,40 @@
+=== rule
+a { color: red; }
+---
+a { color : red ; }
+=== class with a pseudo-class
+.btn:hover { }
+---
+. btn : hover { }
+=== id and child combinator
+#main > p { }
+---
+# main > p { }
+=== comment before a rule
+/* c */ b { }
+---
+b { }
+=== custom property
+:root { --x-y: 1px; }
+---
+: root { --x-y : 1px ; }
+=== comment opener in a string
+a::before { content: "/*"; }
+---
+a :: before { content : $S ; }
+=== media query
+@media (max-width: 600px) { }
+---
+@ media ( max-width : 600px ) { }
+=== minus inside calc
+width: calc(100% - 2px);
+---
+width : calc ( 100 % - 2px ) ;
+=== vendor prefix
+-webkit-box-shadow: none;
+---
+-webkit-box-shadow : none ;
+=== url with a quoted path
+url('a.png')
+---
+url ( $S )

@@ -1,0 +1,16 @@
+[package]
+name = "nmtype"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Contracts, Context Packet and folder lookup for the Neuromorph Nano"
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmhash = { path = "../nmhash" }
+
+[lints]
+workspace = true

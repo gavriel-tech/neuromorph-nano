@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "note": "Memory tiers and writer policy (PLAN 4c nmmem; guide 7, 7.1). T1 working is bounded and in RAM; T2 episodic and T3 structural are on disk under memory/. Identity records are kept apart from the tiers.",
+  "tiers": {
+    "T0": {"kind": "temp", "file": "memory/temp/notes.json", "promote_uses": 3, "clear_run_days": 7, "note": "temporary notes: each note or recall hit is a use, counted once per run-day (a day on which the system ran); a note used on promote_uses run-days is saved as an episode, one unused for clear_run_days run-days is cleared (Luis Jake Gabriel III, 2026-11-12 19:07 to 19:15 UTC)"},
+    "T1": {"kind": "working", "scopes": ["d{n}", "t{n}", "task:{id}", "brain"], "note": "in RAM for one task, dropped at task end; no count limit; its room is the physical memory available at run time"},
+    "T2": {"kind": "episodic", "file": "memory/episodes.jsonl", "append_only": true, "note": "kept by the lifetimes, never removed for size"},
+    "T3": {"kind": "structural", "dir": "memory/structural", "per_version": true, "note": "kept by the lifetimes, never removed for size"}
+  },
+  "hierarchy": {"levels": ["memory/1-core", "memory/2-active/<topic>", "memory/3-archive/<topic>"], "index": "memory/index.json", "core_cap": 32, "core_uses": 3, "core_run_days": 28, "active_run_days": 14, "note": "saved memory, most used at the top (Luis Jake Gabriel III, 2026-11-08 11:42 UTC); a use is a recall hit or the same item again; an active item used on core_uses run-days may rise; 1-core unused core_run_days run-days and 2-active unused active_run_days drop one level (Luis Jake Gabriel III, 2026-11-12 19:15 UTC); archive keeps everything"},
+  "identity": {"dir": "memory/1-core/identity"},
+  "writer_policy": {
+    "min_confidence": 0.5,
+    "require_evidence": true,
+    "refused_log": "memory/refused.jsonl",
+    "memory_provenance_never_observed": true
+  }
+}

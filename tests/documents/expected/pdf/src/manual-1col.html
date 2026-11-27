@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Halvern AQ-40 Service and Maintenance Manual</title>
+<style>
+@page { size: A4; margin: 22mm 18mm 20mm 18mm;
+  @top-left { content: "Halvern AQ-40 Service and Maintenance Manual"; font: 8pt Arial; color: #555; }
+  @top-right { content: "Edition 3"; font: 8pt Arial; color: #555; }
+  @bottom-center { content: "Page " counter(page) " of " counter(pages); font: 8pt Arial; color: #555; } }
+body { font: 10.5pt/1.38 Georgia, serif; margin: 0; }
+h1 { font: bold 17pt Arial, sans-serif; margin: 0 0 8pt 0; }
+h2 { font: bold 13pt Arial, sans-serif; margin: 10pt 0 5pt 0; }
+h3 { font: bold 11.5pt Arial, sans-serif; margin: 8pt 0 4pt 0; }
+p { margin: 0 0 6pt 0; text-align: left; }
+.box { border: 1px solid #888; padding: 4pt 6pt; margin: 4pt 0 8pt 0; background: #f2f2f2; }
+ul, ol { margin: 0 0 6pt 0; padding-left: 18pt; }
+li { margin: 0 0 2pt 0; }
+table { border-collapse: collapse; margin: 4pt 0 8pt 0; font: 9pt Arial, sans-serif; }
+th, td { border: 1px solid #999; padding: 2pt 5pt; text-align: left; white-space: nowrap; }
+pre, code { font: 9pt Consolas, monospace; }
+pre { margin: 4pt 0 8pt 0; }
+section.page { break-after: page; }
+section.page:last-child { break-after: auto; }
+</style>
+</head>
+<body>
+<section class="page">
+<h1>Halvern AQ-40 Water Pump: Service and Maintenance Manual</h1>
+<p>Document HV-AQ40-SM, edition 3. This manual covers the AQ-40 base model and the AQ-40S and AQ-40T variants. Keep it near the pump for the whole life of the unit.</p>
+<h1>1 Introduction and safety</h1>
+<h2>1.1 About this manual</h2>
+<p>This manual is written for the technician who installs, services and repairs the AQ-40. It assumes basic knowledge of plumbing and low voltage wiring. Chapters 1 and 2 describe the pump and its limits. Chapter 3 covers insta&shy;llation, chapter 4 covers routine mainte&shy;nance, chapter 5 covers fault finding and chapter 6 lists spare parts and the terms used in the text.</p>
+<p>Section numbers are used for every cross reference. When the text says "see section 4.2", turn to the section with that number in chapter 4. Procedures are numbered steps and must be carried out in the order given.</p>
+<h2>1.2 Safety symbols</h2>
+<p>Two kinds of boxes appear in the text. A warning box marks a step where a person could be hurt or the pump could be damaged. A note box gives extra info&shy;rmation that makes the work easier but is not a safety matter.</p>
+<div class="box"><b>Warning:</b> Read every warning box before you start the procedure that contains it, not when you reach the step.</div>
+<div class="box"><b>Note:</b> Torque values in this manual are given in newton metres (N m).</div>
+<h2>1.3 General safety rules</h2>
+<p>Always isolate the pump from the mains supply before you open the terminal box or remove any cover. Lock the isolator in the off position and keep the key with you while you work.</p>
+<p>Release the pressure in the outlet pipe before you loosen any union. The pump body can hold water at up to 6 bar after it stops, and a loosened union can spray hot water.</p>
+<p>The motor housing can reach 70 degrees Celsius in normal use. Let the pump cool for at least 30 minutes after switching off before you touch the housing with bare hands.</p>
+</section>
+<section class="page">
+<div class="box"><b>Warning:</b> Never run the pump dry. Running without water for more than 20 seconds destroys the shaft seal and can crack the ceramic face.</div>
+<h2>1.4 Intended use</h2>
+<p>The AQ-40 is a single stage centri&shy;fugal pump for clean, cold or warm water in domestic and light commercial systems. It is suited to pressure boosting, garden irrigation and the transfer of water between tanks.</p>
+<p>Do not use the pump for sea water, fuel, oil, food liquids or any liquid that contains solid particles larger than 2 mm. Do not use it in a place where explosive gas may be present.</p>
+<h2>1.5 Unpacking and checking the delivery</h2>
+<p>The pump is shipped in a carton with moulded foam ends. Lift it out by the motor housing, never by the control unit or the pipe threads, which are easily damaged.</p>
+<p>Check that the carton holds the following items before you throw the packing away:</p>
+<ul><li>the pump with the control unit fitted</li><li>four rubber feet and four M8 bolts with washers</li><li>two plastic thread caps, fitted to the inlet and outlet</li><li>a roll of PTFE tape</li><li>this manual and the warranty card</li></ul>
+<p>If an item is missing or the pump shows damage from transport, report it to the dealer within seven days and keep the packing for inspection. Do not install a pump with a cracked volute or a bent fan cover.</p>
+<div class="box"><b>Note:</b> Leave the plastic thread caps in place until you are ready to fit the pipes. They keep dirt and insects out of the volute.</div>
+<h1>2 Specifications and components</h1>
+<h2>2.1 Technical specifications</h2>
+<p>The table below gives the rated values for the base model. Values for the variants are given in section 2.4.</p>
+</section>
+<section class="page">
+<table><tr><th>Property</th><th>Value</th></tr><tr><td>Rated flow</td><td>40 litres per minute</td></tr><tr><td>Maximum head</td><td>38 m</td></tr><tr><td>Maximum working pressure</td><td>6 bar</td></tr><tr><td>Supply voltage</td><td>230 V AC, 50 Hz, single phase</td></tr><tr><td>Rated power</td><td>550 W</td></tr><tr><td>Full load current</td><td>2.6 A</td></tr><tr><td>Water temperature range</td><td>2 to 60 degrees Celsius</td></tr><tr><td>Ambient temperature range</td><td>0 to 40 degrees Celsius</td></tr><tr><td>Inlet and outlet thread</td><td>1 inch BSP female</td></tr><tr><td>Maximum suction lift</td><td>7 m</td></tr><tr><td>Weight without water</td><td>9.4 kg</td></tr><tr><td>Enclosure rating</td><td>IP44</td></tr><tr><td>Shaft seal type</td><td>carbon on ceramic, 12 mm shaft</td></tr></table>
+<div class="box"><b>Note:</b> The maximum suction lift falls by about 1 m for every 1000 m of altitude above sea level.</div>
+<h2>2.2 Main components</h2>
+<p>The pump has five main assemblies. The motor drives a stainless steel shaft. The impeller is fixed to the end of the shaft by a left hand nut and turns inside the volute, which is the cast body of the pump. The shaft seal sits between the motor and the volute and keeps water out of the motor. The control unit, mounted on top of the motor, holds the pressure switch, the flow sensor and the thermal cutout.</p>
+<p>The inlet strainer is a removable mesh basket behind the inlet cap. It catches grit and leaves before they reach the impeller. The drain plug at the lowest point of the volute lets the pump be emptied for storage or repair.</p>
+<h2>2.3 Control panel and indicator lights</h2>
+<p>The control panel on the front of the control unit has one button and three indicator lights.</p>
+</section>
+<section class="page">
+<p>The green light (POWER) is on whenever the pump has mains power. The amber light (RUN) is on while the motor turns. The red light (FAULT) flashes a code when the control unit has stopped the pump; the codes are explained in section 5.1.</p>
+<p>Pressing the button for less than two seconds starts or stops the pump by hand. Holding it for five seconds clears a fault code and restarts the pump if the fault has gone.</p>
+<h2>2.4 Model variants</h2>
+<p>The AQ-40S has a stainless steel volute instead of cast iron and is the model to choose for water that is slightly acidic. Its rated values are the same as the base model, but it weighs 8.1 kg.</p>
+<p>The AQ-40T adds a 2 litre pressure vessel on the outlet, which reduces the number of starts per hour. Its maximum working pressure is 5 bar because of the vessel rating, and it weighs 12.6 kg.</p>
+<h2>2.5 The rating plate</h2>
+<p>The rating plate is a metal label riveted to the side of the motor. It gives the model, the serial number, the supply voltage, the rated power, the full load current and the year of manufa&shy;cture. Do not paint over it or remove it.</p>
+<p>The serial number has three parts separated by dashes: a two letter factory code, the year and week of manufa&shy;cture as four digits, and a running number. For example, a plate that reads KT-2611-00412 belongs to the 412th pump made at factory KT in week 11 of 2026.</p>
+<p>Quote the full serial number whenever you order parts or ask for service. Parts changed during the production life of the pump, and the serial number tells the dealer which version you have.</p>
+<h1>3 Installation</h1>
+<h2>3.1 Site requirements</h2>
+<p>Install the pump in a dry, ventilated place protected from frost and direct rain. Leave at least 30 cm of free space in front of the inlet cap so the strainer can be taken out, and at least 10 cm around the motor fan cover for cooling air.</p>
+<p>The pump must stand on a level, solid base that does not pass vibration to the building. A concrete plinth or a steel bracket fixed to a solid wall is suitable. A wooden shelf is not suitable.</p>
+</section>
+<section class="page">
+<p>Place the pump as close to the water source as you can. Every metre of suction pipe adds friction, and long suction pipes are the most common cause of poor priming.</p>
+<h2>3.2 Mounting the pump</h2>
+<p>To mount the pump on its base:</p>
+<ol start="1"><li>Mark the four fixing holes using the base plate as a template.</li><li>Drill the holes and fit anchors suited to the base material.</li><li>Place the four rubber feet supplied with the pump over the holes.</li><li>Set the pump on the feet with the inlet facing the water source.</li><li>Fit the M8 bolts with washers and tighten them to 12 N m. Do not overti&shy;ghten, or the feet lose their damping.</li><li>Check with a spirit level that the motor shaft is horizontal.</li></ol>
+<h2>3.3 Pipe connections</h2>
+<p>Use pipe of at least the same size as the pump threads. A smaller suction pipe starves the pump and causes cavitation, a rattling noise with falling pressure.</p>
+<p>Fit a non-return valve on the suction pipe, as low as you can and below the water level if the pump lifts from a well or tank. Without it the pump loses its prime each time it stops. Fit a gate valve on the outlet so the pump can be isolated for service without draining the system.</p>
+<p>Support the pipes with their own brackets. The pump threads must not carry the weight of the pipes.</p>
+<div class="box"><b>Warning:</b> Seal threaded joints with PTFE tape only. Thread paste can enter the pump and score the seal faces.</div>
+<h2>3.4 Electrical connection</h2>
+<p>The electrical connection must be made by a qualified electri&shy;cian and must follow local wiring rules. The supply must have a residual current device rated at 30 mA and a double pole isolator within sight of the pump.</p>
+<p>Use three core cable of at least 1.5 square milli&shy;metres. Connect the live wire to terminal L, the neutral to terminal N and the earth to the terminal marked with the earth symbol. Tighten the cable gland so the cable cannot be pulled out of the terminal box.</p>
+</section>
+<section class="page">
+<div class="box"><b>Warning:</b> The pump must be earthed. Never run it on a supply without an earth connection.</div>
+<h2>3.5 First start and priming</h2>
+<p>Priming means filling the volute and suction pipe with water so the impeller can pull water up. The pump cannot prime itself from dry.</p>
+<p>To prime and start the pump for the first time:</p>
+<ol start="1"><li>Close the outlet gate valve.</li><li>Unscrew the priming plug on top of the volute.</li><li>Pour clean water into the priming hole until it overflows, then wait one minute and top it up again.</li><li>Refit the priming plug hand tight.</li><li>Open the outlet valve about one quarter of a turn.</li><li>Switch on the supply and press the button once. The amber light comes on.</li><li>Watch the pressure gauge. Within 60 seconds the pressure should rise and stay steady.</li><li>When the pressure is steady, open the outlet valve fully.</li></ol>
+<p>If the pressure does not rise within 60 seconds, stop the pump, wait two minutes and repeat steps 2 to 8. If the pump still does not prime after three attempts, check the suction pipe for air leaks and see section 5.2.</p>
+<h2>3.6 Charging the pressure vessel (AQ-40T)</h2>
+<p>The pressure vessel of the AQ-40T holds a rubber membrane with air on one side and water on the other. The air side must be charged to the right pressure, or the vessel gives no benefit and the pump starts too often.</p>
+<p>The correct air charge is 0.2 bar below the cut-in pressure of the pressure switch. With the factory cut-in pressure of 1.5 bar, the air charge is therefore 1.3 bar.</p>
+<p>To check and set the air charge:</p>
+<ol start="1"><li>Isolate the pump and open a tap until no more water flows, so the water side of the vessel is empty.</li><li>Remove the cap from the air valve on top of the vessel.</li><li>Read the air pressure with a tyre gauge.</li><li>Add air with a hand pump, or let air out by pressing the valve core, until the gauge reads the correct charge.</li><li>Refit the cap, close the tap and restart the pump.</li></ol>
+</section>
+<section class="page">
+<p>Check the air charge once a year, and whenever the pump starts more often than it used to. If air comes out of the valve when you press it with water in the vessel, the membrane has split and must be replaced (part HV-4075).</p>
+<h1>4 Routine maintenance</h1>
+<h2>4.1 Maintenance schedule</h2>
+<p>The intervals below are for normal domestic use of up to four hours a day. For heavier use, halve each interval.</p>
+<table><tr><th>Task</th><th>Interval</th><th>Section</th></tr><tr><td>Clean the inlet strainer</td><td>every month</td><td>4.4</td></tr><tr><td>Check for leaks at the seal and unions</td><td>every month</td><td>4.3</td></tr><tr><td>Descale the volute and impeller</td><td>every 6 months in hard water areas</td><td>4.2</td></tr><tr><td>Grease the motor bearings</td><td>every 2000 running hours</td><td>4.5</td></tr><tr><td>Test the pressure switch</td><td>every year</td><td>5.3</td></tr><tr><td>Replace the shaft seal</td><td>every 3 years or when it leaks</td><td>4.3</td></tr><tr><td>Check the earth connection</td><td>every year</td><td>3.4</td></tr></table>
+<div class="box"><b>Note:</b> The control unit counts running hours. Hold the button and press it twice quickly to show the count on the FAULT light, one flash per 100 hours.</div>
+<h2>4.2 Descaling</h2>
+<p>In hard water areas, scale builds up on the impeller and inside the volute. Scale reduces the flow, makes the motor work harder and can jam the impeller after a long stop. Descaling removes it with a mild acid solution.</p>
+<p>Use a descaling solution of citric acid, 50 g dissolved in each litre of warm water. Do not use hydro&shy;chloric acid or any product that is not marked as safe for stainless steel and brass.</p>
+<div class="box"><b>Warning:</b> Wear gloves and eye protection when you mix and use the descaling solution.</div>
+<p>To descale the pump:</p>
+</section>
+<section class="page">
+<ol start="1"><li>Isolate the pump and close the inlet and outlet valves.</li><li>Open the drain plug and let the volute empty into a bucket.</li><li>Refit the drain plug and remove the priming plug.</li><li>Fill the volute with the descaling solution through the priming hole.</li><li>Leave the solution in the pump for 45 minutes. Do not run the motor during this time.</li><li>Drain the solution, then fill and drain the volute twice with clean water.</li><li>Refit the plugs, open the valves and prime the pump as in section 3.5.</li></ol>
+<p>If the impeller is still stiff to turn by hand after descaling, repeat the soak once. If it is still stiff, remove the impeller and clean it as described in section 4.3.1.</p>
+<h2>4.3 Replacing the shaft seal</h2>
+<p>The shaft seal wears in normal use. A worn seal shows as drops of water under the motor end of the volute, or as a rust stain on the base. A seal that leaks must be replaced at once, because water that enters the motor bearings ruins them within weeks.</p>
+<p>Repla&shy;cement seal kit: part number HV-4012. The kit holds the rotating carbon ring, the fixed ceramic seat, the rubber cup and a new volute O-ring.</p>
+<h3>4.3.1 Removing the impeller</h3>
+<ol start="1"><li>Isolate the pump, close both valves and drain the volute.</li><li>Remove the six bolts that hold the volute to the motor flange.</li><li>Pull the motor and impeller away from the volute. The volute stays on the pipes.</li><li>Hold the shaft still with a flat scre&shy;wdriver in the slot at the fan end.</li><li>Unscrew the impeller nut clockwise. It has a left hand thread.</li><li>Pull the impeller off the shaft. Keep the key from the shaft keyway.</li></ol>
+<h3>4.3.2 Fitting the new seal</h3>
+<ol start="1"><li>Pull the old rotating ring off the shaft and push the old ceramic seat out of the flange.</li><li>Clean the seat recess with a soft cloth. Do not use abrasive paper.</li><li>Wet the rubber cup of the new ceramic seat with clean water and press it into the recess with your thumbs, polished face outwards.</li><li>Slide the new rotating ring onto the shaft, carbon face towards the ceramic seat.</li><li>Refit the key and the impeller, and tighten the impeller nut to 8 N m.</li><li>Fit the new O-ring to the volute and refit the motor, tightening the six bolts in a cross pattern to 10 N m.</li><li>Prime the pump as in section 3.5 and check for leaks after ten minutes of running.</li></ol>
+</section>
+<section class="page">
+<div class="box"><b>Warning:</b> Do not touch the polished faces of the carbon ring or the ceramic seat with your fingers. Grease from the skin causes the new seal to leak.</div>
+<h2>4.4 Cleaning the inlet strainer</h2>
+<p>A blocked strainer is the most common cause of low flow. Check it every month, and more often in the first weeks after the pump is installed on a new well.</p>
+<p>To clean the strainer:</p>
+<ol start="1"><li>Stop the pump and close the inlet valve.</li><li>Unscrew the inlet cap by hand. Some water will run out.</li><li>Lift out the mesh basket.</li><li>Rinse the basket under a tap and brush it gently with a soft brush.</li><li>Check the cap O-ring for cuts and replace it if needed (part HV-4031).</li><li>Refit the basket and the cap, open the inlet valve and restart the pump.</li></ol>
+<h2>4.5 Bearing lubrication</h2>
+<p>The motor has two ball bearings. The bearing at the impeller end is sealed for life and needs no grease. The bearing at the fan end has a grease nipple under the fan cover.</p>
+<p>Every 2000 running hours, remove the fan cover and give the grease nipple two strokes of lithium based bearing grease from a hand grease gun. More grease is not better: too much grease makes the bearing run hot.</p>
+<div class="box"><b>Note:</b> A bearing that whines or rumbles after greasing is worn and must be replaced. Bearing repla&shy;cement is a workshop job and is not covered in this manual.</div>
+<h2>4.6 Winter storage</h2>
+<p>If the pump will stand where it can freeze, it must be drained. Water that freezes in the volute cracks it, and a cracked volute is not covered by the warranty.</p>
+<p>To prepare the pump for winter:</p>
+<ol start="1"><li>Isolate the pump and close the valves.</li><li>Open the drain plug and the priming plug and let all the water run out.</li><li>Turn the shaft by hand a few times to let water out of the impeller.</li><li>Leave both plugs out during storage and keep them in a bag tied to the pump.</li></ol>
+</section>
+<section class="page">
+<ol start="5"><li>Cover the motor with a breathable cover. Do not wrap it in plastic, which traps moisture.</li></ol>
+<p>In spring, refit the plugs and prime the pump as described in section 3.5 before the first start.</p>
+<h2>4.7 Checking the motor capacitor</h2>
+<p>The motor needs a run capacitor to start and to run smoothly. A failed capacitor shows as a motor that hums but does not turn, or that turns only after the shaft is spun by hand. Capacitors age faster in hot places.</p>
+<div class="box"><b>Warning:</b> A capacitor can hold a charge after the supply is switched off. Short its terminals with an insulated scre&shy;wdriver before you touch them.</div>
+<p>To check the capacitor:</p>
+<ol start="1"><li>Isolate the pump and open the terminal box.</li><li>Discharge the capacitor as described in the warning above.</li><li>Disconnect its two wires and note which terminal each one came from.</li><li>Set a multimeter to its capaci&shy;tance range and connect it across the capacitor terminals.</li><li>Compare the reading with the value printed on the capacitor, which is 16 microfarad.</li><li>If the reading is more than 10 percent below the printed value, or the case is swollen, fit a new capacitor (part HV-4040).</li></ol>
+<h1>5 Troubleshooting</h1>
+<h2>5.1 Reading the fault codes</h2>
+<p>When the control unit stops the pump, the red FAULT light flashes a code: a number of short flashes followed by a pause of three seconds. Count the flashes and look up the code below.</p>
+<table><tr><th>Flashes</th><th>Meaning</th><th>First action</th></tr><tr><td>1</td><td>dry running detected</td><td>check water supply and prime, section 3.5</td></tr><tr><td>2</td><td>motor overheated</td><td>let the pump cool, section 5.4</td></tr><tr><td>3</td><td>too many starts per hour</td><td>check for leaks in the outlet pipework</td></tr><tr><td>4</td><td>supply voltage too low</td><td>have the supply checked by an electrician</td></tr><tr><td>5</td><td>pressure switch fault</td><td>test the pressure switch, section 5.3</td></tr></table>
+</section>
+<section class="page">
+<p>After the cause has been removed, hold the button for five seconds to clear the code. If the same code comes back three times in one day, do not clear it again; contact a service centre.</p>
+<div class="box"><b>Note:</b> Code 3 usually means a dripping tap or a leaking toilet valve somewhere in the system. Each drop lowers the pressure until the pump starts again.</div>
+<h2>5.2 Troubleshooting table</h2>
+<table><tr><th>Symptom</th><th>Likely cause</th><th>Remedy</th></tr><tr><td>Pump runs but gives no water</td><td>not primed, or air leak in suction pipe</td><td>prime again; tighten suction joints</td></tr><tr><td>Low flow</td><td>blocked inlet strainer</td><td>clean the strainer, section 4.4</td></tr><tr><td>Low flow and rattling noise</td><td>cavitation from a small or long suction pipe</td><td>fit a larger or shorter suction pipe</td></tr><tr><td>Pump starts and stops often</td><td>leak in the system or failed pressure vessel</td><td>find the leak; on AQ-40T check the vessel</td></tr><tr><td>Water under the pump</td><td>worn shaft seal</td><td>replace the seal, section 4.3</td></tr><tr><td>Motor hums but does not turn</td><td>jammed impeller or failed capacitor</td><td>turn the shaft by hand; replace capacitor</td></tr><tr><td>Pump does not start, no lights</td><td>no mains supply</td><td>check the isolator and the RCD</td></tr><tr><td>Pump trips the RCD</td><td>water in the terminal box or motor</td><td>isolate at once and call an electrician</td></tr><tr><td>Pressure lower than before</td><td>scale on impeller</td><td>descale, section 4.2</td></tr></table>
+<h2>5.3 Testing the pressure switch</h2>
+<p>The pressure switch starts the pump when the outlet pressure falls to the cut-in pressure and stops it when the flow stops. The factory cut-in pressure is 1.5 bar. It can be set between 1.0 and 3.0 bar with the screw under the control unit cover.</p>
+<p>To test the pressure switch:</p>
+<ol start="1"><li>Fit a test gauge to the gauge port on the outlet.</li><li>Open a tap downstream and let the pressure fall while you watch the gauge.</li><li>Note the pressure at which the amber light comes on. This is the cut-in pressure.</li><li>Close the tap. The pump should stop within 15 seconds once the flow has stopped.</li><li>If the cut-in pressure is more than 0.3 bar away from the setting, adjust the screw a quarter turn at a time and test again.</li><li>If the pump does not stop after the tap is closed, replace the flow sensor (part HV-4050).</li></ol>
+</section>
+<section class="page">
+<h2>5.4 Resetting the thermal cutout</h2>
+<p>The thermal cutout stops the motor when its windings become too hot, for example because of a jammed impeller, a blocked fan cover or a long period of running against a closed valve. It shows as code 2.</p>
+<p>The cutout resets itself once the motor has cooled, which takes about 20 minutes. The control unit does not restart the pump on its own after a code 2; you must hold the button for five seconds.</p>
+<div class="box"><b>Warning:</b> If the thermal cutout trips again within one hour of a reset, do not keep resetting it. Find the cause first. Repeated overhea&shy;ting damages the winding insulation.</div>
+<h2>5.5 Noise and vibration</h2>
+<p>A healthy AQ-40 makes a steady hum with a soft rush of water. Any new noise is worth tracing early, because most noises point to a fault that gets worse with time.</p>
+<p>A rattle like gravel in the pump is cavitation; see the glossary and section 3.3. A high whine from the fan end points to a dry or worn bearing; see section 4.5. A knock each time the pump stops is water hammer in the outlet pipe, which a slow closing non-return valve or the AQ-40T vessel can cure. A buzz that changes when you press on the pipes means a pipe is touching a wall or another pipe; add a bracket or a rubber sleeve.</p>
+<p>Vibration that you can feel through the base usually means the rubber feet are missing, hardened or overti&shy;ghtened. Replace them with set HV-4061 and tighten the bolts to the value given in section 3.2.</p>
+<h1>6 Parts and glossary</h1>
+<h2>6.1 Spare parts list</h2>
+</section>
+<section class="page">
+<table><tr><th>Part number</th><th>Description</th><th>Used in section</th></tr><tr><td>HV-4012</td><td>shaft seal kit, 12 mm</td><td>4.3</td></tr><tr><td>HV-4020</td><td>impeller, brass, 7 vane</td><td>4.3.1</td></tr><tr><td>HV-4031</td><td>inlet cap O-ring</td><td>4.4</td></tr><tr><td>HV-4033</td><td>inlet strainer basket</td><td>4.4</td></tr><tr><td>HV-4040</td><td>motor run capacitor, 16 microfarad</td><td>5.2</td></tr><tr><td>HV-4050</td><td>flow sensor</td><td>5.3</td></tr><tr><td>HV-4061</td><td>rubber feet, set of four</td><td>3.2</td></tr><tr><td>HV-4075</td><td>pressure vessel membrane, AQ-40T only</td><td>5.2</td></tr></table>
+<p>Order parts from an authorised dealer and quote the serial number from the rating plate, which is on the side of the motor.</p>
+<p>The control unit stores its settings in a short text file that a service tool can read. A typical file looks like this:</p>
+<pre># AQ-40 control unit settings
+cut_in_bar = 1.5
+stop_delay_s = 15
+# Running hours since the last reset
+hours = 1240</pre>
+<h2>6.2 Returning parts under warranty</h2>
+<p>Parts that fail under warranty are returned through the dealer who sold the pump. Clean and dry the part, put it in a bag with the serial number and a short descri&shy;ption of the fault, and keep the receipt. The dealer decides whether the part is replaced or repaired.</p>
+<p>The warranty does not cover damage from frost, dry running, wrong supply voltage, or the use of liquids listed in section 1.4.</p>
+<h2>6.3 Glossary</h2>
+<p><b>Cavitation</b>: the forming and collapse of vapour bubbles at the impeller when the pressure at the inlet is too low. It sounds like gravel in the pump and wears the impeller.</p>
+<p><b>Cut-in pressure</b>: the outlet pressure at which the pressure switch starts the pump.</p>
+</section>
+<section class="page">
+<p><b>Head</b>: the height to which the pump can lift water, in metres. Maximum head is the height at which the flow falls to zero.</p>
+<p><b>Impeller</b>: the rotating part with curved vanes that throws water outwards and raises its pressure.</p>
+<p><b>Priming</b>: filling the pump and suction pipe with water before the first start, so that the impeller can draw water in.</p>
+<p><b>Suction lift</b>: the vertical distance from the water surface up to the pump inlet.</p>
+<p><b>Volute</b>: the spiral shaped body of the pump around the impeller, which turns the speed of the water into pressure.</p>
+<p><b>Thermal cutout</b>: a switch in the motor windings that opens when they become too hot.</p>
+<p><b>Non-return valve</b>: a valve that lets water pass in one direction only and keeps the suction pipe full when the pump stops.</p>
+</section>
+</body>
+</html>

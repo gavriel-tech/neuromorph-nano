@@ -1,0 +1,30 @@
+{
+  "read": [
+    "assets/icon.dat",
+    "scripts/build.ps1",
+    "scripts/deploy.ps1",
+    "scripts/lib/common.ps1"
+  ],
+  "skipped": [
+    {"path": ".gitignore", "reason": "hidden file"},
+    {"path": "packages.lock.json", "reason": "lock file (generated): not read"},
+    {"path": "tools/helper.min.js", "reason": "minified file (generated): not read"},
+    {"path": "scripts/secrets.local.ps1", "reason": "ignored by .gitignore"}
+  ],
+  "definitions": [
+    {"file": "scripts/build.ps1", "name": "Remove-SiteOutput", "kind": "function", "line": 15, "end": 21, "parent": ""},
+    {"file": "scripts/build.ps1", "name": "Build-Page", "kind": "function", "line": 23, "end": 31, "parent": ""},
+    {"file": "scripts/build.ps1", "name": "Write-Manifest", "kind": "function", "line": 33, "end": 41, "parent": ""},
+    {"file": "scripts/lib/common.ps1", "name": "Write-Log", "kind": "function", "line": 5, "end": 10, "parent": ""},
+    {"file": "scripts/lib/common.ps1", "name": "Convert-Markdown", "kind": "function", "line": 12, "end": 24, "parent": ""},
+    {"file": "scripts/lib/common.ps1", "name": "DeployTarget", "kind": "class", "line": 26, "end": 38, "parent": ""},
+    {"file": "scripts/lib/common.ps1", "name": "DeployTarget", "kind": "method", "line": 30, "end": 33, "parent": "DeployTarget"},
+    {"file": "scripts/lib/common.ps1", "name": "Describe", "kind": "method", "line": 35, "end": 37, "parent": "DeployTarget"},
+    {"file": "scripts/lib/common.ps1", "name": "DeployMode", "kind": "enum", "line": 40, "end": 43, "parent": ""},
+    {"file": "scripts/lib/common.ps1", "name": "Get-DeployTarget", "kind": "function", "line": 45, "end": 48, "parent": ""},
+    {"file": "scripts/deploy.ps1", "name": "Test-Health", "kind": "function", "line": 7, "end": 18, "parent": ""},
+    {"file": "scripts/deploy.ps1", "name": "Publish-Site", "kind": "function", "line": 20, "end": 26, "parent": ""}
+  ],
+  "imports": [],
+  "packages": []
+}

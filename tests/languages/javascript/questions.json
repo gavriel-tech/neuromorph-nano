@@ -1,0 +1,164 @@
+{
+  "questions": [
+    {
+      "id": "j01",
+      "kind": "name",
+      "question": "Which regular expression splits a log line into time, level, source and text?",
+      "answers": [
+        {
+          "file": "src/parse.js",
+          "anchor": "const LINE =",
+          "lines": [
+            8,
+            8
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "j02",
+      "kind": "behaviour",
+      "question": "How are stack trace lines attached to the record before them?",
+      "answers": [
+        {
+          "file": "src/parse.js",
+          "anchor": "out[out.length - 1].text +=",
+          "lines": [
+            31,
+            31
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "j03",
+      "kind": "value",
+      "question": "What is the default minimum level of the level filter?",
+      "answers": [
+        {
+          "file": "src/filter.js",
+          "anchor": "constructor(minLevel = 2, source = null) {",
+          "lines": [
+            5,
+            5
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "j04",
+      "kind": "value",
+      "question": "How many lines per minute may one source print before the rest are dropped?",
+      "answers": [
+        {
+          "file": "bin/cli.mjs",
+          "anchor": "const RATE_PER_MINUTE = 120;",
+          "lines": [
+            12,
+            12
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "j05",
+      "kind": "behaviour",
+      "question": "What happens when a followed file shrinks?",
+      "answers": [
+        {
+          "file": "src/follow.js",
+          "anchor": "if (size < offset) {",
+          "lines": [
+            15,
+            15
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "j06",
+      "kind": "name",
+      "question": "Which function colors a level name for the terminal?",
+      "answers": [
+        {
+          "file": "src/format.cjs",
+          "anchor": "function colorize(",
+          "lines": [
+            12,
+            12
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "j07",
+      "kind": "value",
+      "question": "How often is a followed file checked for new lines?",
+      "answers": [
+        {
+          "file": "src/follow.js",
+          "anchor": "export const POLL_MS = 500;",
+          "lines": [
+            5,
+            5
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "j08",
+      "kind": "name",
+      "question": "Which component shows records in a table with a level picker?",
+      "answers": [
+        {
+          "file": "src/view.jsx",
+          "anchor": "export function RecordTable",
+          "lines": [
+            5,
+            5
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "j09",
+      "kind": "behaviour",
+      "question": "What error is raised for an unknown level name?",
+      "answers": [
+        {
+          "file": "src/parse.js",
+          "anchor": "throw new RangeError",
+          "lines": [
+            40,
+            40
+          ],
+          "match": "file"
+        }
+      ]
+    },
+    {
+      "id": "j10",
+      "kind": "relation",
+      "question": "Where are the command line flags for level and source read?",
+      "answers": [
+        {
+          "file": "src/filter.js",
+          "anchor": "static fromArgs(args) {",
+          "lines": [
+            18,
+            18
+          ],
+          "match": "file"
+        }
+      ]
+    }
+  ]
+}

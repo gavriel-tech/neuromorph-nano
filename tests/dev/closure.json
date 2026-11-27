@@ -1,0 +1,1218 @@
+{
+ "note": "Tuning set of the Neuromorph Nano on scratch/frozen-p2: questions about that frozen tree's code and documents, each with every deciding range (anchor on the range's first line, exactly one line of its file holding it), a one-sentence statement and the facts a right reply states. For tuning and fitting only, with the development set; never a release measure. Folds: folds.json.",
+ "root": "scratch/frozen-p2",
+ "questions": [
+  {
+   "id": "c01",
+   "kind": "locate",
+   "group": "locate",
+   "question": "Where does the MCP server answer the initialize request, and where is the protocol revision it reports set?",
+   "statement": "handle_line in nmapi/src/mcp.rs answers initialize with PROTOCOL (2025-06-18), the tools capability, the standing instructions and serverInfo neuromorph-nano.",
+   "facts": [
+    "handle_line answers initialize",
+    "protocol revision is the PROTOCOL constant 2025-06-18",
+    "serverInfo name is neuromorph-nano"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmapi/src/mcp.rs",
+     "anchor": "pub const PROTOCOL: &str = \"2025-06-18\";",
+     "lines": [
+      13,
+      13
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/mcp.rs",
+     "anchor": "\"initialize\" => ok(",
+     "lines": [
+      64,
+      72
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c02",
+   "kind": "locate",
+   "group": "locate",
+   "question": "Where is the personalised rank over the reference graph computed, and where is its restart probability set?",
+   "statement": "RefGraph::rank in nmsubs/src/refgraph.rs walks references both ways and restarts at the seeds with probability 1 - DAMPING, DAMPING being 0.85.",
+   "facts": [
+    "RefGraph::rank in refgraph.rs",
+    "DAMPING is 0.85",
+    "restart probability is 1 - DAMPING",
+    "walk follows references in both directions"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmsubs/src/refgraph.rs",
+     "anchor": "pub const DAMPING: f32 = 0.85;",
+     "lines": [
+      40,
+      40
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/refgraph.rs",
+     "anchor": "/// Personalised rank of every chunk from `seeds` (chunk, weight)",
+     "lines": [
+      593,
+      648
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c03",
+   "kind": "locate",
+   "group": "locate",
+   "question": "Where does the interface server turn an accepted POST into a change of a control or an undo?",
+   "statement": "write_api in nmcore/src/bin/ui.rs routes /api/controls to controls::set and /api/undo to controls::undo; controls::set checks the key and value and writes settings.json.",
+   "facts": [
+    "write_api in ui.rs",
+    "/api/controls calls controls::set",
+    "/api/undo calls controls::undo",
+    "set refuses an unknown control or value"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmcore/src/bin/ui.rs",
+     "anchor": "fn write_api(home: &Path, path: &str, body: &[u8])",
+     "lines": [
+      286,
+      294
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmcore/src/bin/controls.rs",
+     "anchor": "pub fn set(home: &Path, key: &str, value: &str, undo_of: Option<&str>)",
+     "lines": [
+      203,
+      215
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c04",
+   "kind": "locate",
+   "group": "locate",
+   "question": "Where is the SHA-256 of a byte stream computed without holding the whole stream in memory?",
+   "statement": "nmhash::sha256::sha256 wraps the reader in a 1 MiB buffer and digest hashes whole 64-byte blocks of each 1 MiB read, then pads with the bit length.",
+   "facts": [
+    "sha256 in nmhash/src/sha256.rs",
+    "digest reads 1 MiB at a time",
+    "whole 64-byte blocks hashed in one pass",
+    "padding ends with the length in bits"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmhash/src/sha256.rs",
+     "anchor": "pub fn sha256(reader: impl Read) -> std::io::Result<String> {",
+     "lines": [
+      107,
+      109
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmhash/src/sha256.rs",
+     "anchor": "fn digest(mut reader: impl Read) -> std::io::Result<String> {",
+     "lines": [
+      110,
+      154
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c05",
+   "kind": "locate",
+   "group": "locate",
+   "question": "Where are the workspace's crates and the dependencies between them read when a tree is scanned?",
+   "statement": "repo::crates_of runs cargo metadata --no-deps --offline and keeps dependencies between workspace members of every kind; Substrate::scan stores its result in crates.",
+   "facts": [
+    "crates_of in nmsubs/src/repo.rs",
+    "cargo metadata --no-deps --offline",
+    "only workspace members count as dependencies",
+    "normal, dev and build dependencies all count",
+    "called from Substrate::scan"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmsubs/src/repo.rs",
+     "anchor": "pub fn crates_of(root: &Path) -> Vec<Crate> {",
+     "lines": [
+      119,
+      150
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/lib.rs",
+     "anchor": "crates: repo::crates_of(&root),",
+     "lines": [
+      95,
+      95
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c06",
+   "kind": "locate",
+   "group": "locate",
+   "question": "Where are the words of a question that a right answer must cover picked out, and which two-letter words still count?",
+   "statement": "nmlex::key_terms keeps words of three letters or more that are not in STOP, plus two-character words short_name accepts (an upper-case letter then an upper-case letter or digit).",
+   "facts": [
+    "key_terms in nmlex/src/lib.rs",
+    "stop words in STOP are dropped",
+    "words shorter than three letters dropped",
+    "short_name keeps GB, MB, K1 style words"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmlex/src/lib.rs",
+     "anchor": "pub fn key_terms(q: &str) -> Vec<String> {",
+     "lines": [
+      151,
+      161
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmlex/src/lib.rs",
+     "anchor": "pub fn short_name(w: &str) -> bool {",
+     "lines": [
+      145,
+      148
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmlex/src/lib.rs",
+     "anchor": "pub const STOP: &[&str] = &[",
+     "lines": [
+      19,
+      19
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c07",
+   "kind": "value",
+   "group": "value",
+   "question": "By default, how far below its promotion gain must a muscle memory pack's running mean fall before the pack is withdrawn?",
+   "statement": "Below promotion gain minus withdraw_z (1.96 by default) times the square root of the promotion error squared plus the running error squared; no margin exists before the first use.",
+   "facts": [
+    "withdraw_z defaults to 1.96",
+    "margin = z * sqrt(se_promotion^2 + se_running^2)",
+    "promotion error stands in while fewer than two uses",
+    "no withdrawal before the first use"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmmusc/src/lib.rs",
+     "anchor": "Self { gate_z: 1.96, withdraw_z: 1.96",
+     "lines": [
+      82,
+      82
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmmusc/src/withdraw.rs",
+     "anchor": "pub fn margin(promo: &GainRecord, run: &RunningGain, z: f64) -> Option<f64> {",
+     "lines": [
+      49,
+      52
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmmusc/src/withdraw.rs",
+     "anchor": "pub fn should_withdraw(promo: &GainRecord, run: &RunningGain, z: f64) -> bool {",
+     "lines": [
+      59,
+      61
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c08",
+   "kind": "value",
+   "group": "value",
+   "question": "How many lines does each piece of a file hold when the substrate indexes it, and are structural segments used?",
+   "statement": "30 lines: STRUCTURAL_SEGMENTS is false, so index cuts every file into fixed windows of CHUNK = 30 lines.",
+   "facts": [
+    "CHUNK is 30",
+    "STRUCTURAL_SEGMENTS is false",
+    "index steps through the lines by CHUNK"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmsubs/src/lib.rs",
+     "anchor": "pub const CHUNK: usize = 30;",
+     "lines": [
+      20,
+      20
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/lib.rs",
+     "anchor": "let segs = if STRUCTURAL_SEGMENTS {",
+     "lines": [
+      135,
+      139
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/lib.rs",
+     "anchor": "pub const STRUCTURAL_SEGMENTS: bool = false;",
+     "lines": [
+      410,
+      410
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c09",
+   "kind": "value",
+   "group": "value",
+   "question": "How large may one segment of the memory journal grow before the journal starts the next segment?",
+   "statement": "64 MiB (SEGMENT_BYTES): after an append, when the segment file is at least that size, rotate records it in segments.json and moves to the next segment.",
+   "facts": [
+    "SEGMENT_BYTES is 64 MiB",
+    "open uses SEGMENT_BYTES",
+    "checked after each append",
+    "rotate records the closed segment in segments.json"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmmem/src/journal.rs",
+     "anchor": "pub const SEGMENT_BYTES: u64 = 64 * 1024 * 1024;",
+     "lines": [
+      23,
+      23
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmmem/src/journal.rs",
+     "anchor": "Self::open_with(memory, SEGMENT_BYTES)",
+     "lines": [
+      133,
+      133
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmmem/src/journal.rs",
+     "anchor": "if std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0) >= self.segment_bytes {",
+     "lines": [
+      227,
+      229
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmmem/src/journal.rs",
+     "anchor": "fn rotate(&mut self) -> Result<(), Fault> {",
+     "lines": [
+      234,
+      242
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c10",
+   "kind": "value",
+   "group": "value",
+   "question": "How much RAM may the kept encoded chunks use, and what limit applies when the machine's memory cannot be read?",
+   "statement": "Half of the physical memory available when it is read; when the reading fails, the fallback FALLBACK_CACHE_BYTES of 8 GiB.",
+   "facts": [
+    "half of the available memory",
+    "read after the base model is loaded",
+    "fallback 8 GiB (FALLBACK_CACHE_BYTES)"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmengn/src/kvstore.rs",
+     "anchor": "pub const FALLBACK_CACHE_BYTES: usize = 8 << 30;",
+     "lines": [
+      554,
+      554
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmengn/src/kvstore.rs",
+     "anchor": "pub fn derive_ram_limit() -> RamLimit {",
+     "lines": [
+      563,
+      565
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmengn/src/kvstore.rs",
+     "anchor": "pub fn ram_limit_from(reading: Option<(u64, u64)>) -> RamLimit {",
+     "lines": [
+      569,
+      576
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c11",
+   "kind": "explain",
+   "group": "explain",
+   "question": "How does the engine round an f32 activation to binary16, and when does it leave the fast path?",
+   "statement": "r16 rounds the mantissa with ties to even by bit arithmetic when the exponent is in the normal range 113 to 141; subnormal, overflow and special values go through the exact f32_to_f16 converter, whose rounded helper rounds to nearest, ties to even.",
+   "facts": [
+    "fast path for exponent 113..=141",
+    "adds 0x0fff plus the lowest kept bit, then masks",
+    "otherwise f16_to_f32(f32_to_f16(x))",
+    "f32_to_f16 rounds to nearest, ties to even"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmengn/src/half.rs",
+     "anchor": "pub fn r16(x: f32) -> f32 {",
+     "lines": [
+      11,
+      20
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsafe/src/numeric.rs",
+     "anchor": "pub fn f32_to_f16(value: f32) -> u16 {",
+     "lines": [
+      32,
+      49
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsafe/src/numeric.rs",
+     "anchor": "fn rounded(value: u32, shift: u32) -> u32 {",
+     "lines": [
+      25,
+      30
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c12",
+   "kind": "explain",
+   "group": "explain",
+   "question": "What does the Context Rivers mailbox drop when a kind's queue grows past its bound?",
+   "statement": "Past BOUND (256) per kind, publish removes the oldest hypothesized packet first, else the oldest packet that is not a question, counting each drop; a queue of questions only is never cut.",
+   "facts": [
+    "bound is 256 per kind",
+    "oldest hypothesized packet dropped first",
+    "then the oldest non-question",
+    "questions are never dropped",
+    "dropped counter increases"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmbrain/src/rivers.rs",
+     "anchor": "pub const BOUND: usize = 256;",
+     "lines": [
+      9,
+      9
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmbrain/src/rivers.rs",
+     "anchor": "pub fn publish(&mut self, p: Packet) {",
+     "lines": [
+      20,
+      34
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c13",
+   "kind": "explain",
+   "group": "explain",
+   "question": "Why can a muscle memory pack be withdrawn after a recent drop in gains that its whole-history mean hides?",
+   "statement": "should_withdraw_recent also checks, after MIN_RECENT (5) uses, an exponentially weighted recent mean (ALPHA 0.2, about 9 uses) against the promotion gain minus z_recent (Z_RECENT, 3.0) combined standard errors, so a recent drop shows even after a long good history.",
+   "facts": [
+    "whole-history rule checked first",
+    "recent rule needs at least 5 uses",
+    "exponential weight ALPHA 0.2, effective window 9 uses",
+    "gate z_recent (Z_RECENT 3.0)",
+    "helpful and harmful counts kept"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmmusc/src/withdraw.rs",
+     "anchor": "pub fn should_withdraw_recent(",
+     "lines": [
+      114,
+      123
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmmusc/src/withdraw.rs",
+     "anchor": "impl Recent {",
+     "lines": [
+      83,
+      101
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmmusc/src/withdraw.rs",
+     "anchor": "pub const ALPHA: f64 = 0.2;",
+     "lines": [
+      66,
+      71
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c14",
+   "kind": "explain",
+   "group": "explain",
+   "question": "How does the Map Coordinator change the pack token budget and the number of candidates the reranker orders?",
+   "statement": "coordinate starts from the caller's budgets (pack tokens from the call, reranker cap NEURAL_CAP), adds 25 percent pack room for a wide scope, narrows the reranker by a third on conflicts and halves it near the GPU memory limit, then clamps pack tokens to 1000..8000 and the cap to 12.",
+   "facts": [
+    "wide scope (salient > 6) adds 25 percent pack tokens",
+    "conflicts cut the reranker cap by a third",
+    "GPU memory at 90 percent halves the cap",
+    "pack tokens clamped to 1000..8000",
+    "reranker cap at most 12",
+    "base from forage: call tokens and NEURAL_CAP"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmapi/src/coordinator.rs",
+     "anchor": "pub fn coordinate(c: &ContextSummary, m: &ModelSummary, base: Budgets)",
+     "lines": [
+      65,
+      100
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/coordinator.rs",
+     "anchor": "pub const REFINE_MAX: usize = 8;",
+     "lines": [
+      55,
+      61
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/forage.rs",
+     "anchor": "let base = Budgets { refine: crate::coordinator::REFINE_BASE, pack_tokens: tokens",
+     "lines": [
+      676,
+      676
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c15",
+   "kind": "explain",
+   "group": "explain",
+   "question": "Which files does the repository walk read, and which folders does it skip when the studied folder is a Neuromorph folder itself?",
+   "statement": "walk reads .rs, .toml and .md files under 512 KB, skipping dot folders and SKIP (target, node_modules); when is_own finds rules.md and crates/nmcore/Cargo.toml it also skips SKIP_OWN (tests, scratch, home, private, retired, golden and weight folders).",
+   "facts": [
+    ".rs, .toml and .md files only",
+    "files under 512 KB",
+    "dot folders, target and node_modules skipped",
+    "is_own: rules.md and crates/nmcore/Cargo.toml",
+    "SKIP_OWN includes tests and scratch"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmsubs/src/repo.rs",
+     "anchor": "pub const SKIP: &[&str] = &[\"target\", \"node_modules\"];",
+     "lines": [
+      12,
+      12
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/repo.rs",
+     "anchor": "pub const SKIP_OWN: &[&str]",
+     "lines": [
+      17,
+      17
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/repo.rs",
+     "anchor": "pub fn is_own(root: &Path) -> bool {",
+     "lines": [
+      22,
+      24
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/repo.rs",
+     "anchor": "fn walk_with(root: &Path, dir: &Path, skip: &[String], own: bool",
+     "lines": [
+      66,
+      90
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c16",
+   "kind": "explain",
+   "group": "explain",
+   "question": "What happens when the memory journal is opened after a crash left its last line broken, and when does opening fail?",
+   "statement": "open_with checks the hash chain; a broken or unended last line of the last segment is written to journal/torn and cut off; damage before the last line, or another writer holding the LOCK file, fails the open and changes nothing.",
+   "facts": [
+    "the whole chain is checked",
+    "torn last line set aside in journal/torn",
+    "segment truncated to the good length",
+    "damage earlier fails the open",
+    "LOCK file opened with no sharing"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmmem/src/journal.rs",
+     "anchor": "pub fn open_with(memory: &Path, segment_bytes: u64)",
+     "lines": [
+      138,
+      193
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmmem/src/journal.rs",
+     "anchor": "fn lock(dir: &Path) -> Result<std::fs::File, Fault> {",
+     "lines": [
+      116,
+      123
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c17",
+   "kind": "explain",
+   "group": "explain",
+   "question": "When is an nm_context_pack reply served from the answer cache, and when are cached replies dropped?",
+   "statement": "A reply is reused when the same key (question with spacing normalised, tokens, form, format, since, debug, mode) was answered at the current code version; all cached replies are dropped when the version changes or 256 are held.",
+   "facts": [
+    "key holds question, tokens, form, format, since, debug, mode",
+    "only at the same code version",
+    "diagnostics marked answer_cache hit",
+    "dropped at a new version or past 256 replies"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmapi/src/tools.rs",
+     "anchor": "static ANSWERS: std::sync::Mutex<(u64, Replies)>",
+     "lines": [
+      166,
+      168
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/tools.rs",
+     "anchor": "let key: ReplyKey = vec![",
+     "lines": [
+      180,
+      188
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/tools.rs",
+     "anchor": "if let Ok(g) = ANSWERS.lock()",
+     "lines": [
+      189,
+      198
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/tools.rs",
+     "anchor": "if let Ok(mut g) = ANSWERS.lock() {",
+     "lines": [
+      201,
+      206
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c18",
+   "kind": "explain",
+   "group": "explain",
+   "question": "What does the interface server do with a POST whose body is larger than its limit?",
+   "statement": "Bodies over MAX_BODY (64 KiB) are not read, and the POST branch refuses them with 403 Forbidden, as it does a write without the local token, JSON content type and an allowed origin.",
+   "facts": [
+    "MAX_BODY is 64 KiB",
+    "body read only when length is at most MAX_BODY",
+    "403 Forbidden",
+    "writes also need the token, JSON and an allowed origin"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmcore/src/bin/ui.rs",
+     "anchor": "const MAX_BODY: usize = 64 * 1024;",
+     "lines": [
+      261,
+      261
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmcore/src/bin/ui.rs",
+     "anchor": "if length > 0 && length <= MAX_BODY {",
+     "lines": [
+      326,
+      330
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmcore/src/bin/ui.rs",
+     "anchor": "if !srv.write_allowed(origin.as_deref(), ctype.as_deref(), token.as_deref()) || length > MAX_BODY {",
+     "lines": [
+      355,
+      364
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmcore/src/bin/ui.rs",
+     "anchor": "fn write_allowed(&self, origin: Option<&str>, ctype: Option<&str>, token: Option<&str>) -> bool {",
+     "lines": [
+      279,
+      283
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c19",
+   "kind": "trace",
+   "group": "trace",
+   "question": "Trace a tools/call line on the MCP server's standard input to the reply it writes, including what happens when the tool fails.",
+   "statement": "run reads each non-empty line and calls handle_line, which parses it and sends tools/call to call; call runs Api::dispatch, whose dispatch_inner finds the operation and checks fields, and an error becomes a content reply with isError true; run writes and flushes the reply.",
+   "facts": [
+    "run skips empty lines",
+    "handle_line: parse error -32700, notifications get no reply",
+    "call uses api.dispatch",
+    "dispatch_inner checks required, typed and unknown fields",
+    "errors become isError true, not a JSON-RPC error"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmapi/src/mcp.rs",
+     "anchor": "pub fn run(api: &Api, input: impl BufRead, mut output: impl Write)",
+     "lines": [
+      83,
+      94
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/mcp.rs",
+     "anchor": "pub fn handle_line(api: &Api, line: &str) -> Option<String> {",
+     "lines": [
+      52,
+      78
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/mcp.rs",
+     "anchor": "fn call(api: &Api, params: &Value) -> Value {",
+     "lines": [
+      36,
+      49
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/lib.rs",
+     "anchor": "pub fn dispatch(&self, name: &str, input: &Value) -> Result<Value, ApiError> {",
+     "lines": [
+      197,
+      225
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c20",
+   "kind": "trace",
+   "group": "trace",
+   "question": "Trace what happens from a sync of the studied folder to the invalidation packets when one file has changed.",
+   "statement": "sync walks the root again and calls apply, which compares content hashes; with a change it re-indexes the files, adds one to the version, refreshes the reference graph and emits one invalidation packet per changed, added or removed file.",
+   "facts": [
+    "sync calls repo::walk then apply",
+    "apply compares content hashes per path",
+    "no change keeps the version",
+    "index rebuilds symbols and chunks",
+    "version += 1 and refresh_refs",
+    "one invalidation packet per file"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmsubs/src/sync.rs",
+     "anchor": "pub fn sync(&mut self) -> (SyncReport, Vec<Packet>) {",
+     "lines": [
+      52,
+      58
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/sync.rs",
+     "anchor": "pub fn apply(&mut self, next: Vec<FileInfo>) -> (SyncReport, Vec<Packet>) {",
+     "lines": [
+      20,
+      49
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/lib.rs",
+     "anchor": "pub(crate) fn index(&mut self, files: Vec<FileInfo>) {",
+     "lines": [
+      115,
+      149
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c21",
+   "kind": "trace",
+   "group": "trace",
+   "question": "Trace two observed packets with the same key but different text through the Core Brain's reduce step.",
+   "statement": "CoreBrain::reduce takes the mailbox, arbitrate labels each claim, label marks both Contradicted because an observed peer with an observed source differs in text, and the Tension Buffer's hold keeps the group and returns a question packet asking about the conflict.",
+   "facts": [
+    "reduce partitions questions from claims",
+    "arbitrate calls label per packet",
+    "observed_source: path:line, git: or build: source",
+    "Contradicted when an observed peer differs in text",
+    "hold adds a conflict question packet"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmbrain/src/stack.rs",
+     "anchor": "fn reduce(&mut self, packets: Vec<Packet>, budget: &Budget) -> Pack {",
+     "lines": [
+      118,
+      129
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmbrain/src/arbiter.rs",
+     "anchor": "let status = if verified.contains(p.key()) {",
+     "lines": [
+      40,
+      44
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmbrain/src/arbiter.rs",
+     "anchor": "fn observed_source(src: &str) -> bool {",
+     "lines": [
+      25,
+      31
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmbrain/src/contradiction.rs",
+     "anchor": "pub fn hold(&mut self, packets: &[Packet], version: u64) -> Vec<Packet> {",
+     "lines": [
+      33,
+      59
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c22",
+   "kind": "trace",
+   "group": "trace",
+   "question": "Trace an nm_patch_propose call from the finding index to the recorded proposal.",
+   "statement": "tool_patch_propose takes the finding from FINDINGS (filled by the last nm_improve_scan), improve::propose turns its one-line fix into a unified diff, and approval::record appends it to proposals.jsonl with an id of p and the time in milliseconds; nothing is applied.",
+   "facts": [
+    "findings come from the last nm_improve_scan",
+    "propose: a one-line unified diff, none when old equals new",
+    "record appends to proposals.jsonl",
+    "id is p plus the current milliseconds",
+    "never applied by the Nano"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmapi/src/build.rs",
+     "anchor": "pub fn tool_patch_propose(memory: &Path, v: &Value) -> Result<Value, ApiError> {",
+     "lines": [
+      455,
+      470
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/build.rs",
+     "anchor": "if let Ok(mut k) = FINDINGS.lock() {",
+     "lines": [
+      441,
+      443
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmtool/src/improve.rs",
+     "anchor": "pub fn propose(f: &Finding) -> Option<String> {",
+     "lines": [
+      118,
+      124
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmtool/src/approval.rs",
+     "anchor": "pub fn record(dir: &Path, finding: &str, diff: &str) -> Result<String, String> {",
+     "lines": [
+      14,
+      36
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c23",
+   "kind": "trace",
+   "group": "trace",
+   "question": "Trace how a question naming a concept the tree does not contain ends with a withheld pack.",
+   "statement": "After reduce, forage calls absent_terms_with on the question, which weighs each absent content term by rarity (half for one found only through its stem or parts); withhold_uncovered withholds the pack, clearing its packets, when the share is at least ABSENT_SHARE 0.25.",
+   "facts": [
+    "forage calls absent_terms_with after reduce",
+    "weight by idf, half for stem or part matches",
+    "share is absent weight over total",
+    "withheld at share >= 0.25",
+    "packets cleared and a reason given"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmapi/src/forage.rs",
+     "anchor": "let (absent, share) = sub.absent_terms_with(question, general_use(&self.home));",
+     "lines": [
+      820,
+      821
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmsubs/src/lib.rs",
+     "anchor": "pub fn absent_terms_with(&self, q: &str, general: Option<&general::GeneralUse>)",
+     "lines": [
+      185,
+      241
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmbrain/src/synthesis.rs",
+     "anchor": "pub const ABSENT_SHARE: f32 = 0.25;",
+     "lines": [
+      25,
+      25
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmbrain/src/synthesis.rs",
+     "anchor": "pub fn withhold_uncovered(mut pack: Pack, absent: &[String], share: f32) -> Pack {",
+     "lines": [
+      30,
+      38
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c24",
+   "kind": "trace",
+   "group": "trace",
+   "question": "With memory on, trace how a new question recalls earlier episodes and reads their cited lines again.",
+   "statement": "forage calls session::recall when memory is on; recall runs word_recall (rarity-weighted share of key terms at RECALL_FLOOR 0.5 or more, best 3, within RECALL_MARGIN 0.2 of the best), adds episodes recalled by meaning, and re-reads up to 3 citations per episode fresh, marking stale ones.",
+   "facts": [
+    "called only when memory is on",
+    "RECALL_FLOOR 0.5",
+    "best 3 within 0.2 of the best",
+    "recall by meaning joins when engines are bound",
+    "up to 3 citations re-read per episode",
+    "stale citations noted"
+   ],
+   "answers": [
+    {
+     "file": "crates/nmapi/src/forage.rs",
+     "anchor": "let packets = brain.forage(&plan, &BrainView(budget));",
+     "lines": [
+      798,
+      800
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/session.rs",
+     "anchor": "pub fn recall(org: &Organism, question: &str) -> (Vec<Packet>, Vec<Packet>, usize) {",
+     "lines": [
+      259,
+      299
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/session.rs",
+     "anchor": "fn word_recall(",
+     "lines": [
+      228,
+      251
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/session.rs",
+     "anchor": "pub const RECALL_FLOOR: f32 = 0.5;",
+     "lines": [
+      205,
+      205
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmapi/src/session.rs",
+     "anchor": "pub const RECALL_MARGIN: f32 = 0.2;",
+     "lines": [
+      219,
+      220
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c25",
+   "kind": "value",
+   "group": "non-rust",
+   "question": "Which lints does the workspace forbid or deny, and may tests still call unwrap?",
+   "statement": "Cargo.toml forbids unsafe_code and denies clippy correctness, unwrap_used, dbg_macro and todo; clippy.toml allows unwrap, expect, panic, indexing and printing in tests.",
+   "facts": [
+    "unsafe_code forbid",
+    "unwrap_used, dbg_macro, todo denied",
+    "clippy correctness denied",
+    "allow-unwrap-in-tests = true"
+   ],
+   "answers": [
+    {
+     "file": "Cargo.toml",
+     "anchor": "[workspace.lints.rust]",
+     "lines": [
+      14,
+      21
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "clippy.toml",
+     "anchor": "allow-unwrap-in-tests = true",
+     "lines": [
+      2,
+      6
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c26",
+   "kind": "explain",
+   "group": "non-rust",
+   "question": "Why is the Rust toolchain pinned to 1.99.1, and what minimum Rust version does the workspace declare?",
+   "statement": "rust-toolchain.toml pins 1.99.1 because it fixes an FFI bool return regression in 1.99.0; Cargo.toml and clippy.toml declare 1.99 as the minimum version.",
+   "facts": [
+    "channel 1.99.1",
+    "fixes an FFI bool return regression in 1.99.0",
+    "rust-version 1.99 in Cargo.toml",
+    "msrv 1.99 in clippy.toml"
+   ],
+   "answers": [
+    {
+     "file": "rust-toolchain.toml",
+     "anchor": "channel = \"1.99.1\"",
+     "lines": [
+      2,
+      2
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "Cargo.toml",
+     "anchor": "rust-version = \"1.99\"",
+     "lines": [
+      9,
+      9
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "clippy.toml",
+     "anchor": "msrv = \"1.99\"",
+     "lines": [
+      1,
+      1
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c27",
+   "kind": "locate",
+   "group": "non-rust",
+   "question": "In what order does the engine look for the models folder?",
+   "statement": "First the NANO_MODELS environment variable, then dir in designs/models.json (relative to the Nano folder), then weights/ in the Nano folder, as the configuration guide states and nmtype::models_dir does.",
+   "facts": [
+    "NANO_MODELS first",
+    "designs/models.json dir second, relative to the Nano folder",
+    "weights/ last",
+    "models_dir in nmtype"
+   ],
+   "answers": [
+    {
+     "file": "docs/configuration.md",
+     "anchor": "The engine reads models from the first of:",
+     "lines": [
+      27,
+      32
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "crates/nmtype/src/lib.rs",
+     "anchor": "pub fn models_dir(home: impl AsRef<std::path::Path>) -> std::path::PathBuf {",
+     "lines": [
+      88,
+      101
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c28",
+   "kind": "explain",
+   "group": "non-rust",
+   "question": "What does the audit log keep about a tool call, and what does it keep when memory is off?",
+   "statement": "A tool call row keeps the tool, project, time, outcome, the first 200 characters of the question or main argument (left out when it looks like a secret), the files cited and the reply size, never file contents; with memory off only tool, project, mode, time and outcome.",
+   "facts": [
+    "first 200 characters of the question",
+    "left out when it looks like a secret",
+    "files cited and reply size",
+    "file contents never logged",
+    "memory off: tool, project, mode, time, outcome"
+   ],
+   "answers": [
+    {
+     "file": "docs/privacy.md",
+     "anchor": "| `memory/audit.jsonl` |",
+     "lines": [
+      59,
+      59
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "docs/privacy.md",
+     "anchor": "With the `memory` control off, or `serve --memory off`",
+     "lines": [
+      77,
+      79
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "c29",
+   "kind": "decoy",
+   "group": "decoy",
+   "question": "Which function writes memory episodes into a PostgreSQL table, and what connection pool size does it use?",
+   "statement": "None: the Nano keeps memory in its own files and has no PostgreSQL connection.",
+   "facts": [
+    "no PostgreSQL code exists",
+    "memory is kept in files"
+   ],
+   "answers": []
+  },
+  {
+   "id": "c30",
+   "kind": "decoy",
+   "group": "decoy",
+   "question": "Which Kubernetes manifest sets the Nano's replica count and memory limit?",
+   "statement": "None: the tree holds no Kubernetes manifest.",
+   "facts": [
+    "no Kubernetes manifest exists"
+   ],
+   "answers": []
+  }
+ ]
+}

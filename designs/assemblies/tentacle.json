@@ -1,0 +1,19 @@
+{
+  "note": "Tentacle template, the one tentacle of the specification (2026-11-10, step P4 first form; specification 2.1 to 2.4 and 3 and its addition of 2026-11-10 08:00 UTC), instantiated by nmnte::compose with {n} replaced by the tentacle index. One autonomous processing pathway, running in parallel with the others: the tentacle node (its own window over the whole code base for the question, cut into spans; the lens is a temporary specialisation), its drone tip (attention-head drone readers when a model is loaded, and the exact readers as further readers), its core (nmapi.tentacle_core: the neural tentacle core when a model is loaded, else the stated exact fallback core) and its g0_tx (nmbrain.g0, holding the core's state and report), which reports only to G1 (nmbrain.g1#g1 in core.json). No tentacle owns, stores or loads weights: one central copy is used by reference. The working-memory note hangs off the g0_tx. No edge leaves a tentacle except into G1. The earlier five-node territory template (PLAN 4d item 5) is kept as designs/assemblies/compose-context-territory.json, the graph served while --one-tentacle is off. Extra nodes a design adds must be registered components.",
+  "version": 2,
+  "nodes": [
+    {"id": "nmpod.unit#t{n}", "kind": "tentacle", "parent": "nmpod.pod#p0", "ports_in": [{"name": "plan", "kind": "json", "required": true}], "ports_out": [{"name": "assignment", "kind": "json", "required": true}], "config": {"reads": "own window over the whole code base, lens per question"}},
+    {"id": "nmpod.unit#d{n}", "kind": "drone", "parent": "nmpod.unit#t{n}", "ports_in": [{"name": "assignment", "kind": "json", "required": true}], "ports_out": [{"name": "findings", "kind": "json", "required": true}], "config": {"role": "tip", "readers": ["drones (attention heads; central weights by reference when a model is loaded)", "lexical, semantic, deep (inside the window under window reach)", "symbols, git, build, tests, uses, rules, interface (whole code base)"]}},
+    {"id": "nmapi.tentacle_core#t{n}", "kind": "other", "parent": "nmpod.unit#t{n}", "ports_in": [{"name": "findings", "kind": "json", "required": true}], "ports_out": [{"name": "report", "kind": "json", "required": true}], "config": {"role": "core", "neural": "nmapi::tentacle_core when a model is loaded (central weights by reference, none owned)", "fallback": "nmpod::core exact fallback"}},
+    {"id": "nmbrain.g0#t{n}", "kind": "memory", "parent": "nmpod.unit#t{n}", "ports_in": [{"name": "report", "kind": "json", "required": true}], "ports_out": [{"name": "packets", "kind": "packets", "required": true}], "config": {"role": "g0_tx"}},
+    {"id": "nmmem.working#t{n}", "kind": "memory", "parent": "nmpod.unit#t{n}", "ports_in": [{"name": "packets", "kind": "packets", "required": true}], "ports_out": [{"name": "refs", "kind": "refs", "required": false}], "config": {"role": "note"}}
+  ],
+  "edges": [
+    {"from": "nmbrain.stack#plan", "from_port": "plan", "to": "nmpod.unit#t{n}", "to_port": "plan", "mode": {"kind": "direct"}},
+    {"from": "nmpod.unit#t{n}", "from_port": "assignment", "to": "nmpod.unit#d{n}", "to_port": "assignment", "mode": {"kind": "conditional", "predicate": "assigned"}},
+    {"from": "nmpod.unit#d{n}", "from_port": "findings", "to": "nmapi.tentacle_core#t{n}", "to_port": "findings", "mode": {"kind": "direct"}},
+    {"from": "nmapi.tentacle_core#t{n}", "from_port": "report", "to": "nmbrain.g0#t{n}", "to_port": "report", "mode": {"kind": "direct"}},
+    {"from": "nmbrain.g0#t{n}", "from_port": "packets", "to": "nmmem.working#t{n}", "to_port": "packets", "mode": {"kind": "buffered", "bound": 8}},
+    {"from": "nmbrain.g0#t{n}", "from_port": "packets", "to": "nmbrain.g1#g1", "to_port": "packets", "mode": {"kind": "buffered", "bound": 256}}
+  ]
+}

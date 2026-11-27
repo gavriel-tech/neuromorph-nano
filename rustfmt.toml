@@ -1,0 +1,7 @@
+# Formatting of the Rust workspace. Long lines are common in this code base (one-line builders
+# and match arms), so the width is wider than the default and small items stay on one line.
+# Running `cargo fmt` rewrites most source files and makes every part card stale: run it once, in
+# its own change, then regenerate and seal the cards.
+edition = "2024"
+max_width = 140
+use_small_heuristics = "Max"

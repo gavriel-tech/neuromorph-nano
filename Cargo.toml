@@ -1,0 +1,21 @@
+# Neuromorph Nano workspace, Gavriel Technologies.
+[workspace]
+resolver = "3"
+members = ["crates/nmhash", "crates/nmjson", "crates/nmlex", "crates/nmdoc", "crates/nmtype", "crates/nmnte", "crates/nmsubs", "crates/nmpod", "crates/nmbrain", "crates/nmmem", "crates/nmnpcs", "crates/nmapi", "crates/nmcore", "crates/nmlab", "crates/nmffi", "crates/nmsafe", "crates/nmtokz", "crates/nmengn", "crates/nmlearn", "crates/nmtool", "crates/nmmusc"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["Gavriel Technologies", "Luis Jake Gabriel III"]
+repository = "https://github.com/gavriel-tech/neuromorph-nano"
+publish = false
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+correctness = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+dbg_macro = "deny"
+todo = "deny"

@@ -1,0 +1,124 @@
+=== var declaration
+var x = 1;
+---
+var x = 1 ;
+=== require call
+require("./a.js")
+---
+require ( $S )
+=== CommonJS export
+module.exports = { a };
+---
+module . exports = { a } ;
+=== regular expression at the start
+/x/g.exec(s)
+---
+$R . exec ( s )
+=== division across lines
+a = b
+/ c / d
+---
+a = b / c / d
+=== regular expressions in a conditional
+x = a ? /y/ : /z/;
+---
+x = a ? $R : $R ;
+=== regular expressions in an array
+[/a/, /b/]
+---
+[ $R , $R ]
+=== regular expression after typeof
+typeof /x/
+---
+typeof $R
+=== template over two lines
+`line1
+line2`;
+---
+$S ;
+=== call inside a template expression
+`${fn(a, "b")}!`
+---
+$S fn ( a , $S )
+=== escaped backtick
+`a\`b`
+---
+$S
+=== dollar brace in a plain string
+const s = "${x}";
+---
+const s = $S ;
+=== arrow without parentheses
+x => x + 1
+---
+x => x + 1
+=== async arrow
+const g = async () => {};
+---
+const g = async ( ) => { } ;
+=== class with a static method
+class A extends B { static m() {} }
+---
+class A extends B { static m ( ) { } }
+=== getter
+get size() { return this.n; }
+---
+get size ( ) { return this . n ; }
+=== private field
+this.#count++
+---
+this . # count + +
+=== spread
+f(...args)
+---
+f ( . . . args )
+=== exponent
+2 ** 3
+---
+2 * * 3
+=== line comment holding a block comment opener
+a // b /* c
+d
+---
+a d
+=== self-closing JSX element
+<Br />
+---
+< Br / >
+=== entity in a string
+'&amp;'
+---
+$S
+=== escaped slash in a regular expression
+/a\/b/
+---
+$R
+=== numeric division
+x = 4 / 2 / 1;
+---
+x = 4 / 2 / 1 ;
+=== division after parentheses
+x = (1) / 2;
+---
+x = ( 1 ) / 2 ;
+=== quoted object keys
+{ "a-b": 1, 'c': 2 }
+---
+{ $S : 1 , $S : 2 }
+=== tagged template
+html`<p>${x}</p>`
+---
+html $S x
+=== big integer and exponent literals
+10n + 1e3
+---
+10n + 1e3
+=== letters beyond ASCII in a name
+const café = 1;
+---
+const café = 1 ;
+=== interpreter line at the start
+#!/usr/bin/env node
+x
+---
+x

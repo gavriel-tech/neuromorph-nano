@@ -1,0 +1,19 @@
+[package]
+name = "nmsubs"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Global Context Substrate and its views"
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmhash = { path = "../nmhash" }
+nmdoc = { path = "../nmdoc" }
+nmlex = { path = "../nmlex" }
+nmtype = { path = "../nmtype" }
+
+[lints]
+workspace = true

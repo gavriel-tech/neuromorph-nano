@@ -1,0 +1,70 @@
+{
+  "date": "2026-11-10",
+  "step": "P9, cartridges and the preference layer, first form",
+  "read_by": "nmlearn::cartridge::Policy::load (values below; the code holds the same values as its stated fallback) and nmlearn::preference",
+  "label": {
+    "schema": "nm-cartridge/1",
+    "fields": {
+      "schema": "always nm-cartridge/1",
+      "id": "unique id; a learning unit keeps its registry id",
+      "kind": "learning-unit, encoded-cache or other; muscle-memory-pack is refused (muscle memory is its own store, guide 5.3)",
+      "data_class": "sensory or behavioural (guide 5.1); never mixed in one active set",
+      "base": "base population name, the folder under weights/",
+      "base_sha256": "SHA-256 of the released base weights it fits (weights/<base>/part.json field weights.sha256)",
+      "components": "component nodes or layers covered; each must be loaded for the slot check to pass",
+      "scopes": "scope keys role:kind:repo it serves; a missing or * segment matches any",
+      "quantization": "one of quantizations",
+      "description": "plain description",
+      "version": "1 plus the length of its lineage",
+      "check": "Step Check result, one of check_results",
+      "date": "UTC date written, YYYY-MM-DD",
+      "loaded": "whether it is plugged in now"
+    },
+    "kinds": ["learning-unit", "encoded-cache", "other"],
+    "refused_kinds": ["muscle-memory-pack", "muscle-memory"],
+    "data_classes": ["sensory", "behavioural"],
+    "quantizations": ["nmq8-row-f16", "f16", "f32", "none"],
+    "check_results": ["accept", "candidate", "reject", "rolled-back", "retired", "none"],
+    "data_class_by_kind": {"encoded-cache": "sensory"},
+    "unit_data_class": "behavioural",
+    "unit_data_class_reason": "learning units learn judgments only (ranking, compression, withhold, breakage prediction, routing; rules.md), which control behaviour; they hold no sensory content",
+    "unit_status_to_check": {
+      "fitted": "accept",
+      "active": "accept",
+      "accepted-inactive": "accept",
+      "candidate": "candidate",
+      "rejected": "reject",
+      "rolled-back": "rolled-back",
+      "retired": "retired",
+      "unfitted": "none"
+    }
+  },
+  "stacking": {
+    "composition": "select per request and arbitrate at the output; parameters are never merged",
+    "order": ["scope tier, most specific first", "reliability lower bound, highest first", "id, ascending"],
+    "max_active": 16,
+    "max_active_source": "rules.md: a cap of 16 active units",
+    "reliability": "Beta posterior of the cartridge's recorded track record, interval mean plus or minus z standard deviations, lower bound scaled by the answer's own confidence",
+    "beta_prior": [1, 1],
+    "z": 1.645,
+    "z_source": "one-sided level 0.05, the same level as the readout sign test (nmlearn::readout::ALPHA)",
+    "bar": "the base path's recorded success rate in the slot, from units/outcomes.jsonl (derived at run time)",
+    "fallback_threshold": 0.5,
+    "fallback_threshold_use": "only when no outcome is recorded in the slot",
+    "outcomes": {
+      "re-read": "neither answer reliable, or the two answers score different candidate sets",
+      "combine": "same top candidate, or both reliable with overlapping intervals: scores weighted by confidence over variance",
+      "controls": "different top candidates and only one reliable, or one's lower bound above the other's upper bound"
+    }
+  },
+  "preferences": {
+    "store": "preferences/records.jsonl",
+    "data_class": "behavioural",
+    "never_under": "memory/",
+    "signals": ["accept", "reject", "correction"],
+    "rule": "deterministic diff of the preferred and the other form: prefer = terms only in the preferred form, avoid = terms only in the other",
+    "recall_k": "ceil(sqrt(number of records)), derived at run time",
+    "embedder": "the exact hashed embedder of the Core Brain (nmbrain::slot::embed) behind the Embedder trait",
+    "pairwise_head": "later, once enough pairs exist (number from the leave-one-out curve)"
+  }
+}

@@ -1,0 +1,251 @@
+{
+    "version":  1,
+    "note":  "S7 writer fixture (plan owner ruling 2026-11-07 23:56 UTC): 12 seeded build errors, no file or error code shared with designs/breakages.json. Written by runs/2026-11-08-S7-generators/gen-writer-errors.ps1 with each error verified by cargo check on a scratch copy; locked by hash in COPIED.md before any S7 run; never edited after a result. Scoring: file and line within 2 of expected_line, the cause class (family), and a fix that compiles in a scratch Step Check. Intent rule (plan owner ruling 2026-11-08 00:01 UTC): a fix counts only if the scratch Step Check compiles, the fixed line still does the recorded intent (all `keep` patterns match, no `drop` pattern matches), no line other than the seeded one is deleted, and at most three lines change. The exact control is rustc\u0027s machine-applicable suggestion where one exists (`machine_applicable_suggestion`), scored by the same rule.",
+    "items":  [
+                  {
+                      "id":  "w1",
+                      "package":  "emma-wgtreg",
+                      "file":  "framework/wgtadp/wgtreg/src/verify.rs",
+                      "insert_after_line":  218,
+                      "insert":  "        let _nm_seeded = 1_u8; _nm_seeded = 2;",
+                      "expected_code":  "E0384",
+                      "family":  "mutability",
+                      "expected_line":  219,
+                      "anchor":  "pub fn passed(\u0026self) -\u003e bool {",
+                      "file_sha256":  "7ce5bfdbe7bcfea62620f47d04a353897b2196c1bf9f945d4f98c4806c947ad0",
+                      "intent":  "the variable is set to 1 and reassigned to 2 later",
+                      "keep":  [
+                                   "let\\s+(mut\\s+)?_nm_seeded\\b",
+                                   "_nm_seeded\\s*=\\s*2"
+                               ],
+                      "drop":  [
+
+                               ],
+                      "machine_applicable_suggestion":  true
+                  },
+                  {
+                      "id":  "w2",
+                      "package":  "emma-owners",
+                      "file":  "native/rscore/owners/src/manifest.rs",
+                      "insert_after_line":  46,
+                      "insert":  "        let _nm_seeded = String::new(); let _nm_a = _nm_seeded; let _nm_b = _nm_seeded;",
+                      "expected_code":  "E0382",
+                      "family":  "ownership",
+                      "expected_line":  47,
+                      "anchor":  "pub fn main_sha256(bytes: \u0026[u8]) -\u003e Result\u003cString\u003e {",
+                      "file_sha256":  "1a13ebfd63446c2dd65826fd62b252765f180efe30d6084896622b11bb0f0704",
+                      "intent":  "both later bindings receive the string",
+                      "keep":  [
+                                   "_nm_a\\s*=\\s*_nm_seeded",
+                                   "_nm_b\\s*=\\s*_nm_seeded"
+                               ],
+                      "drop":  [
+
+                               ],
+                      "machine_applicable_suggestion":  true
+                  },
+                  {
+                      "id":  "w3",
+                      "package":  "emma-loader",
+                      "file":  "native/rscore/loader/src/experts.rs",
+                      "insert_after_line":  47,
+                      "insert":  "        let _nm_seeded = nm_seeded_module::Value::new();",
+                      "expected_code":  "E0433",
+                      "family":  "resolution",
+                      "expected_line":  48,
+                      "anchor":  "pub fn new(ranges: Vec\u003cExpertRange\u003e, layout: RangeLayout) -\u003e Result\u003cSelf\u003e {",
+                      "file_sha256":  "c96ca857322aea5deaf7099f8c3b717f91ccf17413ada297a2e8087990d16626",
+                      "intent":  "a value is constructed with a `new` constructor of an existing type",
+                      "keep":  [
+                                   "let\\s+_nm_seeded\\s*=\\s*[A-Za-z_][\\w:\u003c\u003e]*::new\\(\\)"
+                               ],
+                      "drop":  [
+                                   "nm_seeded_module"
+                               ],
+                      "machine_applicable_suggestion":  false
+                  },
+                  {
+                      "id":  "w4",
+                      "package":  "emma-exctnm",
+                      "file":  "library/3-neumor/exact-neuromorph/src/session_search.rs",
+                      "insert_after_line":  101,
+                      "insert":  "        let _nm_seeded = std::cmp::max(1_u8);",
+                      "expected_code":  "E0061",
+                      "family":  "arity",
+                      "expected_line":  102,
+                      "anchor":  "fn parse(input: \u0026\u0027a Value) -\u003e Result\u003cSelf, ApiError\u003e {",
+                      "file_sha256":  "7aba52292cb76e1ad51bdf7fbfd574030f529bff1dbcff5212485ed3499e6c31",
+                      "intent":  "the call to max needs its second argument",
+                      "keep":  [
+                                   "max\\(\\s*1_u8\\s*,\\s*[^)\\s][^)]*\\)"
+                               ],
+                      "drop":  [
+
+                               ],
+                      "machine_applicable_suggestion":  false
+                  },
+                  {
+                      "id":  "w5",
+                      "package":  "emma-prtdef",
+                      "file":  "framework/fwcore/prtdef/src/json.rs",
+                      "insert_after_line":  25,
+                      "insert":  "        let _nm_seeded = () + ();",
+                      "expected_code":  "E0369",
+                      "family":  "operator",
+                      "expected_line":  26,
+                      "anchor":  "pub fn get(\u0026self, key: \u0026str) -\u003e Result\u003c\u0026Self\u003e {",
+                      "file_sha256":  "c1b9cf393b2dd966d682c4085c3366aceef8cd8430c39f27f5616b0caba268cb",
+                      "intent":  "two values are added",
+                      "keep":  [
+                                   "let\\s+_nm_seeded\\s*=\\s*\\S.*\\+.*\\S\\s*;"
+                               ],
+                      "drop":  [
+                                   "\\(\\)\\s*\\+\\s*\\(\\)"
+                               ],
+                      "machine_applicable_suggestion":  false
+                  },
+                  {
+                      "id":  "w6",
+                      "package":  "emma-tokenz",
+                      "file":  "native/rscore/tokenz/src/json.rs",
+                      "insert_after_line":  41,
+                      "insert":  "        let _nm_seeded: Vec\u003cu8\u003e = (0_i32..3).collect();",
+                      "expected_code":  "E0277",
+                      "family":  "trait-bound",
+                      "expected_line":  42,
+                      "anchor":  "pub(crate) fn integer(\u0026self) -\u003e Result\u003cu64\u003e {",
+                      "file_sha256":  "b3d3aab9aca6dde246e00a3e2cc06af042f22bcf9926c7f1b28a99ed1488f34f",
+                      "intent":  "the range is collected into a vector",
+                      "keep":  [
+                                   "collect",
+                                   "Vec\\s*\u003c"
+                               ],
+                      "drop":  [
+
+                               ],
+                      "machine_applicable_suggestion":  false
+                  },
+                  {
+                      "id":  "w7",
+                      "package":  "emma-flntcd",
+                      "file":  "library/6-micmod/reason/flint-int4/src/ports.rs",
+                      "insert_after_line":  13,
+                      "insert":  "    let _nm_seeded = 5_u32[0];",
+                      "expected_code":  "E0608",
+                      "family":  "indexing",
+                      "expected_line":  14,
+                      "anchor":  "fn number(n: usize) -\u003e Value {",
+                      "file_sha256":  "350f936eb09f9e005697c229cb1e2781a5f5ba3a274259a6bc742afff76467c9",
+                      "intent":  "an element is read by index 0",
+                      "keep":  [
+                                   "\\[\\s*0\\s*\\]"
+                               ],
+                      "drop":  [
+                                   "5_u32\\s*\\["
+                               ],
+                      "machine_applicable_suggestion":  false
+                  },
+                  {
+                      "id":  "w8",
+                      "package":  "emma-gcntxt",
+                      "file":  "framework/contxt/gcntxt/src/network.rs",
+                      "insert_after_line":  84,
+                      "insert":  "        let _nm_seeded = Vec::\u003cu8\u003e::new(); _nm_seeded.push(1);",
+                      "expected_code":  "E0596",
+                      "family":  "mutability",
+                      "expected_line":  85,
+                      "anchor":  "pub fn new(request: \u0026str, plan: \u0026[\u0026str]) -\u003e Self {",
+                      "file_sha256":  "c0d63d39dbaae33ebe554b01e9a7fb8e547a908a202ac5475ba0bbe55246e40b",
+                      "intent":  "the vector receives a pushed element",
+                      "keep":  [
+                                   "_nm_seeded\\.push\\(\\s*1\\s*\\)"
+                               ],
+                      "drop":  [
+
+                               ],
+                      "machine_applicable_suggestion":  true
+                  },
+                  {
+                      "id":  "w9",
+                      "package":  "emma-blkstk",
+                      "file":  "framework/stacks/blkstk/src/block.rs",
+                      "insert_after_line":  339,
+                      "insert":  "        let _nm_seeded = std::ops::Range { start: 0_u8, end: 1, nm_seeded_field: 2 };",
+                      "expected_code":  "E0560",
+                      "family":  "fields",
+                      "expected_line":  340,
+                      "anchor":  "fn owned_mask(\u0026self) -\u003e Result\u003cOption\u003cBuf\u003e\u003e {",
+                      "file_sha256":  "78537abc809011dfc1ed6fced3089d1c4502cf4b844f9c36abe28a727bdd0af1",
+                      "intent":  "a range is built from its existing fields",
+                      "keep":  [
+                                   "Range\\s*\\{",
+                                   "start",
+                                   "end"
+                               ],
+                      "drop":  [
+                                   "nm_seeded_field"
+                               ],
+                      "machine_applicable_suggestion":  false
+                  },
+                  {
+                      "id":  "w10",
+                      "package":  "emma-salprf",
+                      "file":  "framework/parctl/salprf/src/cli.rs",
+                      "insert_after_line":  229,
+                      "insert":  "    let _nm_seeded = (1_u8, 2_u8).nm_seeded_field;",
+                      "expected_code":  "E0609",
+                      "family":  "fields",
+                      "expected_line":  230,
+                      "anchor":  "fn summary(result: \u0026emma_salprf::Profile) -\u003e Result\u003c()\u003e {",
+                      "file_sha256":  "351a23b7931c5483d73acbcb327c0d8eec21236dff640a03640501cbad5af627",
+                      "intent":  "a field of the tuple is read",
+                      "keep":  [
+                                   "\\(\\s*1_u8\\s*,\\s*2_u8\\s*\\)\\s*\\.\\s*[01]\\b"
+                               ],
+                      "drop":  [
+                                   "nm_seeded_field"
+                               ],
+                      "machine_applicable_suggestion":  false
+                  },
+                  {
+                      "id":  "w11",
+                      "package":  "emma-apisrv",
+                      "file":  "framework/fwcore/apisrv/src/mcp.rs",
+                      "insert_after_line":  68,
+                      "insert":  "    let _nm_seeded = *5_u32;",
+                      "expected_code":  "E0614",
+                      "family":  "deref",
+                      "expected_line":  69,
+                      "anchor":  "pub fn handle_line(api: \u0026Api, line: \u0026str) -\u003e Option\u003cString\u003e {",
+                      "file_sha256":  "bb51221f7c10d6bf678f6b539745055b232b5a36b658c17f096eb7de50d0a69d",
+                      "intent":  "a value is read through a dereference",
+                      "keep":  [
+                                   "\\*"
+                               ],
+                      "drop":  [
+                                   "\\*\\s*5_u32\\s*;"
+                               ],
+                      "machine_applicable_suggestion":  false
+                  },
+                  {
+                      "id":  "w12",
+                      "package":  "emma-encstk",
+                      "file":  "framework/stacks/encstk/src/decide.rs",
+                      "insert_after_line":  158,
+                      "insert":  "    1_u8 = 2;",
+                      "expected_code":  "E0070",
+                      "family":  "assignment",
+                      "expected_line":  159,
+                      "anchor":  "fn clamp(t: f64) -\u003e f64 {",
+                      "file_sha256":  "1566a69e4bf4e31b05ecef4159164388d40d29aab3cf48fdbcd3aabc545b3716",
+                      "intent":  "a place is assigned the value 2",
+                      "keep":  [
+                                   "[A-Za-z_]\\w*\\s*(:\\s*\\w+\\s*)?=\\s*2\\s*;"
+                               ],
+                      "drop":  [
+                                   "1_u8\\s*="
+                               ],
+                      "machine_applicable_suggestion":  false
+                  }
+              ]
+}

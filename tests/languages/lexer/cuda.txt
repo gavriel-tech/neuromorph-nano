@@ -1,0 +1,41 @@
+=== kernel
+__global__ void k(float* x) {}
+---
+__global__ void k ( float * x ) { }
+=== launch
+k<<<b, t>>>(x);
+---
+k < < < b , t > > > ( x ) ;
+=== shared memory
+__shared__ float s[32];
+---
+__shared__ float s [ 32 ] ;
+=== template
+template <typename T> T f(T a);
+---
+template < typename T > T f ( T a ) ;
+=== raw string
+auto r = R"(raw "text")";
+---
+auto r = $S ;
+=== scope operator
+std::vector<int> v;
+---
+std :: vector < int > v ;
+=== line comment
+// comment
+int i;
+---
+int i ;
+=== hexadecimal
+x = 0x7fffffff;
+---
+x = 0x7fffffff ;
+=== escaped quote in a string
+const char* s = "a\"b";
+---
+const char * s = $S ;
+=== C linkage
+extern "C" int g();
+---
+extern $S int g ( ) ;

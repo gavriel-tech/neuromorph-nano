@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "note": "Reflex table (PLAN 4d item 2): four-field rows, evaluated in order, first match wins, no match means keep. level scopes a row to drone, tentacle or brain; any means every level. Changed only through a functional Step Check (nmlearn::adapt).",
+  "rows": [
+    {"level": "any", "field": "source", "op": "matches_glob", "value": "target/**", "then": "drop", "reason": "build output is not project source"},
+    {"level": "drone", "field": "territory_empty", "op": "eq", "value": true, "then": "hold", "reason": "empty territory: ask the Core Brain before reading further"},
+    {"level": "drone", "field": "readers_disagree", "op": "eq", "value": true, "then": "escalate", "reason": "readers disagree: re-read or ask a slot through the Core Brain"},
+    {"level": "any", "field": "status", "op": "eq", "value": "contradicted", "then": "keep", "reason": "conflicts are kept for the Tension Buffer, never dropped"},
+    {"level": "any", "field": "kind", "op": "eq", "value": "question", "then": "keep", "reason": "barrier questions are never dropped"},
+    {"level": "drone", "field": "confidence", "op": "lt", "value": 0.2, "then": "drop", "reason": "below the drone confidence floor"},
+    {"level": "brain", "field": "status", "op": "eq", "value": "hypothesized", "then": "hold", "reason": "speculation does not bind a plan until a reader agrees"}
+  ]
+}

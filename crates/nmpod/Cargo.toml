@@ -1,0 +1,19 @@
+[package]
+name = "nmpod"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "Neuropod: tentacles, drone tips and territories"
+
+[dependencies]
+nmjson = { path = "../nmjson" }
+nmlex = { path = "../nmlex" }
+nmtype = { path = "../nmtype" }
+nmtokz = { path = "../nmtokz" }
+nmsafe = { path = "../nmsafe" }
+
+[lints]
+workspace = true

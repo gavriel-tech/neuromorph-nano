@@ -1,0 +1,64 @@
+{
+  "read": [
+    "assets/sample.dat",
+    "package.json",
+    "bin/cli.mjs",
+    "src/filter.js",
+    "src/follow.js",
+    "src/format.cjs",
+    "src/parse.js",
+    "src/util.cjs",
+    "src/view.jsx",
+    "test/parse.test.js"
+  ],
+  "skipped": [
+    {"path": ".gitignore", "reason": "hidden file"},
+    {"path": "yarn.lock", "reason": "lock file (generated): not read"},
+    {"path": "src/scratch.local.js", "reason": "ignored by .gitignore"}
+  ],
+  "definitions": [
+    {"file": "src/parse.js", "name": "LEVELS", "kind": "const", "line": 5, "end": 5, "parent": ""},
+    {"file": "src/parse.js", "name": "LINE", "kind": "const", "line": 8, "end": 8, "parent": ""},
+    {"file": "src/parse.js", "name": "parseLine", "kind": "function", "line": 14, "end": 21, "parent": ""},
+    {"file": "src/parse.js", "name": "parseAll", "kind": "function", "line": 24, "end": 35, "parent": ""},
+    {"file": "src/parse.js", "name": "levelOf", "kind": "function", "line": 37, "end": 43, "parent": ""},
+    {"file": "src/filter.js", "name": "LevelFilter", "kind": "class", "line": 4, "end": 26, "parent": ""},
+    {"file": "src/filter.js", "name": "constructor", "kind": "method", "line": 5, "end": 8, "parent": "LevelFilter"},
+    {"file": "src/filter.js", "name": "accepts", "kind": "method", "line": 10, "end": 15, "parent": "LevelFilter"},
+    {"file": "src/filter.js", "name": "fromArgs", "kind": "method", "line": 18, "end": 25, "parent": "LevelFilter"},
+    {"file": "src/filter.js", "name": "matchAll", "kind": "function", "line": 29, "end": 30, "parent": ""},
+    {"file": "src/filter.js", "name": "rateLimit", "kind": "function", "line": 33, "end": 47, "parent": ""},
+    {"file": "src/format.cjs", "name": "COLORS", "kind": "const", "line": 5, "end": 9, "parent": ""},
+    {"file": "src/format.cjs", "name": "RESET", "kind": "const", "line": 10, "end": 10, "parent": ""},
+    {"file": "src/format.cjs", "name": "colorize", "kind": "function", "line": 12, "end": 15, "parent": ""},
+    {"file": "src/format.cjs", "name": "formatRecord", "kind": "function", "line": 18, "end": 22, "parent": ""},
+    {"file": "src/util.cjs", "name": "pad", "kind": "function", "line": 4, "end": 6, "parent": ""},
+    {"file": "src/util.cjs", "name": "humanMs", "kind": "function", "line": 9, "end": 9, "parent": ""},
+    {"file": "src/follow.js", "name": "POLL_MS", "kind": "const", "line": 5, "end": 5, "parent": ""},
+    {"file": "src/follow.js", "name": "follow", "kind": "function", "line": 11, "end": 31, "parent": ""},
+    {"file": "src/view.jsx", "name": "RecordTable", "kind": "function", "line": 5, "end": 27, "parent": ""},
+    {"file": "bin/cli.mjs", "name": "require", "kind": "const", "line": 8, "end": 8, "parent": ""},
+    {"file": "bin/cli.mjs", "name": "RATE_PER_MINUTE", "kind": "const", "line": 12, "end": 12, "parent": ""},
+    {"file": "bin/cli.mjs", "name": "main", "kind": "function", "line": 14, "end": 31, "parent": ""}
+  ],
+  "imports": [
+    {"file": "src/filter.js", "line": 1, "to": "src/parse.js"},
+    {"file": "src/format.cjs", "line": 3, "to": "src/util.cjs"},
+    {"file": "src/follow.js", "line": 1, "external": "node:fs"},
+    {"file": "src/follow.js", "line": 2, "to": "src/parse.js"},
+    {"file": "src/view.jsx", "line": 1, "external": "react"},
+    {"file": "src/view.jsx", "line": 2, "to": "src/parse.js"},
+    {"file": "bin/cli.mjs", "line": 2, "external": "node:fs"},
+    {"file": "bin/cli.mjs", "line": 3, "external": "node:module"},
+    {"file": "bin/cli.mjs", "line": 4, "to": "src/parse.js"},
+    {"file": "bin/cli.mjs", "line": 5, "to": "src/filter.js"},
+    {"file": "bin/cli.mjs", "line": 6, "to": "src/follow.js"},
+    {"file": "bin/cli.mjs", "line": 9, "to": "src/format.cjs"},
+    {"file": "test/parse.test.js", "line": 1, "external": "node:assert"},
+    {"file": "test/parse.test.js", "line": 2, "external": "node:test"},
+    {"file": "test/parse.test.js", "line": 3, "to": "src/parse.js"}
+  ],
+  "packages": [
+    {"name": "logtail", "dir": "", "deps": []}
+  ]
+}

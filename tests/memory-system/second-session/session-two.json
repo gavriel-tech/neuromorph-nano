@@ -1,0 +1,31 @@
+{
+ "note": "Second-session test, session two. Every question of fold 0 of tests/dev/folds.json asked again as written (group repeated, taken from tests/dev/questions.json and tests/dev/closure.json at run time by id), reworded with the same meaning in other words (group reworded), and asked about the same places from another angle (group angle). Answers use the same anchors as the source question; each answer is found at run time by its anchor line. Written for the second-session test only; never a release measure.",
+ "questions": [
+  {"id": "r-c01", "of": "c01", "group": "reworded", "kind": "locate", "question": "In the MCP server, which code replies to the client's initialize handshake, and where is the protocol version it announces defined?"},
+  {"id": "r-c04", "of": "c04", "group": "reworded", "kind": "locate", "question": "How is a SHA-256 digest taken over a reader piece by piece, so the whole input never has to be kept in RAM?"},
+  {"id": "r-c13", "of": "c13", "group": "reworded", "kind": "explain", "question": "What lets a behaviour pack be pulled when its latest results fall off even though its long-run average still looks fine?"},
+  {"id": "r-c20", "of": "c20", "group": "reworded", "kind": "trace", "question": "Follow the path from re-scanning the studied directory to the packets that invalidate earlier reads after a single file changed."},
+  {"id": "r-c23", "of": "c23", "group": "reworded", "kind": "trace", "question": "How does a question about something the repository never mentions end up as a withheld reply?"},
+  {"id": "r-d01", "of": "d01", "group": "reworded", "kind": "name", "question": "Which function flags a pack as low confidence once the reranker's top score falls under the threshold?"},
+  {"id": "r-d05", "of": "d05", "group": "reworded", "kind": "name", "question": "How does the Nano locate its home directory when it starts?"},
+  {"id": "r-d14", "of": "d14", "group": "reworded", "kind": "value", "question": "What is the upper limit on how many call sites are read for one question?"},
+  {"id": "r-d19", "of": "d19", "group": "reworded", "kind": "relation", "question": "Where is the residency manager's make_room invoked from?"},
+  {"id": "r-d23", "of": "d23", "group": "reworded", "kind": "behaviour", "question": "What does the JSON parser do if an object repeats a key?"},
+  {"id": "r-d26", "of": "d26", "group": "reworded", "kind": "behaviour", "question": "When Rust sources were changed and cargo check reports errors, how does the stop hook react?"},
+  {"id": "r-d36", "of": "d36", "group": "reworded", "kind": "explain", "question": "When a key and value cache is forked, how are its entries shared between the copies?"},
+  {"id": "r-d37", "of": "d37", "group": "reworded", "kind": "file", "question": "Which source file holds the loop that serves MCP JSON-RPC on stdin and stdout?"},
+  {"id": "a-c01", "of": "c01", "group": "angle", "kind": "value", "question": "What protocol revision string does the Nano's MCP server report, and what name does it give in serverInfo?"},
+  {"id": "a-c04", "of": "c04", "group": "angle", "kind": "value", "question": "How large is the read buffer used when a byte stream is hashed with sha256?"},
+  {"id": "a-c13", "of": "c13", "group": "angle", "kind": "value", "question": "What weight does the newest use get in the recent gain estimator of muscle memory packs, and how many uses must pass before that estimator may withdraw a pack?", "answers_of": [3]},
+  {"id": "a-c20", "of": "c20", "group": "angle", "kind": "explain", "question": "Which function rebuilds the symbols, chunks and term counts when the file list changes, and when is the substrate version increased?", "answers_of": [2, 3]},
+  {"id": "a-c23", "of": "c23", "group": "angle", "kind": "value", "question": "What share of a question, weighted by rarity, must be missing from the tree before the pack is withheld?", "answers_of": [3, 4]},
+  {"id": "a-d01", "of": "d01", "group": "angle", "kind": "explain", "question": "What reason does a pack get when no chunk is judged relevant enough by the reranker, and when is it withheld instead of marked low?"},
+  {"id": "a-d05", "of": "d05", "group": "angle", "kind": "value", "question": "Which environment variable overrides where the Nano's root folder is, and which marker file is looked for otherwise?"},
+  {"id": "a-d14", "of": "d14", "group": "angle", "kind": "name", "question": "Which constant caps the use sites the whole path reads?"},
+  {"id": "a-d19", "of": "d19", "group": "angle", "kind": "relation", "question": "Which places ask the residency manager to free card memory before they allocate?"},
+  {"id": "a-d23", "of": "d23", "group": "angle", "kind": "value", "question": "What error message does the JSON reader give for a repeated key in an object?"},
+  {"id": "a-d26", "of": "d26", "group": "angle", "kind": "behaviour", "question": "Under what condition does the stop hook let the agent stop without blocking a second time?"},
+  {"id": "a-d36", "of": "d36", "group": "angle", "kind": "behaviour", "question": "Does appending to a forked cache change the entries of the cache it was forked from?"},
+  {"id": "a-d37", "of": "d37", "group": "angle", "kind": "name", "question": "Which function reads JSON-RPC lines from standard input until end of input in the MCP server?"}
+ ]
+}

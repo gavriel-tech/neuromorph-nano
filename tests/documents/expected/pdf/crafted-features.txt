@@ -1,0 +1,8 @@
+--- page 1 ---
+Older filters and fonts
+This page is written with a simple font whose encoding replaces some codes by glyph names.
+Its content stream is packed with LZW and then written as ASCII85 text.
+--- page 2 ---
+A composite font with a ToUnicode map
+This line is drawn through two byte codes that only the map turns into letters.
+The second page is packed with run length coding and written as hexadecimal digits.

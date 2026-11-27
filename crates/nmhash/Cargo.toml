@@ -1,0 +1,12 @@
+[package]
+name = "nmhash"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+publish.workspace = true
+repository.workspace = true
+description = "SHA-256 for the Neuromorph Nano"
+
+[lints]
+workspace = true

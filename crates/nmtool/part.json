@@ -1,0 +1,29 @@
+{
+  "id": "nmtool",
+  "kind": "tool",
+  "version": 1,
+  "parent": "nmapi",
+  "ports_in": [{"name": "request", "kind": "json", "required": true}],
+  "ports_out": [{"name": "packets", "kind": "packets", "required": true}],
+  "deps": ["nmjson", "nmlex", "nmtype"],
+  "config_schema": {},
+  "config_default": {"scratch":"scratch"},
+  "subcomponents": [
+    {"id": "nmtool.run", "version": 1, "hash": "9f1072576f8ddbcfe43f72e9707d9e762df4f786aa63e9bc074aae974a3c41b2"},
+    {"id": "nmtool.lex", "version": 1, "hash": "cfb1641132cfa55aafc375d36661e1b1b83647c629518ab2783b6b5db88c69d9"},
+    {"id": "nmtool.build", "version": 1, "hash": "9db72fee1cd167626714c5cba4b33a95ffd8b1ef9ffc4a8fb4632231a7c5fc9a"},
+    {"id": "nmtool.explain", "version": 1, "hash": "1ad59de155dd59e3622f5081d2f1b0e00c2b235debbe666763df9e0b47245db9"},
+    {"id": "nmtool.stepcheck", "version": 1, "hash": "fae648c8eb5519aa96c1d221b0b3d2733c8f37f249b4610674597242f641ba16"},
+    {"id": "nmtool.improve", "version": 1, "hash": "f70ba43e7ddf0b30d8799361d9e072baf78553efb9633f7c7de3acdf7400b6b3"},
+    {"id": "nmtool.approval", "version": 1, "hash": "14621758c8a868b379c2f2efcfdb643739f5405573060defe3930b413b31194e"},
+    {"id": "nmtool.verify", "version": 1, "hash": "356c8a1eb2c28258dd7eaf445ed5bb36ef0e17e8a87951fbc4b8146d8e77fcb7"},
+    {"id": "nmtool.conformance", "version": 1, "hash": "847e033917517cba136bdedb2c5cbe99e84e8fbedebf216624c130a375a76edb"},
+    {"id": "nmtool.scoreboard", "version": 1, "hash": "86b904718e129c5647f14cb730a414bdea474a646c74c4878b061f7c01b87e80"},
+    {"id": "nmtool.conformance/anatomy", "version": 1, "hash": "33caf9dd180b30bf3746c35ef713f019640c7d75b8295bb00e473a14257e48a2"},
+    {"id": "nmtool.conformance/stores", "version": 1, "hash": "c6d19230167fe7f099cff6f72961289bbb0c5d033bf58208613e122a091d04ea"},
+    {"id": "nmtool.conformance/text", "version": 1, "hash": "3c9ff2c0db744f5a542a276a5da52e41071b61cb0380e2527989987ec3b05324"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "249f62bbc5991571652673604afd5cb9d6ca4a81a6a466fadc6244589c7a4f4f"
+}

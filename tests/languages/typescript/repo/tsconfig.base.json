@@ -1,0 +1,9 @@
+{
+  // Shared compiler settings for every package.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "strict": true,
+    "jsx": "react-jsx",
+  },
+}

@@ -1,0 +1,19 @@
+{
+  "id": "nmlex",
+  "kind": "other",
+  "version": 1,
+  "parent": null,
+  "ports_in": [],
+  "ports_out": [],
+  "deps": [],
+  "config_schema": {},
+  "config_default": {},
+  "subcomponents": [
+    {"id": "nmlex.lex", "version": 1, "hash": "90f9a65be56313b4408e2c29fa13830e7abc0235afe2df2a9a9127d6fc026b9d"},
+    {"id": "nmlex.lang", "version": 1, "hash": "4fa1594d31329cb61940519332dae6782a73e4b9e3ef37493122417cc8fdb1b2"},
+    {"id": "nmlex.lang_lex", "version": 1, "hash": "b6eee56b119b04cd872a10c63335b173be84ec5a060b59239c1b7fae9cd9fc6a"}
+  ],
+  "lineage": [],
+  "source": "in-house engine, Gavriel Technologies",
+  "hash": "358aa5c654cc369a485b18cada579ef46de3c2304cc61d18eeaa78dfc2a9dd43"
+}

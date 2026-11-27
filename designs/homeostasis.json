@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "note": "Homeostasis thresholds (PLAN 4c nmbrain::homeostasis; guide 13). Provisional (decision 16): set for the i5-12450H, 32 GB RAM and GTX 1650 4 GB; they guide reflexes and never pin a piece to a device. Actions: suspend, resume, quarantine, throttle, propose.",
+  "thresholds": {
+    "load_max": 0.9,
+    "latency_ms_max": 5000,
+    "anomaly_rate_max": 0.25,
+    "ram_mb_max": 24000,
+    "gpu_mb_max": 3500
+  },
+  "actions": [
+    {"when": "load_max", "then": "throttle", "reason": "unit saturated: shrink its budget"},
+    {"when": "latency_ms_max", "then": "throttle", "reason": "unit slow: shrink its budget, then re-plan"},
+    {"when": "anomaly_rate_max", "then": "quarantine", "reason": "unit keeps contradicting readers: isolate, restart from its card"},
+    {"when": "ram_mb_max", "then": "suspend", "reason": "free RAM: suspend idle slots and units"},
+    {"when": "gpu_mb_max", "then": "suspend", "reason": "free GPU memory: release device views of idle slots"}
+  ],
+  "development": {
+    "starved_twice_adds_drone": true,
+    "idle_tasks_before_remove": 8
+  }
+}

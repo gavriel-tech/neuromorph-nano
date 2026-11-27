@@ -1,0 +1,10 @@
+corrupt/truncated.deflate	compressed data: truncated
+corrupt/block-type.deflate	compressed data: reserved block type
+corrupt/stored-length.deflate	compressed data: stored block length check failed
+corrupt/distance.deflate	compressed data: distance before the start
+corrupt/checksum.gz	compressed data: checksum mismatch
+corrupt/checksum.zlib	compressed data: checksum mismatch
+corrupt/header.zlib	compressed data: invalid header
+corrupt/garbage.deflate	compressed data: invalid code
+bomb/zeros.deflate	compressed data: expands too far (decompression bomb guard)
+bomb/zeros.zip	compressed data: expands too far (decompression bomb guard)

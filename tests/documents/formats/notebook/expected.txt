@@ -1,0 +1,25 @@
+# Flow rate check
+
+Compare the measured flow of bench 1 with the rated flow.
+
+```python
+rated = 40.0
+measured = [41.5, 39.2, 41.0]
+print(sum(measured) / len(measured))
+```
+
+```output
+40.56666666666667
+```
+
+## Result
+
+The mean is within two percent of the rated flow.
+
+```python
+abs(40.57 - rated) / rated
+```
+
+```output
+0.01425
+```

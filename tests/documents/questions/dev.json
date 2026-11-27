@@ -1,0 +1,907 @@
+{
+ "note": "Development set: questions over the whole corpus (manual, textbook, notes, data, mixed); tune on this set only.",
+ "questions": [
+  {
+   "id": "x01",
+   "kind": "define",
+   "question": "In the pump manual, what is meant by cut-in pressure?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "**Cut-in pressure**",
+     "lines": [
+      497,
+      497
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x02",
+   "kind": "define",
+   "question": "What does thermal conductivity mean?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "**Thermal conductivity** is a property",
+     "lines": [
+      25,
+      25
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x03",
+   "kind": "define",
+   "question": "What are quartiles and what does the IQR measure?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "The quartiles split sorted data into four parts",
+     "lines": [
+      75,
+      78
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x04",
+   "kind": "define",
+   "question": "What is emissivity?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "**Emissivity** is the ratio",
+     "lines": [
+      79,
+      79
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x05",
+   "kind": "define",
+   "question": "What does priming the pump mean?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "**Priming**",
+     "lines": [
+      505,
+      506
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "Priming means filling the volute",
+     "lines": [
+      197,
+      198
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x06",
+   "kind": "lookup",
+   "question": "How many watts is the AQ-40 base model rated at?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "| Rated power |",
+     "lines": [
+      86,
+      86
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x07",
+   "kind": "lookup",
+   "question": "When I put the impeller back after a seal change, what torque does its nut need?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "5. Refit the key and the impeller",
+     "lines": [
+      308,
+      308
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x08",
+   "kind": "lookup",
+   "question": "In the statistics chapter's pump example, what is the median flow rate?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "The pump data have twelve values, so the median",
+     "lines": [
+      48,
+      49
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x09",
+   "kind": "lookup",
+   "question": "What was the room temperature when the motor housing temperatures were taken?",
+   "answers": [
+    {
+     "file": "notes/2026-09-19-heat-notes.txt",
+     "anchor": "Room was at 24 C.",
+     "lines": [
+      5,
+      5
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x10",
+   "kind": "lookup",
+   "question": "How hard is the water at site B?",
+   "answers": [
+    {
+     "file": "notes/2026-10-12-water-hardness.md",
+     "anchor": "| site B |",
+     "lines": [
+      9,
+      9
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x11",
+   "kind": "lookup",
+   "question": "How many cents does the shop charge for a single pear?",
+   "answers": [
+    {
+     "file": "mixed/crates/shop/src/lib.rs",
+     "anchor": "\"PEAR\" => 55,",
+     "lines": [
+      8,
+      8
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x12",
+   "kind": "procedure",
+   "question": "Walk me through descaling the AQ-40.",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "To descale the pump:",
+     "lines": [
+      270,
+      278
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x13",
+   "kind": "procedure",
+   "question": "How do I clean the inlet strainer?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "To clean the strainer:",
+     "lines": [
+      321,
+      328
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x14",
+   "kind": "procedure",
+   "question": "What are the steps to fix the pump to its base?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "To mount the pump on its base:",
+     "lines": [
+      159,
+      167
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x15",
+   "kind": "procedure",
+   "question": "How do you work out a sample standard deviation by hand?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "To compute a sample standard deviation by hand",
+     "lines": [
+      95,
+      97
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x16",
+   "kind": "procedure",
+   "question": "Since the shop code cannot do refunds, what steps does staff follow to refund by hand?",
+   "answers": [
+    {
+     "file": "mixed/docs/refund-policy.md",
+     "anchor": "1. Check the receipt and the returned goods.",
+     "lines": [
+      22,
+      26
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x17",
+   "kind": "explain",
+   "question": "Why does the suction pipe need a non-return valve?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "Fit a non-return valve on the suction pipe",
+     "lines": [
+      174,
+      176
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x18",
+   "kind": "explain",
+   "question": "Why does double glazing cut heat loss so much if glass itself barely resists heat?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "The glass contributes only about 2 percent",
+     "lines": [
+      115,
+      115
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x19",
+   "kind": "explain",
+   "question": "Why would you report the median rather than the mean for something like repair times?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "The median is not affected by how extreme",
+     "lines": [
+      51,
+      54
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x20",
+   "kind": "explain",
+   "question": "How does the shop make sure a refused checkout does not change the shelf?",
+   "answers": [
+    {
+     "file": "mixed/docs/design-note.md",
+     "anchor": "`checkout` must never charge for units it could not take.",
+     "lines": [
+      11,
+      14
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x21",
+   "kind": "compare",
+   "question": "What is the difference between the AQ-40S and the AQ-40T?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "The AQ-40S has a stainless steel volute",
+     "lines": [
+      124,
+      125
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "The AQ-40T adds a 2 litre pressure vessel",
+     "lines": [
+      127,
+      128
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x22",
+   "kind": "compare",
+   "question": "How do natural and forced convection differ, including typical coefficients?",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "Convection is called natural or free",
+     "lines": [
+      55,
+      55
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "The **heat transfer coefficient** h is not a property",
+     "lines": [
+      59,
+      59
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x23",
+   "kind": "compare",
+   "question": "Compare the seal kit terms we got from the old and the new supplier.",
+   "answers": [
+    {
+     "file": "notes/2026-09-02-supplier-call.md",
+     "anchor": "Called supplier S014",
+     "lines": [
+      3,
+      7
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "notes/2026-10-20-supplier-switch.md",
+     "anchor": "Decision: from today seal kits are ordered",
+     "lines": [
+      10,
+      11
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x24",
+   "kind": "summarise",
+   "question": "Summarise how the thermal cutout works and how to reset it.",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "## 5.4 Resetting the thermal cutout",
+     "lines": [
+      427,
+      438
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x25",
+   "kind": "summarise",
+   "question": "Give a short summary of how to decide which heat transfer mode matters most.",
+   "answers": [
+    {
+     "file": "textbook/ch1-heat-transfer.md",
+     "anchor": "## 1.7 Choosing the dominant mode",
+     "lines": [
+      135,
+      142
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x26",
+   "kind": "summarise",
+   "question": "How did the AQ-40 field trial turn out overall?",
+   "answers": [
+    {
+     "file": "notes/2026-11-02-trial-summary.md",
+     "anchor": "# Trial summary",
+     "lines": [
+      1,
+      19
+     ],
+     "match": "file"
+    }
+   ]
+  },
+  {
+   "id": "x27",
+   "kind": "locate",
+   "question": "Where in the manual is setting the air pressure in the AQ-40T vessel covered?",
+   "answers": [
+    {
+     "file": "manual/aq40-manual.md",
+     "anchor": "## 3.6 Charging the pressure vessel",
+     "lines": [
+      216,
+      238
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x28",
+   "kind": "locate",
+   "question": "Which part of the statistics chapter deals with outliers?",
+   "answers": [
+    {
+     "file": "textbook/ch2-simple-statistics.txt",
+     "anchor": "2.5 Outliers",
+     "lines": [
+      117,
+      132
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x29",
+   "kind": "locate",
+   "question": "Where is the StockItem type defined?",
+   "answers": [
+    {
+     "file": "mixed/crates/inventory/src/lib.rs",
+     "anchor": "/// One line of stock",
+     "lines": [
+      3,
+      7
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x30",
+   "kind": "table",
+   "question": "How many contact thermometers are in stock and in which bin?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10291,",
+     "lines": [
+      292,
+      292
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x31",
+   "kind": "table",
+   "question": "Which parts in the inventory are out of stock?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10088,",
+     "lines": [
+      89,
+      89
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10203,",
+     "lines": [
+      204,
+      204
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10250,",
+     "lines": [
+      251,
+      251
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x32",
+   "kind": "table",
+   "question": "What is the most expensive single item in the parts list?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10291,",
+     "lines": [
+      292,
+      292
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x33",
+   "kind": "table",
+   "question": "What lead time does Corvane Seals have?",
+   "answers": [
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Corvane Seals",
+     "lines": [
+      15,
+      15
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x34",
+   "kind": "table",
+   "question": "Which of our suppliers are based in Germany?",
+   "answers": [
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Redcar Supply",
+     "lines": [
+      5,
+      5
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Corvane Electric",
+     "lines": [
+      7,
+      7
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Farrow Fasteners",
+     "lines": [
+      17,
+      17
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Harrow Fittings",
+     "lines": [
+      34,
+      34
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x35",
+   "kind": "table",
+   "question": "Which orders were cancelled?",
+   "answers": [
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0068\"",
+     "lines": [
+      68,
+      68
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0073\"",
+     "lines": [
+      73,
+      73
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0099\"",
+     "lines": [
+      99,
+      99
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x36",
+   "kind": "table",
+   "question": "Show me order O-2026-0042.",
+   "answers": [
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0042\"",
+     "lines": [
+      42,
+      42
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x37",
+   "kind": "table",
+   "question": "Which parts come from supplier S031?",
+   "answers": [
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10020,",
+     "lines": [
+      21,
+      21
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10050,",
+     "lines": [
+      51,
+      51
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10250,",
+     "lines": [
+      251,
+      251
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x38",
+   "kind": "table",
+   "question": "List all orders for part P-10012.",
+   "answers": [
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0034\"",
+     "lines": [
+      34,
+      34
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0084\"",
+     "lines": [
+      84,
+      84
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/orders.jsonl",
+     "anchor": "\"order_id\": \"O-2026-0100\"",
+     "lines": [
+      100,
+      100
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x39",
+   "kind": "table",
+   "question": "Which supplier delivers fastest, by quoted lead time?",
+   "answers": [
+    {
+     "file": "data/suppliers.tsv",
+     "anchor": "Ashby Fasteners",
+     "lines": [
+      3,
+      3
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x40",
+   "kind": "temporal",
+   "question": "What descaling interval applies now to pumps on hard water?",
+   "answers": [
+    {
+     "file": "notes/2026-10-14-maintenance-plan-update.md",
+     "anchor": "- Descale every 60 days at site B",
+     "lines": [
+      9,
+      11
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "notes/2026-11-02-trial-summary.md",
+     "anchor": "- Descale every 60 days in hard water.",
+     "lines": [
+      14,
+      14
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x41",
+   "kind": "temporal",
+   "question": "What happened on bench 1 just after half past two on 3 October?",
+   "answers": [
+    {
+     "file": "data/pump-service.log",
+     "anchor": "2026-10-03T14:30:05Z",
+     "lines": [
+      318,
+      342
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x42",
+   "kind": "temporal",
+   "question": "Which day of the week is the weekly meeting held on now?",
+   "answers": [
+    {
+     "file": "notes/2026-10-01-meeting.md",
+     "anchor": "Decision: the weekly meeting moves to Thursdays",
+     "lines": [
+      7,
+      7
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x43",
+   "kind": "multihop",
+   "question": "If a customer returns three pears, how much should the refund be in cents?",
+   "answers": [
+    {
+     "file": "mixed/docs/refund-policy.md",
+     "anchor": "The refund is the price the customer paid",
+     "lines": [
+      12,
+      15
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "mixed/crates/shop/src/lib.rs",
+     "anchor": "/// Price of one unit in cents",
+     "lines": [
+      4,
+      11
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x44",
+   "kind": "multihop",
+   "question": "The O-ring that turned up in the wrong bin at the September count: what bin is it listed in, and what does it cost?",
+   "answers": [
+    {
+     "file": "notes/2026-09-24-inventory-count.md",
+     "anchor": "- P-10142 (inlet cap O-ring)",
+     "lines": [
+      6,
+      6
+     ],
+     "match": "lines"
+    },
+    {
+     "file": "data/parts.csv",
+     "anchor": "P-10142,",
+     "lines": [
+      143,
+      143
+     ],
+     "match": "lines"
+    }
+   ]
+  },
+  {
+   "id": "x45",
+   "kind": "decoy",
+   "question": "How loud is the AQ-40 in decibels?",
+   "answers": []
+  },
+  {
+   "id": "x46",
+   "kind": "decoy",
+   "question": "How many years of warranty does the AQ-40 come with?",
+   "answers": []
+  },
+  {
+   "id": "x47",
+   "kind": "decoy",
+   "question": "What is the thermal conductivity of concrete?",
+   "answers": []
+  },
+  {
+   "id": "x48",
+   "kind": "decoy",
+   "question": "How is the coefficient of variation calculated?",
+   "answers": []
+  },
+  {
+   "id": "x49",
+   "kind": "decoy",
+   "question": "What is the contact email for supplier S041?",
+   "answers": []
+  },
+  {
+   "id": "x50",
+   "kind": "decoy",
+   "question": "Which discount codes does the shop accept at checkout?",
+   "answers": []
+  }
+ ]
+}

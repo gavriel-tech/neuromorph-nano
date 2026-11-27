@@ -1,0 +1,7 @@
+Bench setup, 3 September
+
+Two benches. Bench 1 takes pumps 1 to 3, bench 2 takes pumps 4 to 6.
+Each bench has its own 200 litre tank, a flow meter and a pressure gauge on the outlet.
+The bench log goes to pump-service.log on the shared drive, one line per event.
+Water for the tanks comes from the yard tap, which is hard water (about 300 mg/l).
+Flow meters were zeroed today, except bench 2 which needs a new zero tool.

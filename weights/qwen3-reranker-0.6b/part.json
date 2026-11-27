@@ -1,0 +1,28 @@
+{
+  "id": "weight-opnwgt-basewt-qwen3-reranker-0.6b",
+  "level": "9-weight",
+  "kind": "wgtset",
+  "label": "qwen3-reranker-0.6b",
+  "purpose": "Qwen3-Reranker-0.6B as released: relevance of a passage to a query as P(yes), scored the way its model card does (the card's chat prompt with an empty think block, softmax of the last-token \"yes\" and \"no\" logits); the reranker slot's engine in the mini (2026-11-09), cut into clusters by NPCS.",
+  "weights": {
+    "origin": "https://huggingface.co/Qwen/Qwen3-Reranker-0.6B",
+    "licence": "apache-2.0",
+    "revision": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+    "sha256": "27cd75a405b9c1b46b59abfd88aaa209e6fed2a1972cde9b70e7659537c5e65b",
+    "main_file": "files/model.safetensors",
+    "bytes": 1191588280,
+    "files": 14,
+    "manifest": "INTEGRITY.md (Weights): one SHA-256 row per file",
+    "location": "weights/qwen3-reranker-0.6b/files",
+    "derived_from": null
+  },
+  "state": {
+    "status": "in use",
+    "read_only": true,
+    "base": "base weights: used exactly as released, nothing added or edited"
+  },
+  "owner": "Gavriel Technologies",
+  "version": "e61197ed45024b0ed8a2d74b80b4d909f1255473",
+  "hash": "27cd75a405b9c1b46b59abfd88aaa209e6fed2a1972cde9b70e7659537c5e65b",
+  "copied": "2026-11-09 from the EMMA weight shelf (library/9-weight/opnwgt/basewt/qwen3-reranker-0.6b/files), every file hash-identical to it and to its 2026-11-01 download record; the download tool's .cache folder left out"
+}

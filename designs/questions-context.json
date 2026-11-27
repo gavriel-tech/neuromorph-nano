@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "note": "Written 2026-11-07 at S0 from an in-house source tree of Gavriel Technologies (PLAN 4d item 9). Blind deterministic selection: candidates sorted by SHA-256 of their key, first N taken. Locked by hash in COPIED.md before S1; never edited after a result. Capability 1: 20 questions answered with the right citation, plus 3 decoys whose subject does not exist in the tree (verified absent at writing) and must be withheld.",
+  "items": [
+    {"id": "c1", "decoy": false, "question": "What value is the constant GB set to, and where is it defined?", "answer": "1_000_000_000", "type": "u64", "citation": "framework/wgtadp/wgtreg/src/placement.rs:33"},
+    {"id": "c2", "decoy": false, "question": "What value is the constant ABI_VERSION set to, and where is it defined?", "answer": "2 << 16", "type": "u32", "citation": "native/rscore/ffikrn/src/lib.rs:19"},
+    {"id": "c3", "decoy": false, "question": "What value is the constant HEAD set to, and where is it defined?", "answer": "\"lm_head\"", "type": "&str", "citation": "library/6-micmod/reason/flint-int4/src/gpu.rs:18"},
+    {"id": "c4", "decoy": false, "question": "What value is the constant IDLE set to, and where is it defined?", "answer": "std::time::Duration::from_secs(30)", "type": "std::time::Duration", "citation": "framework/fwcore/apisrv/src/http.rs:120"},
+    {"id": "c5", "decoy": false, "question": "What value is the constant SCHEMA set to, and where is it defined?", "answer": "\"parmap-tensors-v1\"", "type": "&str", "citation": "framework/parctl/parmap/src/schema.rs:7"},
+    {"id": "c6", "decoy": false, "question": "What value is the constant TRIES set to, and where is it defined?", "answer": "2", "type": "usize", "citation": "library/6-micmod/decisn/opendecider-nano/stem/src/lib.rs:17"},
+    {"id": "c7", "decoy": false, "question": "What value is the constant SET set to, and where is it defined?", "answer": "\"flint-int4\"", "type": "&str", "citation": "library/6-micmod/reason/flint-int4/src/experts.rs:26"},
+    {"id": "c8", "decoy": false, "question": "What value is the constant GENERAL set to, and where is it defined?", "answer": "\"general-request\"", "type": "&str", "citation": "library/3-neumor/exact-neuromorph/src/general.rs:16"},
+    {"id": "c9", "decoy": false, "question": "What value is the constant MB set to, and where is it defined?", "answer": "1_000_000", "type": "u64", "citation": "framework/wgtadp/wgtreg/src/placement.rs:31"},
+    {"id": "c10", "decoy": false, "question": "What value is the constant MEMORY set to, and where is it defined?", "answer": "\"run-memory\"", "type": "&str", "citation": "library/3-neumor/exact-neuromorph/src/lib.rs:73"},
+    {"id": "c11", "decoy": false, "question": "What value is the constant CHUNK set to, and where is it defined?", "answer": "4096", "type": "usize", "citation": "framework/wgtadp/nrntrn/src/loss.rs:9"},
+    {"id": "c12", "decoy": false, "question": "What value is the constant T_P_EXACT set to, and where is it defined?", "answer": "0.527", "type": "f64", "citation": "library/6-micmod/decisn/opendecider-nano/mode/src/lib.rs:143"},
+    {"id": "c13", "decoy": false, "question": "What value is the constant ADMISSION set to, and where is it defined?", "answer": "\"reader-admission\"", "type": "&str", "citation": "library/3-neumor/exact-neuromorph/src/lib.rs:75"},
+    {"id": "c14", "decoy": false, "question": "What value is the constant DOSES set to, and where is it defined?", "answer": "[0.0, 0.25, 0.5, 0.75, 1.0]", "type": "[f32; 5]", "citation": "framework/parctl/salprf/src/causal.rs:9"},
+    {"id": "c15", "decoy": false, "question": "What value is the constant CHAIN_KEYS set to, and where is it defined?", "answer": "[\"request\", \"hops\"]", "type": "[&str; 2]", "citation": "library/3-neumor/exact-neuromorph/src/chain.rs:19"},
+    {"id": "c16", "decoy": false, "question": "What value is the constant K1 set to, and where is it defined?", "answer": "1.2", "type": "f64", "citation": "library/7-compon/memory/bm25-recall/src/lib.rs:9"},
+    {"id": "c17", "decoy": false, "question": "What value is the constant PATHS set to, and where is it defined?", "answer": "[\"math\", \"repo\", \"general\"]", "type": "[&str; 3]", "citation": "library/3-neumor/exact-neuromorph/src/fast_core.rs:24"},
+    {"id": "c18", "decoy": false, "question": "What value is the constant GRAPH_SPEC set to, and where is it defined?", "answer": "\"emma-graph/1\"", "type": "&str", "citation": "framework/autonm/loopsp/src/lib.rs:37"},
+    {"id": "c19", "decoy": false, "question": "What value is the constant ABI set to, and where is it defined?", "answer": "1", "type": "u32", "citation": "native/rscore/plgsdk/src/lib.rs:15"},
+    {"id": "c20", "decoy": false, "question": "What value is the constant ROUTED set to, and where is it defined?", "answer": "\"routed-request\"", "type": "&str", "citation": "library/3-neumor/exact-neuromorph/src/route.rs:11"},
+    {"id": "x1", "decoy": true, "question": "What value is the constant MAX_TENTACLE_FANOUT set to, and where is it defined?", "answer": null, "probe": "MAX_TENTACLE_FANOUT", "expect": "withhold"},
+    {"id": "x2", "decoy": true, "question": "Where is the function reconcile_drone_ledger defined, and what does it return?", "answer": null, "probe": "reconcile_drone_ledger", "expect": "withhold"},
+    {"id": "x3", "decoy": true, "question": "Which workspace crates depend directly on emma-plstcx?", "answer": null, "probe": "emma-plstcx", "expect": "withhold"}
+  ]
+}
