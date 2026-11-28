@@ -131,8 +131,9 @@ pub fn walk(root: &Path, dir: &Path, skip: &[String], out: &mut Vec<FileInfo>) {
 pub fn walk_counted(root: &Path, dir: &Path, skip: &[String], out: &mut Vec<FileInfo>, skipped: &mut Vec<Skipped>) {
     let own = is_own(root);
     let ignore = if own { Ignore::default() } else { Ignore::of(root) };
+    let mut nano = NanoIgnore::default();
     let mut entries = Vec::new();
-    collect_walk(root, dir, &Rules { skip, own, ignore: &ignore }, &mut entries);
+    collect_walk(root, dir, &Rules { skip, own, ignore: &ignore }, &mut nano, None, &mut entries);
     let decoded = nmtype::budget::run(entries.len(), |i| match entries.get(i) {
         Some(WalkEntry::Skip(s)) => (Vec::new(), vec![s.clone()]),
         Some(WalkEntry::Read { abs, rel, class }) => {
@@ -158,17 +159,30 @@ pub fn walk_counted(root: &Path, dir: &Path, skip: &[String], out: &mut Vec<File
 }
 
 /// Fast metadata-only fingerprint of every walked entry under `root` (path, size, mtime) plus
-/// `.git/HEAD` and `config_tag` (zero file reads). Used by `crate::cache` to validate the binary
-/// substrate cache in milliseconds.
+/// `.git/HEAD`, any active `.nanoignore` files, and `config_tag` (zero file reads). Used by
+/// `crate::cache` to validate the binary substrate cache in milliseconds.
 #[must_use]
 pub(crate) fn manifest_fingerprint(root: &Path, skip: &[String], config_tag: &str) -> String {
     use std::fmt::Write as _;
     let own = is_own(root);
     let ignore = if own { Ignore::default() } else { Ignore::of(root) };
+    let mut nano = NanoIgnore::default();
+    let mut nano_files = Vec::new();
     let mut entries = Vec::new();
-    collect_walk(root, root, &Rules { skip, own, ignore: &ignore }, &mut entries);
+    collect_walk(root, root, &Rules { skip, own, ignore: &ignore }, &mut nano, Some(&mut nano_files), &mut entries);
     let mut buf = String::with_capacity(entries.len().saturating_mul(64) + 256);
     let _ = writeln!(buf, "cfg:{config_tag}|own:{own}|skip:{}", skip.join(","));
+    for nf in &nano_files {
+        let rel = nf.strip_prefix(root).unwrap_or(nf).to_string_lossy().replace('\\', "/");
+        if let Ok(m) = std::fs::metadata(nf) {
+            let (secs, nanos) = m
+                .modified()
+                .ok()
+                .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+                .map_or((0, 0), |d| (d.as_secs(), d.subsec_nanos()));
+            let _ = writeln!(buf, "N:{rel}:{}:{secs}:{nanos}", m.len());
+        }
+    }
     if let Ok(m) = std::fs::metadata(root.join(".git").join("HEAD")) {
         let (secs, nanos) = m
             .modified()
@@ -211,8 +225,108 @@ struct Rules<'a> {
     ignore: &'a Ignore,
 }
 
-/// Why a file is skipped when the ignore rules leave it out.
+/// Why a file is skipped when the `.gitignore` rules leave it out.
 pub const IGNORED: &str = "ignored by .gitignore";
+/// File name for explicit Neuromorph Nano exclusions (applies in every repository, root and nested).
+pub const NANOIGNORE_FILE: &str = ".nanoignore";
+/// Why a file is skipped when `.nanoignore` excludes it.
+pub const NANOIGNORED: &str = "ignored by .nanoignore";
+
+/// One parsed gitignore/nanoignore rule: `(pattern, negated, folders_only, anchored)`.
+type IgnoreRule = (String, bool, bool, bool);
+
+/// Scoped `.nanoignore` rules active during a directory walk or direct path lookup.
+/// Uses the same gitignore-style syntax (`#` comments, `*`, `?`, `**`, trailing `/` for folders,
+/// leading or inner `/` anchored to the `.nanoignore` file's folder, and `!` to re-include).
+/// Unlike `.gitignore`, `.nanoignore` applies in every repository (including Neuromorph folders)
+/// and blocks files from substrate scanning, dense indexing, fresh recall re-reads, and primes.
+#[derive(Clone, Debug, Default)]
+pub struct NanoIgnore {
+    /// Stack of `(base_rel, rules)` from root down to the current folder.
+    scopes: Vec<(String, Vec<IgnoreRule>)>,
+}
+
+impl NanoIgnore {
+    /// Push a `.nanoignore` file from `dir` if present; returns true when a scope was pushed.
+    fn push_dir(&mut self, root: &Path, dir: &Path, record: Option<&mut Vec<PathBuf>>) -> bool {
+        let file = dir.join(NANOIGNORE_FILE);
+        let Ok(text) = std::fs::read_to_string(&file) else { return false };
+        if let Some(rec) = record {
+            rec.push(file);
+        }
+        let base = dir.strip_prefix(root).map(|p| p.to_string_lossy().replace('\\', "/")).unwrap_or_default();
+        self.scopes.push((base, Ignore::parse(&text)));
+        true
+    }
+    fn pop(&mut self) {
+        self.scopes.pop();
+    }
+    /// True when root-relative `path` (forward slashes) matches the active `.nanoignore` stack.
+    #[must_use]
+    pub fn ignored(&self, path: &str, dir: bool) -> bool {
+        if self.scopes.is_empty() {
+            return false;
+        }
+        let mut out = false;
+        for (base, rules) in &self.scopes {
+            let rel = if base.is_empty() {
+                path
+            } else if let Some(rest) = path.strip_prefix(base.as_str()).and_then(|r| r.strip_prefix('/')) {
+                rest
+            } else {
+                continue;
+            };
+            let name = rel.rsplit('/').next().unwrap_or(rel);
+            for (pat, neg, only_dir, anchored) in rules {
+                if *only_dir && !dir {
+                    continue;
+                }
+                let hit = if *anchored { glob(pat, rel) } else { glob(pat, name) };
+                if hit {
+                    out = !neg;
+                }
+            }
+        }
+        out
+    }
+}
+
+/// True when `rel` (root-relative path, `/` or `\`, or `container!member`) or any of its parent
+/// directories under `root` is excluded by root or nested `.nanoignore` files.
+#[must_use]
+pub fn is_nanoignored(root: &Path, rel: &str) -> bool {
+    let disk = rel.split('!').next().unwrap_or(rel).replace('\\', "/");
+    let clean = disk.trim_start_matches("./").trim_start_matches('/');
+    if clean.is_empty() {
+        return false;
+    }
+    let parts: Vec<&str> = clean.split('/').filter(|s| !s.is_empty()).collect();
+    if parts.is_empty() {
+        return false;
+    }
+    let mut nano = NanoIgnore::default();
+    let _ = nano.push_dir(root, root, None);
+    let mut cur_dir = root.to_path_buf();
+    let mut cur_rel = String::new();
+    for (idx, part) in parts.iter().enumerate() {
+        let is_last = idx + 1 == parts.len();
+        if !cur_rel.is_empty() {
+            cur_rel.push('/');
+        }
+        cur_rel.push_str(part);
+        if is_last {
+            // Check both as file and, if it is a directory on disk, as a directory.
+            let is_dir = cur_dir.join(part).is_dir();
+            return nano.ignored(&cur_rel, is_dir);
+        }
+        if nano.ignored(&cur_rel, true) {
+            return true;
+        }
+        cur_dir.push(part);
+        let _ = nano.push_dir(root, &cur_dir, None);
+    }
+    false
+}
 
 /// The ignore rules of a studied root that is not a Neuromorph folder. When the root is the top of
 /// a git work tree, git itself lists the ignored paths (`git ls-files --others --ignored
@@ -347,9 +461,15 @@ pub const LINKED_FOLDER: &str = "linked folder (symbolic link or junction): not 
 /// Roadmap Phase 4.6 (2026-11-25): a link whose target is gone.
 pub const BROKEN_LINK: &str = "broken link: not read";
 
-fn collect_walk(root: &Path, dir: &Path, rules: &Rules<'_>, out: &mut Vec<WalkEntry>) {
+fn collect_walk(root: &Path, dir: &Path, rules: &Rules<'_>, nano: &mut NanoIgnore, mut nano_files: Option<&mut Vec<PathBuf>>, out: &mut Vec<WalkEntry>) {
     let (skip, own, ignore) = (rules.skip, rules.own, rules.ignore);
-    let Ok(rd) = std::fs::read_dir(dir) else { return };
+    let pushed = nano.push_dir(root, dir, nano_files.as_deref_mut());
+    let Ok(rd) = std::fs::read_dir(dir) else {
+        if pushed {
+            nano.pop();
+        }
+        return;
+    };
     let mut entries: Vec<_> = rd.flatten().collect();
     entries.sort_by_key(std::fs::DirEntry::file_name);
     for e in entries {
@@ -367,6 +487,7 @@ fn collect_walk(root: &Path, dir: &Path, rules: &Rules<'_>, out: &mut Vec<WalkEn
                 Ok(m) => {
                     let class = nmdoc::format::by_name(&name, m.len());
                     match class {
+                        _ if nano.ignored(&path, false) => out.push(WalkEntry::Skip(Skipped { path, reason: NANOIGNORED })),
                         nmdoc::Class::Skip(reason) => out.push(WalkEntry::Skip(Skipped { path, reason })),
                         _ if ignore.ignored(&path, false) => out.push(WalkEntry::Skip(Skipped { path, reason: IGNORED })),
                         _ => out.push(WalkEntry::Read { abs: p, rel: path, class }),
@@ -381,10 +502,15 @@ fn collect_walk(root: &Path, dir: &Path, rules: &Rules<'_>, out: &mut Vec<WalkEn
                 && !SKIP.contains(&name.as_str())
                 && !(own && SKIP_OWN.contains(&name.as_str()))
                 && !skip.contains(&name)
+                && !nano.ignored(&path, true)
                 && !ignore.ignored(&path, true)
             {
-                collect_walk(root, &p, rules, out);
+                collect_walk(root, &p, rules, nano, nano_files.as_deref_mut(), out);
             }
+            continue;
+        }
+        if nano.ignored(&path, false) {
+            out.push(WalkEntry::Skip(Skipped { path, reason: NANOIGNORED }));
             continue;
         }
         let size = e.metadata().map_or(u64::MAX, |m| m.len());
@@ -401,6 +527,9 @@ fn collect_walk(root: &Path, dir: &Path, rules: &Rules<'_>, out: &mut Vec<WalkEn
         }
         out.push(WalkEntry::Read { abs: p, rel: path, class });
     }
+    if pushed {
+        nano.pop();
+    }
 }
 
 impl FileInfo {
@@ -414,10 +543,13 @@ impl FileInfo {
 
 /// The text of one read path as it is now: the file on disk when it is plain UTF-8 text, else
 /// what the reader derives from it (a container member `file!member`, a file read raw). `None`
-/// when the file or member is gone.
+/// when the file or member is gone or excluded by `.nanoignore`.
 #[must_use]
 pub fn fresh_text(root: &Path, path: &str) -> Option<String> {
     let disk = path.split('!').next().unwrap_or(path);
+    if is_nanoignored(root, disk) {
+        return None;
+    }
     // Roadmap Phase 4.6 (2026-11-25): a file that has grown past the largest size the walk reads
     // is not read whole into memory here either.
     if std::fs::metadata(root.join(disk)).ok()?.len() >= nmdoc::format::MAX_GENERAL {
@@ -885,6 +1017,84 @@ mod resilience_tests {
         // A file grown past the limit is not read whole by `fresh_text`.
         assert!(fresh_text(&root, "data/huge.bin").is_none());
         assert!(secs < 120.0, "walk took {secs:.1} s");
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn nanoignore_root_nested_negation_fresh_and_fingerprint() {
+        let root = std::env::temp_dir().join(format!("nmsubs-nanoignore-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let mk = |rel: &str, body: &str| {
+            let p = root.join(rel);
+            if let Some(d) = p.parent() {
+                std::fs::create_dir_all(d).expect("mkdir");
+            }
+            std::fs::write(&p, body).expect("write");
+        };
+        // Make it look like a Neuromorph own repo too, proving .nanoignore still applies even when .gitignore does not.
+        mk("rules.md", "# rules\n");
+        mk("crates/nmcore/Cargo.toml", "[package]\nname = \"nmcore\"\n");
+        mk("src/public.rs", "pub fn ok() -> u32 { 1 }\n");
+        mk("src/secret.pem", "PRIVATE KEY\n");
+        mk("secrets/keys.json", "{\"token\":\"abc\"}\n");
+        mk("secrets/nested/deep.txt", "deep secret\n");
+        mk("sub/keep.rs", "pub fn keep() {}\n");
+        mk("sub/drop.rs", "pub fn drop_me() {}\n");
+        mk("sub/reinclude.rs", "pub fn back() {}\n");
+        mk("top_only.txt", "root anchored\n");
+        mk("sub/top_only.txt", "not root anchored\n");
+
+        let fp_before = manifest_fingerprint(&root, &[], "t");
+
+        mk(
+            ".nanoignore",
+            "# Exclude secrets and keys\n*.pem\nsecrets/\n/top_only.txt\n",
+        );
+        mk(
+            "sub/.nanoignore",
+            "*.rs\n!keep.rs\n!reinclude.rs\n",
+        );
+
+        let fp_after = manifest_fingerprint(&root, &[], "t");
+        assert_ne!(fp_before, fp_after, "adding .nanoignore must invalidate substrate cache fingerprint");
+
+        let mut files = Vec::new();
+        let mut skipped = Vec::new();
+        walk_counted(&root, &root, &[], &mut files, &mut skipped);
+        let read: Vec<&str> = files.iter().map(|f| f.path.as_str()).collect();
+        let why = |p: &str| skipped.iter().find(|s| s.path == p).map(|s| s.reason);
+
+        assert!(read.contains(&"src/public.rs"), "{read:?}");
+        assert!(read.contains(&"sub/keep.rs"), "{read:?}");
+        assert!(read.contains(&"sub/reinclude.rs"), "{read:?}");
+        assert!(read.contains(&"sub/top_only.txt"), "{read:?}");
+
+        // Excluded files and folders never enter the substrate.
+        assert!(!read.contains(&"src/secret.pem"), "{read:?}");
+        assert!(!read.contains(&"top_only.txt"), "{read:?}");
+        assert!(!read.contains(&"sub/drop.rs"), "{read:?}");
+        assert!(!read.iter().any(|p| p.starts_with("secrets/")), "{read:?}");
+
+        assert_eq!(why("src/secret.pem"), Some(NANOIGNORED));
+        assert_eq!(why("top_only.txt"), Some(NANOIGNORED));
+        assert_eq!(why("sub/drop.rs"), Some(NANOIGNORED));
+
+        // Direct path lookups & fresh_text enforce .nanoignore (including parent dir rules and container!member).
+        assert!(is_nanoignored(&root, "src/secret.pem"));
+        assert!(is_nanoignored(&root, "secrets/keys.json"));
+        assert!(is_nanoignored(&root, "secrets/nested/deep.txt"));
+        assert!(is_nanoignored(&root, "secrets/archive.zip!inner.txt"));
+        assert!(is_nanoignored(&root, "sub/drop.rs"));
+        assert!(!is_nanoignored(&root, "src/public.rs"));
+        assert!(!is_nanoignored(&root, "sub/keep.rs"));
+        assert!(!is_nanoignored(&root, "sub/top_only.txt"));
+
+        assert!(fresh_text(&root, "src/secret.pem").is_none());
+        assert!(fresh_text(&root, "secrets/keys.json").is_none());
+        assert!(fresh_text(&root, "sub/drop.rs").is_none());
+        assert!(fresh_text(&root, "src/public.rs").is_some());
+        assert!(fresh_text(&root, "sub/keep.rs").is_some());
+
         let _ = std::fs::remove_dir_all(&root);
     }
 }

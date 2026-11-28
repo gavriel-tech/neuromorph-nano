@@ -12,10 +12,10 @@
 
 import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
-import { useApi, type Projects, type Status } from "@/lib/api";
+import { projectLabel, useApi, type Projects, type Status } from "@/lib/api";
 import { useConnect } from "@/components/ConnectStatus";
 import { Dot } from "@/components/ui";
-import { maskName, maskPath } from "@/lib/privacy";
+import { maskPath } from "@/lib/privacy";
 import { readPref, writePref } from "@/lib/prefs";
 
 type Downloads = { cartridges?: { key: string; present: boolean }[]; air_gap?: boolean };
@@ -154,7 +154,7 @@ function SetupRail({ status }: { status: Status | null }) {
       <div className="grid gap-1.5">
         <span className="eyebrow flex items-baseline justify-between gap-3">
           <span>Coding agents</span>
-          {last && <span className="mono normal-case tracking-normal text-quiet">newest project {maskName(last.key)}</span>}
+          {last && <span className="mono normal-case tracking-normal text-quiet">newest project {projectLabel(last)}</span>}
         </span>
         {!last ? (
           <span className="mono text-[11px] text-faint">No project known yet. Connect one below and its folder shows here.</span>

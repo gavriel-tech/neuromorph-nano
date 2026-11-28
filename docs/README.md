@@ -11,6 +11,7 @@
 | [`cartridges-and-parameters.md`](cartridges-and-parameters.md) | Every cartridge type, the cartridge library and the plug and unplug rack, parameter maps and job filters, and the upstream open weights as reference and fallback. |
 | [`build-flow.md`](build-flow.md) | How the weights are built, step by step: open weights, maps, surgery, base cartridges, job filters, adapters, stacks and learning, with the commands used and each map's lineage. |
 | [`continuous-learning.md`](continuous-learning.md) | The continuous learning design and what of it v0.1.0 runs. |
+| [`dead-skin-vectors.md`](dead-skin-vectors.md) | The dead-skin biomimetic vector store (`dense_store.rs`, `skin.json`): continuous micro-shedding, undo/branch-switch revival barrier, enzymatic age calibration, and O(1) segment drop. |
 | [`privacy.md`](privacy.md) | What stays on the machine, what is stored where, Air-Gap Mode, and how to check it yourself. |
 
 Top-level files of the repository:

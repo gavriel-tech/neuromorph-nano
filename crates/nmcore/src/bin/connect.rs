@@ -19,9 +19,9 @@ pub const SERVER: &str = crate::project::SERVER;
 pub const GROUPS: &[(&str, Option<&str>, bool)] = &[
     ("SessionStart", None, false),
     ("UserPromptSubmit", None, false),
-    ("PreToolUse", Some("Edit|Write|NotebookEdit"), false),
+    ("PreToolUse", Some("Edit|MultiEdit|Write|NotebookEdit"), false),
     ("PostToolUse", Some("Bash|PowerShell|mcp__neuromorph-nano__.*"), false),
-    ("PostToolUse", Some("Read|Edit|Write|NotebookEdit|Grep|Glob"), true),
+    ("PostToolUse", Some("Read|Edit|MultiEdit|Write|NotebookEdit|Grep|Glob"), true),
     ("PostToolUseFailure", None, false),
     ("Stop", None, false),
     ("PreCompact", None, false),

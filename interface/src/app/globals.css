@@ -105,6 +105,24 @@ body {
   font-size: 12.5px;
   overflow-x: hidden;
 }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-2) transparent;
+}
+*::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border-radius: 3px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--line-3);
+}
 p,
 .read {
   font-family: var(--font-geist-sans), system-ui, sans-serif;

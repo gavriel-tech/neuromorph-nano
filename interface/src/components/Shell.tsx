@@ -4,11 +4,10 @@ import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import DotText from "@/components/DotText";
-import { Dot, Masked, Mark } from "@/components/ui";
-import { maskName } from "@/lib/privacy";
+import { Dot, Mark } from "@/components/ui";
+import ProjectMenu from "@/components/ProjectMenu";
 import { useWorking } from "@/lib/live";
-import { ago, useApi, type Projects, type Status } from "@/lib/api";
-import { useNow } from "@/lib/clock";
+import { useApi, type Status } from "@/lib/api";
 import { engineServing, eventGroup, GROUP_NAMES, nowLine, stageGroup, writerState } from "@/lib/livefeed";
 import { useLive } from "@/lib/livehook";
 import { parseStorage, STORAGE_API } from "@/lib/storage";
@@ -205,16 +204,13 @@ function SystemMeters() {
   );
 }
 
-function EngineStatus({ compact = false }: { compact?: boolean }) {
+function EngineStatus({ compact = false, inDrawer = false }: { compact?: boolean; inDrawer?: boolean }) {
   const { data, error } = useApi<Status>("/api/status", 5000);
-  const projects = useApi<Projects>("/api/projects", 15000);
-  const now = useNow();
   const online = !!data && !error;
   // /api/status answering means the interface server is up; an engine is serving only when it
   // reports serving processes.
   const servingN = online && typeof data.serving === "number" ? data.serving : null;
   const engineOn = servingN !== null && servingN > 0;
-  const current = [...(projects.data?.projects ?? [])].sort((a, b) => (b.last_ms ?? 0) - (a.last_ms ?? 0))[0];
   return (
     <div className={compact ? "text-xs" : "border-t border-line pt-4 text-xs"}>
       <div className="flex items-center gap-2">
@@ -237,26 +233,25 @@ function EngineStatus({ compact = false }: { compact?: boolean }) {
         </div>
       )}
       {!compact && (
-        <div className={`mono mt-1.5 text-[10px] text-quiet ${SHORT_HIDE}`} data-build>
+        <div className={`mono mt-1.5 text-[10px] text-quiet ${inDrawer ? "" : SHORT_HIDE}`} data-build>
           {data ? `v${data.version} · ` : ""}build {BUILD} UTC
         </div>
       )}
       {!compact && (
-        <div className={SHORT_HIDE}>
-          <div className="mt-2.5 text-faint">Last served project</div>
-          {current ? (
-            <div className="mt-0.5 flex items-baseline gap-2">
-              <span className="mono min-w-0 flex-1 truncate text-muted">
-                <Masked id={`project:${current.key}`} shown={`project ${maskName(current.key)}`} full={current.key} />
-              </span>
-              {current.last_ms && now > 0 && <span className="shrink-0 text-faint">{ago(current.last_ms, now)}</span>}
-            </div>
-          ) : (
-            <div className="mt-0.5 text-muted">{projects.data ? "none yet" : "–"}</div>
-          )}
+        <div className={inDrawer ? "" : SHORT_HIDE}>
+          <ActiveProjectPicker />
           <IsolationLine />
         </div>
       )}
+    </div>
+  );
+}
+
+/** Global active project selector in the left sidebar: switch, add, edit, or delete (double-confirmed). */
+function ActiveProjectPicker() {
+  return (
+    <div className="mt-2.5 border-t border-line/60 pt-2.5" data-e2e="global-project-picker">
+      <ProjectMenu placement="up" compact label="Active project" />
     </div>
   );
 }
@@ -280,7 +275,7 @@ export default function Shell({ children }: { children: ReactNode }) {
   }, [menu.open]);
 
   return (
-    <div className="relative flex min-h-dvh">
+    <div className="relative flex min-h-dvh lg:h-dvh lg:overflow-hidden">
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-bg-2 focus:px-3 focus:py-2 focus:text-sm">
         Skip to content
       </a>
@@ -328,21 +323,21 @@ export default function Shell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-line bg-bg px-4 lg:hidden">
-          <Link href="/" className="flex items-center gap-2.5 text-muted">
-            <Mark className="h-5 w-5" working={working} />
-            <span className="text-text">
-              <DotText text="NEUROMORPH" size={10} label="Neuromorph" />
+      <div className="flex min-w-0 flex-1 flex-col lg:h-dvh lg:min-h-0 lg:overflow-hidden">
+        <header className="sticky top-0 z-40 flex h-14 items-center gap-2.5 border-b border-line bg-bg px-3 sm:gap-3 sm:px-4 lg:hidden">
+          <Link href="/" className="flex min-w-0 items-center gap-2 text-muted sm:gap-2.5">
+            <Mark className="h-5 w-5 shrink-0" working={working} />
+            <span className="truncate text-text">
+              <DotText text="NEUROMORPH" size={9.5} label="Neuromorph" />
             </span>
-            <span className="flex flex-col leading-none">
+            <span className="hidden flex-col leading-none sm:flex">
               <span className="mono text-[10px] uppercase tracking-[0.2em] text-faint">Nano</span>
               <span className="mono mt-1 text-[9px] text-quiet" data-build>
                 build {BUILD}
               </span>
             </span>
           </Link>
-          <div className="ml-auto">
+          <div className="ml-auto shrink-0">
             <EngineStatus compact />
           </div>
           <button
@@ -388,12 +383,12 @@ export default function Shell({ children }: { children: ReactNode }) {
               ))}
               <div className="mt-2 grid grid-cols-[minmax(0,1fr)] gap-4 border-t border-line p-2 pt-3">
                 <SystemMeters />
-                <EngineStatus />
+                <EngineStatus inDrawer />
               </div>
             </nav>
           </div>
         )}
-        <main id="main" className="w-full min-w-0 flex-1 px-4 py-6 md:px-8 md:py-7 2xl:px-10">
+        <main id="main" className="flex w-full min-w-0 flex-1 flex-col lg:min-h-0 lg:overflow-hidden">
           {children}
         </main>
       </div>

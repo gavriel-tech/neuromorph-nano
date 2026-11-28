@@ -140,6 +140,30 @@ fn intake(event: &str, home: Option<&Path>, start: std::time::Instant) -> Result
     if let Some(g) = &given {
         rec.insert("prime".into(), g.record_value(mode));
     }
+    // Custom primes configured per project (event, interval, and schedule triggers).
+    let custom_fired = if oversize || mode == crate::prime::Mode::Off || !can_prime {
+        Vec::new()
+    } else {
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let ctx = crate::primes_ctl::HookCtx {
+                home,
+                memory: &memory,
+                root: &root,
+                event: &ev_name,
+                rec: &rec,
+                now_ms: nmtype::now_ms(),
+                agy,
+            };
+            crate::primes_ctl::at_hook(&ctx)
+        }))
+        .unwrap_or_default()
+    };
+    if !custom_fired.is_empty() {
+        rec.insert(
+            "custom_primes".into(),
+            Value::Array(custom_fired.iter().map(|(id, _, _)| s(id)).collect()),
+        );
+    }
     // Reminders, step nudges and loops the user or the agent set (`guidance.rs`); they ride with
     // the prime, never count against it, and a fault costs the guidance only.
     let guided = if oversize {
@@ -170,14 +194,43 @@ fn intake(event: &str, home: Option<&Path>, start: std::time::Instant) -> Result
     append(&situation_file(&memory), &Value::Object(rec))?;
     if let Some(g) = &given {
         crate::prime::remember(&memory, &session, g, &ev_name)?;
+        let proj_key = memory.file_name().and_then(|x| x.to_str()).unwrap_or_default();
+        let places = Value::Array(g.places.iter().map(|p| s(p)).collect());
+        let label = format!("Prime ({}) at {} ({} {})", g.kind, ev_name, g.places.len(), if g.places.len() == 1 { "place" } else { "places" });
+        let _ = crate::controls::audit(
+            home,
+            "prime",
+            vec![
+                ("project", s(proj_key)),
+                ("prime_kind", s(g.kind)),
+                ("event", s(&ev_name)),
+                ("prime_id", s(&g.id)),
+                ("places", places),
+                ("chars", n(g.text.chars().count() as u64)),
+                ("mode", s(mode.label())),
+                ("via", s(if agy { "antigravity" } else { "claude-code" })),
+                ("ok", Value::Bool(true)),
+                ("label", s(&label)),
+            ],
+        );
     }
-    let prime_text = given.as_ref().map(|g| g.text.as_str());
+    let combined_prime: Option<String> = {
+        let mut parts: Vec<&str> = Vec::new();
+        if let Some(g) = &given {
+            parts.push(g.text.as_str());
+        }
+        for (_, _, line) in &custom_fired {
+            parts.push(line.as_str());
+        }
+        if parts.is_empty() { None } else { Some(parts.join("\n")) }
+    };
+    let prime_text = combined_prime.as_deref();
     if agy {
         write_stdout(&agy_reply(&agy_event, crate::guidance::agy_text(prime_text, guided.as_ref()).as_deref()));
     } else if guided.is_none()
-        && let Some(g) = &given
+        && let Some(text) = prime_text
     {
-        write_stdout(&g.reply(&ev_name));
+        write_stdout(&crate::prime::Given::reply_text(&ev_name, text));
     } else if let Some(line) = crate::guidance::reply(&ev_name, prime_text, guided.as_ref()) {
         write_stdout(&line);
     }
@@ -523,7 +576,7 @@ fn tool(ev: &str, input: &Value, root: &Path, cwd: &Path, r: &mut BTreeMap<Strin
     let mut sensitive = false;
     let mut add_path = |p: &str, span: Option<(u64, u64)>, paths: &mut Vec<String>, lines: &mut Vec<Value>| {
         let rel = relative(root, cwd, p);
-        sensitive |= is_sensitive(&rel);
+        sensitive |= is_sensitive(&rel) || nmsubs::repo::is_nanoignored(root, &rel);
         if paths.len() < MAX_PATHS && !paths.contains(&rel) {
             paths.push(rel.clone());
         }

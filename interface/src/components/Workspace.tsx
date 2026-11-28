@@ -189,37 +189,39 @@ export default function Workspace({
   const hasRail = rail.length > 0 || !!about;
   return (
     <RailCtx.Provider value={api}>
-      <div className={`grid min-w-0 ${hasRail && isOpen && !narrow ? "xl:grid-cols-[minmax(0,1fr)_minmax(20rem,25rem)]" : ""}`}>
-        <div className="min-w-0">
-          <header className="mb-5 flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-line pb-3" data-e2e="work-head">
-            <h1 className="mono flex items-center gap-3 text-[14px] font-normal uppercase leading-none tracking-[0.3em] text-text">
+      <div className={`grid min-w-0 flex-1 lg:h-full lg:min-h-0 ${hasRail && isOpen && !narrow ? "xl:grid-cols-[minmax(0,1fr)_minmax(20rem,25rem)]" : ""}`}>
+        <div className="flex min-w-0 flex-col lg:h-full lg:min-h-0">
+          <header className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 border-b border-line px-4 pt-4 pb-3 md:gap-x-6 md:px-8 md:pt-6 2xl:px-10" data-e2e="work-head">
+            <h1 className="mono flex items-center gap-2.5 text-[13px] font-normal uppercase leading-none tracking-[0.26em] text-text sm:gap-3 sm:text-[14px] sm:tracking-[0.3em]">
               <Reticle className="h-3.5 w-3.5 text-sense-pale" />
               {title}
             </h1>
-            {status && <div className="mono flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-[10.5px] uppercase tracking-[0.1em] text-muted">{status}</div>}
+            {status && <div className="mono flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[10px] uppercase tracking-[0.1em] text-muted sm:gap-x-4 sm:text-[10.5px]">{status}</div>}
             {hasRail && (
-              <span className="ml-auto flex items-center gap-3">
+              <span className="ml-auto flex shrink-0 items-center gap-3">
                 {about && (
-                  <button type="button" onClick={() => api.open("about")} className="press mono text-[10px] uppercase tracking-[0.12em] text-faint hover:text-text" title="What this page is and how it works">
+                  <button type="button" onClick={() => api.open("about")} className="press mono py-1 text-[10px] uppercase tracking-[0.12em] text-faint hover:text-text" title="What this page is and how it works">
                     about
                   </button>
                 )}
                 {!isOpen && (
-                  <button type="button" onClick={() => openRail(true)} className="press mono border-b border-line-strong text-[10px] uppercase tracking-[0.12em] text-muted hover:text-text" data-e2e="rail-open">
+                  <button type="button" onClick={() => openRail(true)} className="press mono border-b border-line-strong py-1 text-[10px] uppercase tracking-[0.12em] text-muted hover:text-text" data-e2e="rail-open">
                     ⟨ {rail.map((t) => t.label.toLowerCase()).slice(0, 2).join(", ") || "about"}
                   </button>
                 )}
               </span>
             )}
           </header>
-          <div className="min-w-0" data-e2e="work-main">
-            {children}
+          <div className="min-w-0 flex-1 px-4 pt-5 pb-6 md:px-8 md:pb-7 2xl:px-10 lg:min-h-0 lg:overflow-y-auto" data-e2e="work-scroll">
+            <div className="min-w-0" data-e2e="work-main">
+              {children}
+            </div>
           </div>
         </div>
         {/* The rail stays mounted while folded or closed (hidden), so its forms keep what was
             typed and anything in it can be found and opened from the page. */}
         {hasRail && !narrow && (
-          <aside hidden={!isOpen} className="sticky top-0 -my-6 -mr-4 ml-6 h-[100dvh] min-w-0 self-start border-l border-line bg-bg-1/60 md:-my-7 md:-mr-8 2xl:-mr-10" aria-label="Side panel">
+          <aside hidden={!isOpen} className="h-full min-h-0 min-w-0 border-l border-line bg-bg-1/60" aria-label="Side panel">
             <Rail tabs={rail} about={about} active={active} setActive={pick} shown={shown} clear={api.clear} onClose={() => openRail(false)} />
           </aside>
         )}

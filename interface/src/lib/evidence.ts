@@ -27,29 +27,67 @@ export const isPrimeRow = (r: LedgerRow) => r.row === "primed" || r.row === "nud
  *  continuation). */
 export const isGuidedRow = (r: LedgerRow) => r.row === "guided";
 
-/* ---------- The project asked for: picked on a page, kept for this session only. ---------- */
+/* ---------- Global active project: persisted in localStorage, synced across all pages and tabs. ---------- */
+const PROJ_STORE_KEY = "nano.active.project";
 let picked: string | null = null;
+let loadedFromDisk = false;
 const subs = new Set<() => void>();
+
+function readPicked(): string | null {
+  if (typeof window === "undefined") return null;
+  if (!loadedFromDisk) {
+    loadedFromDisk = true;
+    try {
+      const saved = window.localStorage.getItem(PROJ_STORE_KEY);
+      if (saved && saved.trim()) picked = saved.trim();
+    } catch {
+      // ignore storage errors
+    }
+  }
+  return picked;
+}
+
 export function pickProject(key: string | null) {
-  picked = key;
+  picked = key && key.trim() ? key.trim() : null;
+  loadedFromDisk = true;
+  if (typeof window !== "undefined") {
+    try {
+      if (picked) window.localStorage.setItem(PROJ_STORE_KEY, picked);
+      else window.localStorage.removeItem(PROJ_STORE_KEY);
+    } catch {
+      // ignore storage errors
+    }
+  }
   subs.forEach((f) => f());
 }
 
-/** The project whose session, ledger and outcomes are shown: the one picked on a page, else the
- *  project a server is serving now, else the most recently served, else the Nano's own folder. */
+/** The global active project across every page: the user's picked project (if it still exists or is
+ *  `nano`), else the project a server is serving now, else the most recently served, else `nano`. */
 export function useProjectKey(): { key: string | null; picked: boolean; projects: Projects | null } {
   const projects = useApi<Projects>("/api/projects", 10000);
   const p = useSyncExternalStore(
     (f) => {
       subs.add(f);
-      return () => subs.delete(f);
+      const onStorage = (e: StorageEvent) => {
+        if (e.key === PROJ_STORE_KEY) {
+          loadedFromDisk = false;
+          f();
+        }
+      };
+      if (typeof window !== "undefined") window.addEventListener("storage", onStorage);
+      return () => {
+        subs.delete(f);
+        if (typeof window !== "undefined") window.removeEventListener("storage", onStorage);
+      };
     },
-    () => picked,
+    () => readPicked(),
     () => null,
   );
   const d = projects.data;
-  if (p) return { key: p, picked: true, projects: d };
-  if (!d) return { key: null, picked: false, projects: null };
+  if (!d) return { key: p, picked: Boolean(p), projects: null };
+  if (p && (p === "nano" || d.projects.some((x) => x.key === p))) {
+    return { key: p, picked: true, projects: d };
+  }
   const serving = d.serving?.find((s) => s.project_key)?.project_key;
   const newest = [...d.projects].sort((a, b) => (b.last_ms ?? 0) - (a.last_ms ?? 0))[0]?.key;
   return { key: d.current ?? serving ?? newest ?? "nano", picked: false, projects: d };

@@ -20,12 +20,13 @@ import Link from "next/link";
 import { useCallback, useMemo, useState } from "react";
 import { ControlRow, NoteLine } from "@/components/Controls";
 import { DistillationSection } from "@/components/DistilBuilder";
-import { LearningCartridges, LearningEngine, LearningEvidence, LearningPrimes, LearningStore, LearningUnits } from "@/components/LearningPanels";
+import { LearningCartridges, LearningEngine, LearningEvidence, LearningStore, LearningUnits } from "@/components/LearningPanels";
 import type { LearnedUnitsReply } from "@/components/LearnedUnits";
 import MainTabs from "@/components/MainTabs";
 import { Block, HashRoute, ledgerUrl, ProjectPick } from "@/components/MemoryPanels";
 import PlateCanvas from "@/components/PlateCanvas";
 import PreferenceBuilder, { PreferenceNotes } from "@/components/PreferenceBuilder";
+import { PrimesRail } from "@/components/PrimesStudio";
 import { TrainingDataPanel } from "@/components/TrainingData";
 import { useTopology } from "@/components/Topology";
 import Workspace, { RailSection } from "@/components/Workspace";
@@ -110,7 +111,6 @@ export default function Learning() {
   const [note, setNote] = useState<{ text: string; tone: "verified" | "error" } | null>(null);
   const ctl = controls.data?.find((c) => c.key === "learning");
   const cycleCtl = controls.data?.find((c) => c.key === "learning.cycle");
-  const primeCtl = controls.data?.find((c) => c.key === "priming") ?? controls.data?.find((c) => c.key === "nudges");
   const examplesCtl = controls.data?.find((c) => c.key === "examples");
   const audit = useApi<Audit>("/api/audit?limit=300", 5000);
   const { tree, status, error: treeError } = useTopology();
@@ -217,6 +217,11 @@ export default function Learning() {
       <RailSection title="Learned units">
         <p className="text-[12px] leading-relaxed text-muted">Everything learned is kept beside the frozen models and never merged into them, in compartments: one per project, one shared, one of the Nano&apos;s own. A compartment switched off gives the base&apos;s outputs again, bit for bit. A compartment in the middle opens its units here.</p>
       </RailSection>
+      <RailSection title="Priming &amp; agent nudging">
+        <p className="text-[12px] leading-relaxed text-muted">
+          Primes proactively nudge your coding agent in the right direction through lifecycle hooks (past verified answers, recurring failure fixes, edit-impact warnings, compaction resume, core memories, and unverified open loops), alongside user- or agent-set completion loops, step-graph directions, and reminders on Memory -&gt; Loops and graph. Every prime is verified fresh on disk and scored by the Evidence Ledger.
+        </p>
+      </RailSection>
       <RailSection title="The figure">
         <p className="text-[11.5px] leading-relaxed text-faint">One cluster per recorded call, gathering toward the cartridge slot at the right. The slot fills only when the engine reports a learned piece; nothing in it is drawn before it is measured.</p>
       </RailSection>
@@ -244,7 +249,7 @@ export default function Learning() {
       defaultTab="evidence"
       rail={[
         { id: "evidence", label: "Evidence", count: L ? (L.rows?.length ?? 0) : undefined, body: <LearningEvidence ledger={{ data: L, error: ledger.error }} level={level} projectKey={key} pending={ledgerPending} /> },
-        { id: "primes", label: "Primes", count: L?.primes?.given ?? L?.nudges?.given, body: <LearningPrimes ledger={L} level={level} control={primeCtl ?? null} /> },
+        { id: "primes", label: "Primes", count: L?.primes?.given ?? L?.nudges?.given, body: <PrimesRail /> },
         {
           id: "training",
           label: "Training data",

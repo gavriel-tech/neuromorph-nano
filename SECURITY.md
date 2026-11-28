@@ -16,9 +16,17 @@ Neuromorph Nano runs entirely on your machine. Your code, your questions, its me
 audit log stay on your disk. The Nano sends no telemetry and makes no network request of its own.
 The cargo commands it runs for build help and Step Check are passed `--offline`.
 
-- **Local only.** The MCP server talks to the agent over standard input and output. The interface
-  server binds 127.0.0.1 and is not reachable from other machines, unless the control `network`
-  is set to `view` or `control` (off by default; see below).
+- **Local only (the Nano itself).** The MCP server talks to the agent over standard input and
+  output. The interface server binds 127.0.0.1 and is not reachable from other machines, unless the
+  control `network` is set to `view` or `control` (off by default; see below).
+- **What your coding agent sends (cloud vs. local agents).** Neuromorph Nano sends no telemetry and
+  makes no outbound network requests of its own, **but your coding agent is a separate process**:
+  any Context Packet, MCP tool reply, or lifecycle prime Neuromorph Nano hands to your agent enters
+  that agent's conversation and is sent to whichever model backs it. With a cloud-backed agent
+  (such as Claude Code, Antigravity, Cursor, VS Code, or Windsurf), that means the cloud model
+  provider. Use `.nanoignore` (below) to stop Neuromorph Nano from reading or putting sensitive
+  files into Context Packets or primes, or run a local model behind your agent with Air-Gap Mode on
+  for zero external transmission (see `docs/agents.md` and `docs/privacy.md`).
 - **Downloads and publishing only when you ask.** The only outbound requests are the ones you start: downloading
   the base cartridges, parameter maps and job filters, optional upstream open weights, browsing or fetching from a cartridge source
   (the official library `gavriel-tech/neuromorph-nano-cartridges` or a third-party Hugging Face
@@ -49,10 +57,31 @@ The cargo commands it runs for build help and Step Check are passed `--offline`.
 - **Models read only.** The upstream model files are never written. Each model's main weights
   file is checked against the SHA-256 on its card when the engine opens it. Base cartridges, job
   filters, learned units and quantized copies are separate files.
-- **Reads of your code stay in RAM.** What the Nano reads from your repository is held in memory
-  while the code is unchanged and is never written to disk. Muscle memory (behaviour packs) is the
-  only learned store derived from use, and it holds behaviour, never code. The meaning index keeps
-  vectors and content hashes, never the material's text.
+- **Local code handling & rebuildable caches.** With `memory = off`, reads of your repository stay
+  strictly in RAM and nothing about your code is written to disk. With `memory = on` (default), two
+  rebuildable local caches live in `memory/projects/<name>-<8 hex>/` on your disk:
+  `substrate-cache-<12 hex>.bin` (which holds derived text, symbols, and chunks for fast restarts;
+  prunable on **Storage** or via `NANO_SUBSTRATE_CACHE=off`) and `world-model/notes.jsonl` (idle
+  Writer summaries when `writer.idle = on`). The dense meaning index (`dense/`) keeps only binary16
+  vectors and opaque hashes (`skin.json`), never file text or paths; episodes keep citations and
+  line hashes, never copied code; the audit log never holds file contents; and muscle memory
+  (`muscle/`) keeps behavioral packs only (`nmmusc-sensory-refused`). Nothing matched by
+  `.nanoignore` enters any of these stores.
+- **Explicit file exclusions (`.nanoignore`).** Manage exclusions manually via `<repo>/.nanoignore`
+  (and nested subdirectory `.nanoignore` files), through the local Interface (**Settings -> Privacy
+  and network -> File exclusions (.nanoignore)**), through the local JSON API
+  (`GET/POST /api/nanoignore`), or via MCP (`nm_settings` `op=nanoignore | nanoignore_check |
+  nanoignore_set | nanoignore_add | nanoignore_remove`), all using gitignore-style patterns (`#`
+  comments, `*`, `?`, `**`, trailing `/` for folders, leading or inner `/` anchored to that folder,
+  and `!` negation). API, UI, and MCP writes are atomic, logged in Audit (`kind: "nanoignore"`), and
+  undoable. Unlike `.gitignore`, `.nanoignore` applies in every repository, immediately invalidates
+  the substrate cache when changed, and stops Neuromorph Nano from reading, indexing, embedding,
+  writing world-model notes for, priming from, returning build-help source snippets for, or
+  including matching files in Context Packets handed to a cloud coding agent (such as Claude Code).
+  **Scope boundary:** `.nanoignore` controls what Neuromorph Nano reads and sends; your coding
+  agent's own direct tools (such as Claude Code's `Read` or shell commands) remain governed by your
+  agent's own ignore and permission settings. For zero external transmission, pair `.nanoignore`
+  with your agent's own rules or run a local model behind your agent with Air-Gap Mode on.
 
 ## What is stored on disk, and where
 

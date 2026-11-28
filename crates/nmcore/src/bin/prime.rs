@@ -84,9 +84,9 @@ impl Mode {
     #[must_use]
     pub fn parse(v: Option<&String>) -> Self {
         match v.map(String::as_str) {
-            Some("off") => Self::Off,
+            Some("quiet") => Self::Quiet,
             Some("on") => Self::On,
-            _ => Self::Quiet,
+            _ => Self::Off,
         }
     }
     #[must_use]
@@ -141,9 +141,9 @@ impl Given {
     }
     /// The hook's reply: one JSON object with `hookSpecificOutput.additionalContext` only.
     #[must_use]
-    pub fn reply(&self, event: &str) -> String {
+    pub fn reply_text(event: &str, text: &str) -> String {
         let s = |t: &str| Value::String(t.to_owned());
-        let inner = Value::Object([("hookEventName".to_owned(), s(event)), ("additionalContext".to_owned(), s(&self.text))].into_iter().collect());
+        let inner = Value::Object([("hookEventName".to_owned(), s(event)), ("additionalContext".to_owned(), s(text))].into_iter().collect());
         Value::Object([("hookSpecificOutput".to_owned(), inner)].into_iter().collect()).encode().unwrap_or_default()
     }
 }
@@ -243,17 +243,22 @@ pub fn offer(a: &Ask) -> Result<Given, Silent> {
     let session = a.session().ok_or(Silent::Nothing)?;
     let ids = memo(a.memory, session);
     let kind = a.field("kind").unwrap_or_default();
+    let on = |rule: &str| crate::primes_ctl::builtin_enabled(a.memory, rule);
     let (rule, made): (&'static str, Option<Given>) = match a.event {
-        "UserPromptSubmit" => ("prompt-recall", prompt_recall(a)),
+        "UserPromptSubmit" => ("prompt-recall", if on("prompt-recall") { prompt_recall(a) } else { None }),
         "PostToolUse" | "PostToolUseFailure" if matches!(kind, "build" | "test") && matches!(a.rec.get("ok"), Some(Value::Bool(false))) => {
-            ("failure-fix", failure_fix(a))
+            ("failure-fix", if on("failure-fix") { failure_fix(a) } else { None })
         }
-        "PreToolUse" if matches!(a.field("tool"), Some("Edit" | "MultiEdit")) => ("edit-impact", edit_impact(a)),
-        "SessionStart" => match resume(a, session) {
+        "PreToolUse" if matches!(a.field("tool"), Some("Edit" | "MultiEdit" | "Write" | "NotebookEdit")) => {
+            ("edit-impact", if on("edit-impact") { edit_impact(a) } else { None })
+        }
+        "SessionStart" => match if on("resume") { resume(a, session) } else { None } {
             Some(g) => ("resume", Some(g)),
-            None => ("core", core(a)),
+            None => ("core", if on("core") { core(a) } else { None }),
         },
-        "Stop" if a.mode == Mode::On && !matches!(a.input.get("stop_hook_active"), Ok(Value::Bool(true))) => ("open-loop", open_loop(a, session)),
+        "Stop" if a.mode == Mode::On && !matches!(a.input.get("stop_hook_active"), Ok(Value::Bool(true))) => {
+            ("open-loop", if on("open-loop") { open_loop(a, session) } else { None })
+        }
         _ => return Err(Silent::Nothing),
     };
     // Past the deadline the rule's answer is dropped, whatever it was, and the record says so.
@@ -275,9 +280,9 @@ fn labels(places: &[Place]) -> Vec<String> {
     places.iter().map(Place::label).collect()
 }
 
-/// Every place of a memory reads as it did when verified.
+/// Every place of a memory reads as it did when verified, and none is excluded by `.nanoignore`.
 fn all_fresh(root: &Path, k: &Known) -> bool {
-    !k.places.is_empty() && k.places.iter().all(|p| fresh(root, p))
+    !k.places.is_empty() && k.places.iter().all(|p| !nmsubs::repo::is_nanoignored(root, &p.path) && fresh(root, p))
 }
 
 fn times(n: u32) -> String {
@@ -355,14 +360,24 @@ fn failure_fix(a: &Ask) -> Option<Given> {
 }
 
 /// The path and lines of the edit's before-lines (the hook's own record of a PreToolUse).
+/// Falls back to the full file span when a `Write` overwrites a file without narrow line bounds.
 fn edit_lines(rec: &BTreeMap<String, Value>) -> Option<(String, u64, u64)> {
-    let l = rec.get("lines")?.array().ok()?.first()?.array().ok()?.to_vec();
-    Some((l.first()?.string().ok()?.to_owned(), l.get(1)?.integer().ok()?, l.get(2)?.integer().ok()?))
+    if let Some(l) = rec.get("lines").and_then(|v| v.array().ok()).and_then(|a| a.first()).and_then(|v| v.array().ok())
+        && let (Some(p), Some(a), Some(b)) = (
+            l.first().and_then(|v| v.string().ok()),
+            l.get(1).and_then(|v| v.integer().ok()),
+            l.get(2).and_then(|v| v.integer().ok()),
+        )
+    {
+        return Some((p.to_owned(), a, b));
+    }
+    let path = rec.get("paths")?.array().ok()?.first()?.string().ok()?.to_owned();
+    Some((path, 1, u64::MAX))
 }
 
 fn edit_impact(a: &Ask) -> Option<Given> {
     let (path, start, end) = edit_lines(a.rec)?;
-    if path == "<outside>" {
+    if path == "<outside>" || nmsubs::repo::is_nanoignored(a.root, &path) {
         return None;
     }
     let overlaps = |p: &Place| p.path == path && (p.start as u64) <= end && start <= p.end as u64;
@@ -421,13 +436,21 @@ fn defined(line: &str) -> Option<String> {
 
 fn callers(a: &Ask, path: &str) -> Option<Given> {
     let ti = a.input.get("tool_input").ok()?;
-    let old = ti.get("old_string").and_then(Value::string).ok()?;
-    let new = ti.get("new_string").and_then(Value::string).unwrap_or_default();
-    // A signature line of the old text that the new text does not keep word for word.
-    let (sig, name) = old.lines().find_map(|l| defined(l).map(|n| (l.trim().to_owned(), n)))?;
-    if new.lines().any(|l| l.trim() == sig) {
+    let pairs: Vec<(&str, &str)> = if let Ok(old) = ti.get("old_string").and_then(Value::string) {
+        vec![(old, ti.get("new_string").and_then(Value::string).unwrap_or_default())]
+    } else if let Ok(edits) = ti.get("edits").and_then(Value::array) {
+        edits
+            .iter()
+            .filter_map(|e| Some((e.get("old_string").and_then(Value::string).ok()?, e.get("new_string").and_then(Value::string).unwrap_or_default())))
+            .collect()
+    } else {
         return None;
-    }
+    };
+    // A signature line of the old text that the new text does not keep word for word.
+    let (sig, name) = pairs.into_iter().find_map(|(old, new)| {
+        let (s, n) = old.lines().find_map(|l| defined(l).map(|n| (l.trim().to_owned(), n)))?;
+        if new.lines().any(|l| l.trim() == s) { None } else { Some((s, n)) }
+    })?;
     let ext = Path::new(path).extension()?.to_string_lossy().into_owned();
     let call = format!("{name}(");
     let mut found: Vec<String> = Vec::new();
@@ -449,9 +472,10 @@ fn callers(a: &Ask, path: &str) -> Option<Given> {
             let fname = e.file_name().to_string_lossy().into_owned();
             if p.is_dir() {
                 // The folders the material's reader leaves out (`nmsubs::repo`): hidden ones, its
-                // skip list, and the Neuromorph folder's own state when the project is one.
+                // skip list, `.nanoignore` rules, and the Neuromorph folder's own state when the project is one.
                 let own = nmsubs::repo::is_own(a.root) && nmsubs::repo::SKIP_OWN.contains(&fname.as_str());
-                if !fname.starts_with('.') && !nmsubs::repo::SKIP.contains(&fname.as_str()) && !own {
+                let dir_rel = p.strip_prefix(a.root).map(|r| r.to_string_lossy().replace('\\', "/")).unwrap_or_default();
+                if !fname.starts_with('.') && !nmsubs::repo::SKIP.contains(&fname.as_str()) && !own && !nmsubs::repo::is_nanoignored(a.root, &dir_rel) {
                     stack.push(p);
                 }
                 continue;
@@ -461,7 +485,7 @@ fn callers(a: &Ask, path: &str) -> Option<Given> {
                 continue;
             }
             let rel = p.strip_prefix(a.root).map(|r| r.to_string_lossy().replace('\\', "/")).unwrap_or_default();
-            if rel.is_empty() || rel == path {
+            if rel.is_empty() || rel == path || nmsubs::repo::is_nanoignored(a.root, &rel) {
                 continue;
             }
             let Ok(body) = std::fs::read_to_string(&p) else { continue };
@@ -512,7 +536,7 @@ fn is_code(path: &str) -> bool {
 }
 
 fn exists(root: &Path, rel: &str) -> bool {
-    rel.split('/').fold(root.to_path_buf(), |a, c| a.join(c)).is_file()
+    !nmsubs::repo::is_nanoignored(root, rel) && rel.split('/').fold(root.to_path_buf(), |a, c| a.join(c)).is_file()
 }
 
 fn spans(v: &[(u64, u64)]) -> String {
@@ -548,6 +572,9 @@ fn core(a: &Ask) -> Option<Given> {
     let mut parts: Vec<String> = Vec::new();
     let mut given: Vec<&nmmem::session_open::Core> = Vec::new();
     for c in &all {
+        if c.places.iter().any(|p| nmsubs::repo::is_nanoignored(a.root, p.split(':').next().unwrap_or(p))) {
+            continue;
+        }
         parts.push(format!("{} ({})", c.text.replace('\n', " "), c.places.join(", ")));
         given.push(c);
     }
@@ -754,6 +781,12 @@ fn check_in(dir: &Path) -> Result<(), String> {
     if !g.as_ref().is_ok_and(|g| g.kind == "edit-impact" && g.text.contains("fixed cargo-test a")) {
         return Err(format!("prime: edit-impact from memory {g:?}"));
     }
+    // A full-file Write over a verified fix also triggers edit-impact via path fallback.
+    let pre_write = rec_of(r#"{"session":"s3w","kind":"write","tool":"Write","paths":["src/lib.rs"]}"#)?;
+    let g = offer(&Ask { home: dir, memory: &memory, root: &root, event: "PreToolUse", input: &input, rec: &pre_write, mode: Mode::Quiet, start: Instant::now() });
+    if !g.as_ref().is_ok_and(|g| g.kind == "edit-impact" && g.text.contains("fixed cargo-test a")) {
+        return Err(format!("prime: edit-impact on Write {g:?}"));
+    }
     std::fs::write(root.join("src/lib.rs"), body.replace("n * 2", "n * 3")).map_err(e)?;
     if ask(&fail, "PostToolUseFailure", Mode::Quiet).is_ok() || ask(&s2, "PostToolUseFailure", Mode::On).is_ok_and(|g| g.kind == "failure-fix") {
         return Err("prime: a stale fix gave a prime".into());
@@ -761,6 +794,13 @@ fn check_in(dir: &Path) -> Result<(), String> {
     let g = offer(&Ask { home: dir, memory: &memory, root: &root, event: "PreToolUse", input: &edit_in, rec: &pre, mode: Mode::Quiet, start: Instant::now() });
     if !g.as_ref().is_ok_and(|g| g.places == ["src/main.rs:2"]) {
         return Err(format!("prime: caller of a changed signature {g:?}"));
+    }
+    // MultiEdit signature changes also surface callers.
+    let pre_multi = rec_of(r#"{"session":"s3m","kind":"edit","tool":"MultiEdit","lines":[["src/lib.rs",1,1]]}"#)?;
+    let multi_in = nmjson::parse(br#"{"tool_input":{"edits":[{"old_string":"pub fn total(n: u64) -> u64 {","new_string":"pub fn total(n: u64, k: u64) -> u64 {"}]}}"#).map_err(|x| x.to_string())?;
+    let g = offer(&Ask { home: dir, memory: &memory, root: &root, event: "PreToolUse", input: &multi_in, rec: &pre_multi, mode: Mode::Quiet, start: Instant::now() });
+    if !g.as_ref().is_ok_and(|g| g.places == ["src/main.rs:2"]) {
+        return Err(format!("prime: MultiEdit caller of a changed signature {g:?}"));
     }
     if defined("    pub fn total(n: u64) -> u64 {").as_deref() != Some("total") || defined("let x = total(3);").is_some() {
         return Err("prime: definition lines".into());
@@ -780,6 +820,16 @@ fn check_in(dir: &Path) -> Result<(), String> {
     if g.kind != "core" || g.places != ["src/main.rs:1-3"] || !g.text.contains("where is main") || g.text.ends_with("...") {
         return Err(format!("prime: core at session open {g:?}"));
     }
+    // Adding src/main.rs to .nanoignore immediately blocks core primes and caller scans citing it.
+    std::fs::write(root.join(".nanoignore"), "src/main.rs\n").map_err(e)?;
+    if ask(&start, "SessionStart", Mode::Quiet).is_ok() {
+        return Err("prime: a .nanoignore'd core memory was handed on".into());
+    }
+    let g = offer(&Ask { home: dir, memory: &memory, root: &root, event: "PreToolUse", input: &edit_in, rec: &pre, mode: Mode::Quiet, start: Instant::now() });
+    if g.is_ok() {
+        return Err(format!("prime: caller scan leaked .nanoignore'd file {g:?}"));
+    }
+    let _ = std::fs::remove_file(root.join(".nanoignore"));
     std::fs::write(root.join("src/main.rs"), "fn main() {\n    let x = total(4);\n}\n").map_err(e)?;
     if ask(&start, "SessionStart", Mode::Quiet).is_ok() {
         return Err("prime: a core memory whose lines changed was handed on".into());

@@ -59,6 +59,8 @@ pub fn destructive(path: &str, v: &Value) -> bool {
         || (path == "/api/cartridge-sources" && text(v, "action").as_deref() == Some("remove"))
         // Removing a reminder, loop or step of the agent's guidance.
         || (path == "/api/guidance" && text(v, "action").as_deref() == Some("remove"))
+        // Removing a custom prime or deleting a user-saved prime preset.
+        || (path == "/api/primes" && matches!(text(v, "action").as_deref(), Some("remove" | "preset_delete")))
         // Clearing a parameter overlay (every entry out; undone from Audit). Its preview passes.
         || (path == "/api/parameters/overlay" && text(v, "action").as_deref() == Some("clear") && !matches!(v.get("preview"), Ok(Value::Bool(true))))
 }
@@ -321,6 +323,10 @@ fn preview_of(home: &Path, path: &str, v: &Value) -> Result<(Value, String), Str
         "/api/guidance" => {
             let (title, line, word) = crate::guidance::remove_plan(home, v)?;
             (preview(&title, vec![item(&line, None, None, None)], None, None, "can be undone in Audit (the item is put back as it was)", None), word)
+        }
+        "/api/primes" => {
+            let (title, word) = crate::primes_ctl::delete_preview(home, v)?;
+            (preview(&title, vec![item(&title, None, None, None)], None, None, "can be undone in Audit (previous primes configuration and presets are restored)", None), word)
         }
         "/api/cartridge-sources" => {
             let id = field(v, "id")?;

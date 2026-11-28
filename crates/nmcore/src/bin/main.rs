@@ -37,6 +37,7 @@ mod preferences;
 mod backups;
 mod teach;
 mod prime;
+mod primes_ctl;
 mod outcomes;
 mod project;
 mod secrets;

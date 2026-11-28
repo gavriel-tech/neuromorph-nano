@@ -16,6 +16,8 @@ import { roleTitle } from "@/components/MicroModel";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Controls, { NoteLine } from "@/components/Controls";
 import LeanModePanel, { LeanModeGuide, mcpToolList } from "@/components/LeanModePanel";
+import ProjectMenu from "@/components/ProjectMenu";
+import ProjectsPanel, { ProjectsGuide } from "@/components/ProjectsPanel";
 import { Empty, Masked, Panel, Pill, Placeholder } from "@/components/ui";
 import { ago, bytes, post, refreshAll, useApi, useApiLevel, type Audit, type Control, type DevicesReply, type Projects, type Status } from "@/lib/api";
 import { useNow } from "@/lib/clock";
@@ -31,6 +33,7 @@ import Workspace, { RailSection, useRail } from "@/components/Workspace";
 import { limitNumber, machineCapacity, parseLimits, residency } from "@/lib/limits";
 import { engineServing } from "@/lib/livefeed";
 import { useLive } from "@/lib/livehook";
+import { useProjectKey } from "@/lib/evidence";
 import { CONTROL_GROUP_ORDER, controlGroupName } from "@/lib/controls";
 
 type Settings = Record<string, Record<string, unknown>>;
@@ -47,6 +50,193 @@ type AirGapReply = {
   downloads_running?: boolean;
   models_local_dir: string;
 };
+
+type NanoIgnoreReply = {
+  project?: string;
+  root?: string;
+  file?: string;
+  exists?: boolean;
+  content?: string;
+  rules?: string[];
+  nested?: string[];
+  test?: { path: string; ignored: boolean };
+  note?: string;
+  error?: string;
+};
+
+function NanoIgnorePanel({ projects }: { projects: Projects | null | undefined }) {
+  const { key: activeKey } = useProjectKey();
+  const list = useMemo(() => [...(projects?.projects ?? [])].sort((a, b) => (b.last_ms ?? 0) - (a.last_ms ?? 0)), [projects]);
+  const projectKey = activeKey || list[0]?.key || "nano";
+  const [testPath, setTestPath] = useState("");
+  const trimmedTest = testPath.trim();
+  const url = `/api/nanoignore?project=${encodeURIComponent(projectKey)}${trimmedTest ? `&test=${encodeURIComponent(trimmedTest)}` : ""}`;
+  const q = useApi<NanoIgnoreReply>(url, 15000);
+  const d = q.data;
+
+  const [draftMap, setDraftMap] = useState<Record<string, string>>({});
+  const draft = projectKey in draftMap ? draftMap[projectKey] : (d?.content ?? "");
+  const dirty = projectKey in draftMap && draftMap[projectKey] !== (d?.content ?? "");
+  const [quickPat, setQuickPat] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [note, setNote] = useState<{ text: string; tone: "verified" | "error" } | null>(null);
+
+  const saveContent = async (content: string) => {
+    setBusy(true);
+    try {
+      await post("/api/nanoignore", { project: projectKey, action: "set", content });
+      setDraftMap((m) => {
+        const next = { ...m };
+        delete next[projectKey];
+        return next;
+      });
+      setNote({ text: "Saved .nanoignore. Substrate cache invalidated immediately; logged in Audit with Undo.", tone: "verified" });
+      refreshAll("/api/nanoignore");
+      refreshAll("/api/audit");
+    } catch (e) {
+      setNote({ text: e instanceof Error ? e.message : String(e), tone: "error" });
+    }
+    setBusy(false);
+  };
+
+  const addQuick = async () => {
+    const pat = quickPat.trim();
+    if (!pat) return;
+    setBusy(true);
+    try {
+      await post("/api/nanoignore", { project: projectKey, action: "add", pattern: pat });
+      setQuickPat("");
+      setDraftMap((m) => {
+        const next = { ...m };
+        delete next[projectKey];
+        return next;
+      });
+      setNote({ text: `Added "${pat}" to .nanoignore. Logged in Audit with Undo.`, tone: "verified" });
+      refreshAll("/api/nanoignore");
+      refreshAll("/api/audit");
+    } catch (e) {
+      setNote({ text: e instanceof Error ? e.message : String(e), tone: "error" });
+    }
+    setBusy(false);
+  };
+
+  const rules = d?.rules ?? [];
+  const nested = d?.nested ?? [];
+
+  return (
+    <Panel
+      title="File exclusions (.nanoignore)"
+      right={
+        d ? (
+          <Pill tone={rules.length > 0 ? "verified" : "muted"}>
+            {rules.length} {rules.length === 1 ? "rule" : "rules"}
+          </Pill>
+        ) : undefined
+      }
+    >
+      <NoteLine note={note} />
+      <div className="grid gap-3" data-e2e="nanoignore-panel">
+        <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-end sm:gap-4">
+          <div className="min-w-0 sm:min-w-[12rem] sm:flex-1">
+            <ProjectMenu placement="down" label="repository" />
+          </div>
+          <label className="grid min-w-0 gap-1 sm:min-w-[14rem] sm:flex-1">
+            <span className="mono text-[10px] uppercase tracking-[0.12em] text-faint">test a relative path</span>
+            <input
+              value={testPath}
+              onChange={(e) => setTestPath(e.target.value)}
+              placeholder="e.g. secrets/keys.json or src/app.ts"
+              className="mono h-9 w-full border-b border-line-strong bg-transparent px-1 text-[11px] text-text outline-none placeholder:text-quiet focus-visible:border-sense-pale"
+            />
+          </label>
+          {d?.test && (
+            <Pill tone={d.test.ignored ? "verified" : "muted"}>
+              {d.test.ignored ? "excluded by .nanoignore" : "readable by Nano"}
+            </Pill>
+          )}
+        </div>
+
+        {q.error && !d ? (
+          <Empty title=".nanoignore did not answer">{q.error}</Empty>
+        ) : d?.error ? (
+          <Empty title=".nanoignore unavailable">{d.error}</Empty>
+        ) : !d ? (
+          <Placeholder className="h-28" what=".nanoignore" />
+        ) : (
+          <>
+            <div className="grid gap-2 sm:flex sm:flex-wrap sm:items-center">
+              <input
+                value={quickPat}
+                onChange={(e) => setQuickPat(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    void addQuick();
+                  }
+                }}
+                placeholder="Quick add pattern: *.pem, secrets/, internal/, !secrets/template.json"
+                className="mono h-9 w-full min-w-0 border-b border-line-strong bg-transparent px-1 text-[11px] text-text outline-none placeholder:text-quiet focus-visible:border-sense-pale sm:min-w-[16rem] sm:flex-1"
+              />
+              <button
+                type="button"
+                disabled={busy || !quickPat.trim()}
+                onClick={() => void addQuick()}
+                className="press mono min-h-9 w-fit border-b border-sense-pale px-2 text-[10.5px] uppercase tracking-[0.12em] text-sense-pale hover:text-text disabled:opacity-40"
+              >
+                + add pattern
+              </button>
+            </div>
+
+            <label className="grid gap-1">
+              <span className="mono flex items-baseline justify-between text-[10px] uppercase tracking-[0.12em] text-faint">
+                <span>{d.file ? maskPath(d.file) : ".nanoignore"}</span>
+                <span className="normal-case tracking-normal text-quiet">{d.exists ? "on disk" : "not created yet"}</span>
+              </span>
+              <textarea
+                rows={5}
+                value={draft}
+                onChange={(e) => setDraftMap((m) => ({ ...m, [projectKey]: e.target.value }))}
+                placeholder={"# Gitignore-style patterns excluded from Neuromorph Nano\n*.pem\n.env*\nsecrets/\ninternal/"}
+                className="mono w-full border border-line bg-bg-1/50 p-2.5 text-[11.5px] leading-relaxed text-text outline-none placeholder:text-quiet focus-visible:border-sense-pale"
+              />
+            </label>
+
+            <div className="flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                disabled={busy || !dirty}
+                onClick={() => void saveContent(draft)}
+                className="press mono min-h-10 border-b border-sense-pale px-1 text-[11px] uppercase tracking-[0.12em] text-sense-pale hover:text-text disabled:opacity-40"
+              >
+                {busy ? "Saving" : "Save .nanoignore"}
+              </button>
+              {dirty && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setDraftMap((m) => {
+                      const next = { ...m };
+                      delete next[projectKey];
+                      return next;
+                    })
+                  }
+                  className="press mono min-h-10 text-[10.5px] uppercase tracking-[0.12em] text-faint hover:text-text"
+                >
+                  discard edits
+                </button>
+              )}
+              {nested.length > 0 && (
+                <span className="mono text-[10.5px] text-faint">
+                  nested: {nested.join(", ")}
+                </span>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </Panel>
+  );
+}
 
 function AirGapPanel() {
   const airgap = useApi<AirGapReply>("/api/airgap", 5000);
@@ -540,7 +730,7 @@ function HomeostasisPanel({ status }: { status?: Status | null }) {
       <div className="grid gap-6 border-t border-line pt-6 @3xl:grid-cols-2">
         <div className="grid content-start gap-2 border-b border-line/60 pb-4 @3xl:border-r @3xl:border-b-0 @3xl:pr-6 @3xl:pb-0">
           <div className="eyebrow">Quota and prompt footprint</div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+          <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1.5 text-xs">
             <span className="text-faint">MCP tool list</span>
             <span className="mono text-right text-text">
               {effToolCount === null ? NR : `${toolWords} (${effToolMode})`}
@@ -612,9 +802,10 @@ function HomeostasisPanel({ status }: { status?: Status | null }) {
 // browser. 2026-11-26: the design files moved to the rail, so the bar holds only the controls.
 const VIEWS = [
   { id: "machine", label: "Machine", about: "The card, its budget and the hardware limits." },
+  { id: "projects", label: "Projects", about: "Create custom projects, rename workspaces, inspect storage, and safely forget old projects." },
   { id: "tools", label: "Agents & tools", about: "Connect your coding agents, choose which MCP tools they see, and what a turn costs." },
   { id: "controls", label: "Controls", about: "Every switch and number the engine reports, by group. Each change is logged in Audit, where it can be undone." },
-  { id: "privacy", label: "Privacy & network", about: "Air gap, local isolation and paired devices." },
+  { id: "privacy", label: "Privacy & network", about: "Air gap, file exclusions (.nanoignore), local isolation and paired devices." },
   { id: "speed", label: "Stage times", about: "Where the time of a question goes." },
 ] as const;
 type View = (typeof VIEWS)[number]["id"];
@@ -649,6 +840,14 @@ function PrivacyGuide() {
           <li>There is no encryption on the wire: anyone on your local network can read traffic and device tokens.</li>
         </ul>
       </RailSection>
+      <RailSection title="File exclusions (.nanoignore)">
+        <p className="read text-[11.5px] leading-relaxed text-muted">
+          Excludes matching files and folders (root and nested <span className="mono">.nanoignore</span>, gitignore syntax) from the Global Context Substrate, substrate cache, dense vectors, idle Writer world model, fresh recall, build-help source snippets, hooks, and primes. Every edit here is logged in Audit with one-click Undo.
+        </p>
+        <p className="read mt-2 text-[11px] leading-relaxed text-faint">
+          Scope boundary: <span className="mono">.nanoignore</span> governs what Neuromorph Nano reads and puts into Context Packets or primes; pair with your coding agent&apos;s own ignore and permission rules to block direct file reads by the agent.
+        </p>
+      </RailSection>
     </>
   );
 }
@@ -678,6 +877,26 @@ const SURFACES: Record<View, Surface[]> = {
       mcp: ["nm_settings op=status", "nm_live"],
       keys: ["budget.gpu_mb_max", "residency.idle_release"],
       note: "The meters are readings of the serving engine. The budget and the idle release are controls, set in Controls.",
+    },
+  ],
+  projects: [
+    { what: "List registered projects", api: ["GET /api/projects"], mcp: ["nm_settings op=projects"] },
+    {
+      what: "Create a custom or folder-backed project",
+      api: ['POST /api/projects {"action": "create", "name", "root"?, "description"?}'],
+      mcp: ["nm_settings op=project_create (name, root?, description?)"],
+      note: "Omit root to create a custom workspace project without a folder. Audited with Undo.",
+    },
+    {
+      what: "Rename a project",
+      api: ['POST /api/projects {"action": "rename", "project", "name", "description"?}'],
+      mcp: ["nm_settings op=project_rename (project, name, description?)"],
+    },
+    {
+      what: "Forget a project's memory",
+      api: ['POST /api/projects/forget {"project", "confirm_token"}'],
+      mcp: ["nm_storage op=forget_project (project, confirm_token)"],
+      note: "Two-step confirmation; never touches the repository's own files.",
     },
   ],
   tools: [
@@ -719,6 +938,12 @@ const SURFACES: Record<View, Surface[]> = {
   ],
   privacy: [
     { what: "Air gap", api: ["GET /api/airgap"], mcp: ["nm_settings op=airgap"], keys: ["air_gap"], note: "The environment variable NANO_AIR_GAP=on locks it on; the switch is then read only." },
+    {
+      what: "File exclusions (.nanoignore)",
+      api: ["GET /api/nanoignore?project=<key>[&test=<path>]", 'POST /api/nanoignore {"project", "action": "set" | "add" | "remove", "content" | "pattern"}'],
+      mcp: ["nm_settings op=nanoignore | nanoignore_check | nanoignore_set | nanoignore_add | nanoignore_remove"],
+      note: "Writes atomically, immediately invalidates substrate-cache-*.bin, and is undoable from Audit.",
+    },
     { what: "Local network access", api: ['POST /api/controls {"key": "network", "value": "off" | "view" | "control"}'], mcp: ["nm_settings op=set"], keys: ["network"] },
     { what: "Paired devices (read)", api: ["GET /api/devices"], mcp: ["nm_settings op=devices"] },
     { what: "Make a pairing code", api: ["POST /api/pair/code (this computer's interface only)"], cli: ["neuromorph-nano pair"], note: "Not in MCP: a pairing code is made by the person at the computer." },
@@ -869,6 +1094,7 @@ function SettingsGuide({ view }: { view: View }) {
           </RailSection>
         </>
       )}
+      {view === "projects" && <ProjectsGuide />}
       {view === "tools" && (
         <>
           <RailSection title="Connecting">
@@ -962,11 +1188,14 @@ function DesignDeepLink({ target }: { target: string | null }) {
 export default function SettingsPage() {
   const { data, error } = useApi<Settings>("/api/settings");
   const status = useApi<Status>("/api/status", 15000);
+  const { key: activeProjectKey, projects: activeProjects } = useProjectKey();
   const projectsQ = useApi<Projects>("/api/projects", 30000);
   const airgap = useApi<AirGapReply>("/api/airgap", 15000);
   const controls = useApi<Control[]>("/api/controls", 15000);
-  // The project served last (its folder), else the Nano's own folder.
-  const lastProject = [...(projectsQ.data?.projects ?? [])].sort((a, b) => (b.last_ms ?? 0) - (a.last_ms ?? 0))[0]?.root ?? status.data?.root ?? null;
+  // Active global project's folder, else the project served last, else the Nano's own folder.
+  const allProjectsList = activeProjects?.projects ?? projectsQ.data?.projects ?? [];
+  const activeProjectRoot = allProjectsList.find((p) => p.key === activeProjectKey)?.root ?? null;
+  const lastProject = activeProjectRoot ?? [...allProjectsList].sort((a, b) => (b.last_ms ?? 0) - (a.last_ms ?? 0))[0]?.root ?? status.data?.root ?? null;
   // 2026-11-26: a section name in the address opens that section (`/settings/#privacy`); any other
   // name in the address is a design file, which opens in the rail's design files.
   const section = useSection(VIEWS, VIEW_KEY);
@@ -1020,6 +1249,7 @@ export default function SettingsPage() {
           <HomeostasisPanel status={status.data} />
         </div>
       )}
+      {view === "projects" && <ProjectsPanel root={status.data?.root} />}
       {view === "tools" && (
         <div className="grid gap-10">
           <ConnectPanel project={lastProject} />
@@ -1030,6 +1260,7 @@ export default function SettingsPage() {
       {view === "privacy" && (
         <div className="grid gap-10">
           <AirGapPanel />
+          <NanoIgnorePanel projects={projectsQ.data} />
           <DevicesPanel />
         </div>
       )}

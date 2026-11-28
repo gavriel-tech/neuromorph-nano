@@ -51,9 +51,9 @@ export function useSection<T extends Section>(sections: readonly T[], storageKey
  *  Arrow keys move between sections; Enter or Space picks. */
 export default function SectionBar<T extends Section>({ sections, value, onPick, label }: { sections: readonly T[]; value: T["id"]; onPick: (id: T["id"]) => void; label: string }) {
   return (
-    <nav aria-label={label} className="sticky top-14 z-30 -mx-4 mb-8 border-b border-line bg-bg/95 px-4 backdrop-blur lg:top-0" data-e2e="section-bar">
+    <nav aria-label={label} className="sticky top-14 z-30 -mx-4 -mt-5 mb-6 border-b border-line bg-bg/95 px-4 pt-2 backdrop-blur md:-mx-8 md:px-8 lg:-top-5 2xl:-mx-10 2xl:px-10" data-e2e="section-bar">
       <ul
-        className="flex gap-1 overflow-x-auto [scrollbar-width:none]"
+        className="flex gap-1 overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onKeyDown={(e) => {
           if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
           const i = sections.findIndex((s) => s.id === value);
@@ -81,7 +81,7 @@ export default function SectionBar<T extends Section>({ sections, value, onPick,
                 className={`press mono relative inline-flex min-h-11 items-center px-3 text-[11px] uppercase tracking-[0.1em] ${on ? "text-text" : "text-faint hover:text-text"}`}
               >
                 {v.label}
-                {on && <span aria-hidden className="absolute right-3 bottom-[-1px] left-3 h-[2px] bg-sense-pale" />}
+                {on && <span aria-hidden className="absolute right-3 bottom-0 left-3 h-[2px] bg-sense-pale" />}
               </a>
             </li>
           );

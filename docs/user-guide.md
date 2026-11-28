@@ -238,24 +238,24 @@ What it keeps and how to clear it: `docs\privacy.md`, Evidence ledger.
 
 ### Priming
 
-With hooks on, the Nano can add a short note, a prime, to Claude Code's context at the moment it
-is likely to help, without being asked. Each note states located facts and where they came from:
+With hooks on, the Nano proactively **nudges** your coding agent (Claude Code via `additionalContext`, Antigravity via `injectSteps`) in the right direction at key session moments without waiting to be asked. Each prime states only located facts and where they came from, riding on the same hook channel as user- or agent-set guidance (objectives, completion loops, step-graph directions, and reminders below):
 
-- at a prompt: the places that answered a similar question before, when that answer was verified;
-- after a failed build or test: the change that fixed the same failure last time;
-- before an edit: that the lines hold a verified fix, or that the edit changes a function's
-  signature and where the function is called;
-- after Claude Code compacts its conversation: what was in play (the task, files edited, failing
-  checks, changes not yet verified);
-- with the setting at `on`, also at a session start (what the last session left open) and at a stop
-  (files changed and not built or tested since).
+- `prompt-recall` (`UserPromptSubmit` / `PreInvocation`): surfaces the verified places that answered a similar question before;
+- `failure-fix` (`PostToolUseFailure` or failed build/test `PostToolUse`): surfaces the verified change that fixed the same error signature previously;
+- `edit-impact` (`PreToolUse` on `Edit`, `MultiEdit`, `Write`, or `NotebookEdit`): warns before edits touching lines that hold a verified fix, rest under a refuted outcome, or change a function signature with live callers elsewhere in the package;
+- `resume` (`SessionStart` after compaction, or at startup with `priming = on`): restores what was actively in play (task, edited files, failing checks, unverified changes) so compaction does not wipe working context;
+- `core` (`SessionStart` when `resume` has nothing to say): surfaces the project's most-used `1-core` memories at session open;
+- `open-loop` (`Stop`, with `priming = on`): flags files modified during the turn that were not built or tested since, or are still failing.
 
-The source of each note is read fresh before it is given; if the cited lines changed, nothing is
-said. The same note is never given twice in a session. The setting `priming` sets which: `quiet`
-(the default, strong evidence only), `on` (weaker evidence too, and at a session start and a stop)
-or `off`. There is no count per session. Change it in the interface's settings, where it is
-audited and can be undone. Each note given is judged in the evidence ledger (whether the place was
-then read or edited, whether the next check passed), so the ledger shows which kinds help.
+The source of each prime is re-read fresh on disk before delivery; if any cited line changed, nothing is sent. The same `(kind, source)` prime never repeats twice in a session, and a self-calibrating latency deadline (`2x` the host's median hook latency, `25 ms` fallback) silently drops any prime not ready in time so hooks never stall your agent. Priming and all built-in prime rules start `off` by default (opt-in); set master `priming` to `quiet` (strong evidence only) or `on` (weaker evidence plus startup resume and stop open-loop nudges) and toggle individual primes on like alarm switches.
+
+Open **Audit -> Primes Studio** (`/audit/#primes`) or use the right-side **Quick prime control** rail (available on Audit and Learning) for full live-synced control across the Web UI, HTTP API (`/api/primes`), and MCP (`nm_settings` `op=primes`, `prime_builtin`, `prime_add`, `prime_edit`, `prime_toggle`, `prime_remove`, `prime_all_off`, `prime_preset_save`, `prime_preset_apply`, `prime_preset_delete`):
+
+- **Alarm-style switches (ON/OFF separate from Add/Remove):** every built-in rule and custom prime starts `off` until toggled on. Switching a prime off dims it in your list without deleting it; removing a prime is a separate explicit action, and **All off** (`all_off`) disarms everything in one click.
+- **Clean `+ Add Prime` workflow & tabbed Preset Picker:** click **+ Add Prime** to create a custom prime or click **Browse presets** to open the tabbed **Choose a preset** pop-up (**Verified presets** and **Prompt & schedule** starter/saved presets: `quiet-verified`, `active-guardrails`, `build-discipline`, `compaction-shield`, `workday-checkin`, `pre-edit-guard`). Selecting any preset prefills only the prompt, trigger, interval, schedule, and repeat settings so you can edit it cleanly and click **Add Prime** (the engine attaches the `Neuromorph Nano prime (<Label>):` header automatically at fire time).
+- **Custom triggers, timers, and UTC schedules:** trigger on lifecycle events (`session-start`, `prompt`, `compact`, `stop`, `edit`, `failure`, `tools`, `error-repeats`), minute-based **interval** timers (`interval_min`), or UTC day/clock **schedule** windows (`days`, `after`, `before`), with optional file-path globs, repetition caps (`always`, `once`, `max`), and links to active Guidance loops. Every change shares one atomic state across UI, HTTP API, and MCP, is audited with one-click Undo, and deletions use the two-step confirmation gate.
+
+Manage the globally synced active project from any project dropdown (left sidebar, Audit, Primes Studio, Memory, Learning, Settings) or under **Settings -> Projects** (`/settings/#projects`), `POST /api/projects`, or MCP `nm_settings` (`project_create`, `project_rename`): click **Settings** on any project card to open its centered Settings modal (rename/description, live project prime switches, `.nanoignore` quick-exclude, and two-step confirmed Delete that never touches your source files). Transient `scratch/` and internal test-fixture folders are automatically excluded from auto-registration.
 
 ### Reminders, loops and steps
 

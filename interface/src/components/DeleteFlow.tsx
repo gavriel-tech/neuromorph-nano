@@ -252,11 +252,11 @@ export default function DeleteFlow<T = unknown>({
                   className="mono h-9 w-full max-w-xs min-w-0 border-b border-line-strong bg-transparent px-1 text-xs text-text outline-none focus-visible:border-sense-pale"
                   data-e2e="delete-word"
                 />
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-line/60 pt-3">
                   <button
                     type="submit"
                     disabled={busy || (!expired && !matches)}
-                    className="press mono min-h-11 border border-error/70 px-3 text-[11px] uppercase tracking-[0.12em] text-error hover:bg-error/10 disabled:opacity-40"
+                    className="press mono min-h-11 border border-error/70 px-3.5 text-[11px] uppercase tracking-[0.12em] text-error hover:bg-error/10 disabled:opacity-40"
                     data-e2e="delete-final"
                   >
                     {phase === "deleting" ? "Deleting" : expired ? "Expired · preview again" : permanent ? "Delete permanently" : "Delete"}

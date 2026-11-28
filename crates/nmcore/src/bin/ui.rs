@@ -388,6 +388,7 @@ fn api(home: &Path, path: &str, query: &str) -> Option<Value> {
         // this machine, and its profile (`nmapi::limits`, which `nm_settings` calls too).
         "/api/limits" => Some(limits_view(home)),
         "/api/airgap" => Some(crate::controls::air_gap_view(home, 0)),
+        "/api/nanoignore" => Some(crate::controls::nanoignore_view(home, query)),
         // 2026-11-26 (Phase B, every feature in the interface, MCP and the API): a MicroModel's
         // tensors and clusters (`nm_weights`, read only), a map's contents, a cartridge's values,
         // the learning units, the project lenses, the objectives, the MCP clients' connection.
@@ -415,6 +416,7 @@ fn api(home: &Path, path: &str, query: &str) -> Option<Value> {
         "/api/goals" => Some(crate::memory_api::goals_view(home, query)),
         // Reminders, loops and the step graph for the coding agent (`guidance`).
         "/api/guidance" => Some(crate::guidance::view(home, query)),
+        "/api/primes" => Some(crate::primes_ctl::view(home, query)),
         "/api/connect" => Some(crate::onboard::status_view(home, query)),
         _ => None,
     }
@@ -1905,6 +1907,9 @@ fn phase_b_write(home: &Path, path: &str, v: &Value, by: &str) -> Option<Result<
             crate::preferences::plug(home, field("id")?, on, by)
         })(),
         "/api/preferences/apply" => crate::preferences::apply(home, v),
+        "/api/nanoignore" => crate::controls::nanoignore_write(home, v, by),
+        "/api/projects" => crate::project::write(home, v, by),
+        "/api/primes" => crate::primes_ctl::write(home, v, by),
         _ => return None,
     })
 }

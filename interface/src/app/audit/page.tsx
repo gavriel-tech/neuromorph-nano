@@ -19,12 +19,17 @@ import { useEffect, useRef, useState } from "react";
 import { ControlRow, NoteLine } from "@/components/Controls";
 import DeleteFlow, { type DeleteNote } from "@/components/DeleteFlow";
 import { Tape } from "@/components/PagePlates";
+import PrimesStudio, { PrimesRail } from "@/components/PrimesStudio";
+import ProjectMenu from "@/components/ProjectMenu";
+import SectionBar from "@/components/SectionBar";
 import StageTimesPanel from "@/components/StageTimes";
 import Workspace, { RailSection, useRail } from "@/components/Workspace";
 import { CallText, Dot, Empty, Failed, Masked, Pill, Placeholder, Segmented, type Tone } from "@/components/ui";
 import { msText } from "@/lib/activity";
-import { ago, bytes, post, refreshAll, useApi, type Audit, type AuditRow, type Control, type Projects } from "@/lib/api";
+import { ago, bytes, post, refreshAll, useApi, type Audit, type AuditRow, type Control, type Ledger } from "@/lib/api";
 import { useNow } from "@/lib/clock";
+import { primeCounts, useProjectKey } from "@/lib/evidence";
+import { setHash, useHash } from "@/lib/hash";
 import { callLabel, captureMask, hide, maskName, maskPathsIn, reveal, useRevealed } from "@/lib/privacy";
 
 type Note = { text: string; tone: "verified" | "error" };
@@ -34,7 +39,8 @@ type Note = { text: string; tone: "verified" | "error" };
 const KIND_GROUPS: Record<string, string[]> = {
   all: [],
   tool: ["tool"],
-  setting: ["setting"],
+  priming: ["prime", "prime-config"],
+  setting: ["setting", "nanoignore", "project"],
   outcome: ["outcome"],
   learning: ["learning-cycle", "training", "engine-rollback", "engine-sync", "distil", "unit"],
   "memory & guidance": ["memory", "goal", "guidance"],
@@ -86,6 +92,9 @@ const UNDO_KINDS: Record<string, string[] | null> = {
   // from this date keep their `from`; earlier rows have no action and are not offered).
   "library-base": ["choose"],
   "role-model": ["choose"],
+  nanoignore: ["set", "add", "remove"],
+  project: ["create", "rename"],
+  "prime-config": null,
 };
 function undoable(e: AuditRow): boolean {
   if (e.kind === "setting") return true;
@@ -168,7 +177,7 @@ function RevealToggle({ id }: { id: string }) {
       onClick={() => (on ? hide(id) : reveal(id))}
       aria-label={on ? "Hide question" : "Show question"}
       data-e2e="audit-row-reveal"
-      className="press mono ml-2 min-h-10 shrink-0 self-center border-b border-line-strong px-1.5 text-[10px] uppercase tracking-[0.12em] text-faint hover:border-sense-pale hover:text-text"
+      className="press mono ml-1 min-h-10 shrink-0 self-center border-b border-line-strong px-1.5 text-[10px] uppercase tracking-[0.12em] text-faint hover:border-sense-pale hover:text-text sm:ml-2"
     >
       {on ? "hide" : "show"}
     </button>
@@ -179,7 +188,7 @@ function RevealToggle({ id }: { id: string }) {
 async function undoRow(id: string): Promise<Note> {
   try {
     await post("/api/undo", { id });
-    for (const p of ["/api/audit", "/api/controls", "/api/cartridges", "/api/cartridges/library", "/api/surgery", "/api/parameter-maps", "/api/devices"]) refreshAll(p);
+    for (const p of ["/api/audit", "/api/controls", "/api/primes", "/api/projects", "/api/nanoignore", "/api/cartridges", "/api/cartridges/library", "/api/surgery", "/api/parameter-maps", "/api/devices"]) refreshAll(p);
     return { text: "Undone. The undo is logged too.", tone: "verified" };
   } catch (e) {
     return { text: e instanceof Error ? e.message : String(e), tone: "error" };
@@ -368,29 +377,39 @@ function AuditAbout() {
       <RailSection title="Episodes">
         <p className="read text-[11px] text-faint">Kept with memory on, one per answered question, for recall and outcomes. The question stays hidden until shown.</p>
       </RailSection>
+      <RailSection title="Priming">
+        <p className="read text-[11px] text-faint">Every verified prime sent to your coding agent through lifecycle hooks is logged as a <span className="mono text-muted">prime</span> row (kind, trigger, cited places, no file contents) and filterable under <span className="mono text-muted">priming</span>. Open the Primes tab to inspect follow-through verdicts and toggle the priming control.</p>
+      </RailSection>
     </div>
   );
 }
 
+const AUDIT_VIEWS = [
+  { id: "log", label: "Audit Log", about: "Every tool call, setting change, prime delivery, and undoable action." },
+  { id: "primes", label: "Primes Studio", about: "Alarm-style switches for built-in primes, custom triggers, intervals, schedules, and presets." },
+  { id: "episodes", label: "Episodes", about: "Recorded question episodes for recall and verified outcomes." },
+] as const;
+type AuditView = (typeof AUDIT_VIEWS)[number]["id"];
+
 const dayOf = (ms: number) => new Date(ms).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 const timeOf = (ms: number) => new Date(ms).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
 
-/** The working middle: the tape, the filters and the timeline. */
-function AuditWork() {
+/** The working middle: top section bar (Audit Log | Primes Studio | Episodes), tape, filters, and timeline. */
+function AuditWork({ view, onPickView }: { view: AuditView; onPickView: (v: AuditView) => void }) {
   const rail = useRail();
+  const { key: globalProjectKey } = useProjectKey();
   const [kind, setKind] = useState("all");
-  const [project, setProject] = useState("");
+  const [allProjects, setAllProjects] = useState(false);
   const [state, setState] = useState<StateFilter>("all");
-  const [view, setView] = useState<"log" | "episodes">("log");
   const [msg, setMsg] = useState<Note | null>(null);
   const now = useNow();
+  const activeProject = allProjects ? "" : (globalProjectKey ?? "");
   const q = new URLSearchParams();
   if (kind !== "all") q.set("kind", (KIND_GROUPS[kind] ?? [kind]).join(","));
-  if (project) q.set("project", project);
+  if (activeProject) q.set("project", activeProject);
   q.set("limit", "200");
   const path = `/api/audit?${q.toString()}`;
   const { data, error } = useApi<Audit>(path, 3000);
-  const projects = useApi<Projects>("/api/projects", 15000);
 
   const all = [...(data?.audit ?? [])].reverse();
   const undone = new Set(all.flatMap((e) => (typeof e.undo_of === "string" ? [e.undo_of] : [])));
@@ -400,7 +419,6 @@ function AuditWork() {
   const undoCount = all.filter(canUndo).length;
   const [undoing, setUndoing] = useState<string | null>(null);
   const episodes = [...(data?.episodes ?? [])].reverse();
-  const projectKeys = ["nano", ...(projects.data?.projects.map((p) => p.key) ?? [])];
   const maxMs = Math.max(1, ...rows.map((e) => (typeof e.ms === "number" ? e.ms : 0)));
   const shownKey = rail.shown?.key ?? null;
 
@@ -433,14 +451,14 @@ function AuditWork() {
       window.history.pushState(null, "", "/audit/");
       rail.clear();
       setKind("all");
-      setProject("");
+      setAllProjects(false);
       setState("all");
-      setView("log");
+      onPickView("log");
       window.scrollTo({ top: 0 });
     };
     window.addEventListener("nm:nav-reset", onReset);
     return () => window.removeEventListener("nm:nav-reset", onReset);
-  }, [rail]);
+  }, [rail, onPickView]);
 
   useEffect(() => {
     if (typeof window === "undefined" || all.length === 0) return;
@@ -456,8 +474,9 @@ function AuditWork() {
   });
 
   return (
-    <div className="grid min-w-0 gap-6">
-      {data && rows.length > 0 && (
+    <div className="grid min-w-0 gap-5">
+      <SectionBar sections={AUDIT_VIEWS} value={view} onPick={(v) => onPickView(v)} label="Audit sections" />
+      {data && view === "log" && rows.length > 0 && (
         <section aria-label="Tape of events" className="min-w-0">
           <div className="topo night ticks border border-line px-3 py-3">
             <Tape rows={rows} now={now} onPick={open} picked={shownKey?.startsWith("audit:") ? shownKey.slice(6) : null} />
@@ -465,7 +484,9 @@ function AuditWork() {
           <div className="mono mt-1.5 text-[10px] uppercase tracking-[0.16em] text-faint">Fig. 1 · every event along time · the parts it named beneath · a mark opens its event</div>
         </section>
       )}
+      {view !== "primes" && (
       <div className="grid min-w-0 gap-3" data-e2e="audit-filters">
+        {view === "log" && (
         <div role="radiogroup" aria-label="Kind" className="flex min-w-0 flex-wrap items-end gap-x-1 gap-y-1 border-b border-line">
           {KINDS.map((k) => {
             const on = k === kind;
@@ -476,27 +497,31 @@ function AuditWork() {
             );
           })}
         </div>
-        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
-        <label className="relative">
-          <span className="sr-only">Project</span>
-          <select value={project} onChange={(e) => setProject(e.target.value)} className="press mono h-9 max-w-[220px] appearance-none border-b border-line-strong bg-transparent pr-8 pl-1 text-[11px] text-muted hover:border-text focus-visible:border-sense-pale">
-            <option value="">All projects</option>
-            {projectKeys.map((p) => (
-              <option key={p} value={p}>
-                {p === "nano" ? "The Nano itself" : `project ${maskName(p)}`}
-              </option>
-            ))}
-          </select>
-          <svg aria-hidden viewBox="0 0 16 16" className="pointer-events-none absolute top-1/2 right-2 h-3 w-3 -translate-y-1/2 text-faint">
-            <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.2" />
-          </svg>
-        </label>
-        {view === "log" && <Segmented values={[...STATES]} value={state} label="State" onPick={(v) => setState(v as StateFilter)} render={(v) => (v === "failed" && data ? `failed ${failed}` : v === "undoable" && data ? `undoable ${undoCount}` : v)} />}
-        <div className="ml-auto">
-          <Segmented values={["log", "episodes"]} value={view} label="View" onPick={(v) => setView(v as "log" | "episodes")} render={(v) => (v === "log" ? `Log ${data ? rows.length : ""}` : `Episodes ${data ? episodes.length : ""}`)} />
-        </div>
+        )}
+        <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2.5">
+          <ProjectMenu placement="down" label="project" onSelect={() => setAllProjects(false)} />
+          <button
+            type="button"
+            aria-pressed={allProjects}
+            data-e2e="audit-all-projects-toggle"
+            onClick={() => setAllProjects((v) => !v)}
+            className={`press mono h-9 shrink-0 border px-2.5 text-[10px] uppercase tracking-[0.12em] ${
+              allProjects
+                ? "border-sense-pale bg-bg-2/70 text-text"
+                : "border-line-strong text-faint hover:border-sense-pale hover:text-text"
+            }`}
+          >
+            {allProjects ? "Showing all projects" : "All projects"}
+          </button>
+          {view === "log" && (
+            <div className="w-full sm:w-auto sm:min-w-[20rem]">
+              <Segmented values={[...STATES]} value={state} label="State" onPick={(v) => setState(v as StateFilter)} render={(v) => (v === "failed" && data ? `failed ${failed}` : v === "undoable" && data ? `undoable ${undoCount}` : v)} />
+            </div>
+          )}
         </div>
       </div>
+      )}
+      {view === "primes" && <PrimesStudio onBack={() => onPickView("log")} />}
       <NoteLine note={msg} />
       {error && !data && <Failed error={error} />}
       {!data && !error && <Placeholder className="h-80" what="audit log" />}
@@ -507,12 +532,12 @@ function AuditWork() {
           <div className="grid gap-5" data-e2e="audit-log">
             {days.map((d, di) => (
               <section key={`${d.day}-${di}`} aria-label={d.day} className="min-w-0">
-                <div className="mono sticky top-0 z-10 flex items-baseline justify-between gap-3 border-b border-line bg-bg/90 py-1.5 text-[10.5px] uppercase tracking-[0.14em] text-faint backdrop-blur">
+                <div className="mono sticky top-[6.75rem] z-10 flex items-baseline justify-between gap-3 border-b border-line bg-bg/90 py-1.5 text-[10.5px] uppercase tracking-[0.14em] text-faint backdrop-blur lg:top-[2.75rem]">
                   <span>{d.day}</span>
                   <span className="text-quiet">{d.rows.length}</span>
                 </div>
                 <ol className="relative">
-                  <span aria-hidden className="absolute top-0 bottom-0 left-[5.1rem] w-px bg-line" />
+                  <span aria-hidden className="absolute top-0 bottom-0 left-[4.25rem] w-px bg-line sm:left-[5.1rem]" />
                   {d.rows.map((e) => {
                     const tone = toneOf(e);
                     const on = shownKey === `audit:${e.id}`;
@@ -526,23 +551,23 @@ function AuditWork() {
                           aria-pressed={on}
                           data-e2e="audit-row"
                           data-kind={e.kind}
-                          className="press group grid min-h-10 min-w-0 flex-1 grid-cols-[4rem_1.2rem_minmax(0,1fr)_auto] items-center gap-x-2 py-1.5 text-left"
+                          className="press group grid min-h-10 min-w-0 flex-1 grid-cols-[3.5rem_1rem_minmax(0,1fr)_auto] items-center gap-x-1.5 py-1.5 text-left sm:grid-cols-[4rem_1.2rem_minmax(0,1fr)_auto] sm:gap-x-2"
                         >
-                          <span className="mono pl-1 text-[10.5px] text-faint tabular-nums">{timeOf(e.time_ms)}</span>
+                          <span className="mono pl-0.5 text-[10px] text-faint tabular-nums sm:pl-1 sm:text-[10.5px]">{timeOf(e.time_ms)}</span>
                           <span className="relative flex justify-center">
                             <i aria-hidden className={`relative z-[1] block h-2 w-2 rounded-full border ${on ? "scale-125" : ""}`} style={{ background: tone === "muted" ? "var(--bg-0)" : SPINE[tone], borderColor: SPINE[tone] }} />
                           </span>
                           <span className="min-w-0">
                             <span className="flex min-w-0 items-center gap-2">
                               <span className="mono hidden shrink-0 text-[10px] uppercase tracking-[0.08em] text-quiet sm:inline">{e.kind}</span>
-                              <span className={`mono min-w-0 truncate text-[12px] ${on ? "text-text" : "text-muted group-hover:text-text"}`}>{undoable(e) || e.kind !== "tool" ? titleOf(e) : <CallWords e={e} />}</span>
+                              <span className={`mono min-w-0 truncate text-[11.5px] sm:text-[12px] ${on ? "text-text" : "text-muted group-hover:text-text"}`}>{undoable(e) || e.kind !== "tool" ? titleOf(e) : <CallWords e={e} />}</span>
                               {undone.has(e.id) ? (
                                 <span className="mono shrink-0 text-[10px] text-quiet">undone</span>
                               ) : typeof e.undo_of === "string" ? (
                                 <span className="mono shrink-0 text-[10px] text-quiet">an undo</span>
                               ) : null}
                             </span>
-                            <span className="mono block truncate text-[10.5px] text-faint">{metaOf(e)}</span>
+                            <span className="mono block truncate text-[10px] text-faint sm:text-[10.5px]">{metaOf(e)}</span>
                           </span>
                           <span className="flex shrink-0 items-center gap-2">
                             {ms !== null && (
@@ -550,7 +575,7 @@ function AuditWork() {
                                 <span className="block h-full" style={{ width: `${Math.max(2, Math.sqrt(ms / maxMs) * 100)}%`, background: e.ok === false ? "var(--error)" : "var(--sense-pale)" }} />
                               </span>
                             )}
-                            <span className="mono w-14 text-right text-[10.5px] text-faint">{now > 0 ? ago(e.time_ms, now) : ""}</span>
+                            <span className="mono hidden w-14 text-right text-[10.5px] text-faint sm:inline-block">{now > 0 ? ago(e.time_ms, now) : ""}</span>
                           </span>
                         </button>
                         {hasHidden && <RevealToggle id={`call:${e.id}`} />}
@@ -565,7 +590,7 @@ function AuditWork() {
                               setMsg(await undoRow(e.id));
                               setUndoing(null);
                             }}
-                            className="press mono ml-2 min-h-10 shrink-0 self-center border-b border-sense-pale px-1.5 text-[10px] uppercase tracking-[0.12em] text-sense-pale hover:text-text disabled:opacity-40"
+                            className="press mono ml-1 min-h-10 shrink-0 self-center border-b border-sense-pale px-1.5 text-[10px] uppercase tracking-[0.12em] text-sense-pale hover:text-text disabled:opacity-40 sm:ml-2"
                           >
                             {undoing === e.id ? "undoing" : "undo"}
                           </button>
@@ -613,6 +638,18 @@ function AuditWork() {
 
 export default function AuditPage() {
   const { data, error } = useApi<Audit>("/api/audit?limit=200", 3000);
+  const { key: projKey } = useProjectKey();
+  const ledger = useApi<Ledger>(projKey ? `/api/ledger?project=${encodeURIComponent(projKey)}` : "/api/ledger", 10000);
+  const hash = useHash();
+  const [pickedView, setPickedView] = useState<AuditView | null>(null);
+  const view: AuditView = pickedView ?? (hash === "#primes" ? "primes" : hash === "#episodes" ? "episodes" : "log");
+  const setView = (next: AuditView) => {
+    setPickedView(next);
+    if (typeof window !== "undefined") {
+      setHash(next === "log" ? "" : `#${next}`, false);
+    }
+  };
+  const pc = primeCounts(ledger.data);
   const rows = data?.audit ?? [];
   const failed = rows.filter((e) => e.ok === false).length;
   const canUndo = rows.filter((e) => undoable(e) && !rows.some((r) => r.undo_of === e.id)).length;
@@ -632,6 +669,12 @@ export default function AuditPage() {
       }
       rail={[
         {
+          id: "primes-rail",
+          label: "Primes",
+          count: pc?.given,
+          body: <PrimesRail inStudio={view === "primes"} onOpenStudio={() => setView("primes")} onOpenLog={() => setView("log")} />,
+        },
+        {
           id: "stages",
           label: "Stage times",
           // The figures of a row stay on one line in the narrow panel (790 ms, not 790 over ms).
@@ -646,7 +689,7 @@ export default function AuditPage() {
       ]}
       about={<AuditAbout />}
     >
-      <AuditWork />
+      <AuditWork view={view} onPickView={setView} />
     </Workspace>
   );
 }

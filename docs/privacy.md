@@ -71,6 +71,47 @@ What your agent does with the context the Nano gives it is up to the agent. Clau
 example, sends its conversation, including the tool replies and any prime, to its own model
 service.
 
+### Excluding files with `.nanoignore`
+
+If your repository contains tracked files you want Neuromorph Nano to avoid completely (for example
+keys, internal notes, legal or customer data, or proprietary files you do not want placed into
+Context Packets sent to a cloud agent like Claude Code), manage exclusions across any of four
+equivalent surfaces:
+
+| Control Surface | How to Use |
+|---|---|
+| **Manual / agent file edit** | Create or edit `<repo>/.nanoignore` (and optionally nested `<repo>/<subdir>/.nanoignore`) directly in your editor or repository. |
+| **Local Interface** | Open **Settings -> Privacy and network -> File exclusions (`.nanoignore`)** to pick a repository, edit rules or quick-add patterns, test whether a relative path is excluded, and save with one-click Undo on Audit. |
+| **Local JSON API** | `GET /api/nanoignore?project=<key_or_folder>[&test=<rel_path>]` reads rules, nested `.nanoignore` files, and path match status; `POST /api/nanoignore` (`action: "set" | "add" | "remove"`) writes atomically with an undoable `nanoignore` audit row. |
+| **MCP (`nm_settings`)** | `op=nanoignore`, `nanoignore_check` (`test`), `nanoignore_set` (`content`), `nanoignore_add` (`pattern`), `nanoignore_remove` (`pattern`), and `op=undo` (`id`) so coding agents can manage exclusions with full Audit accountability. |
+
+`.nanoignore` uses gitignore-style syntax:
+
+```gitignore
+# Exclude sensitive files and directories from Neuromorph Nano
+*.pem
+.env*
+secrets/
+internal/
+/top_only.txt
+!secrets/public-template.json
+```
+
+- **Enforced everywhere in Neuromorph Nano:** matching files and directories are never walked into
+  the Global Context Substrate, never embedded into the dense meaning index, never summarized by
+  the idle Writer, never re-read by fresh memory recall (`fresh_text`), never cited in primes
+  (`prompt-recall`, `failure-fix`, `edit-impact`, `core`, `resume`), never surfaced as build-help
+  source snippets, and marked sensitive in hook logs.
+- **Immediate cache invalidation:** adding, editing, or removing a `.nanoignore` file changes the
+  substrate manifest fingerprint so `substrate-cache-*.bin` rebuilds immediately without serving
+  previously cached content.
+- **Applies in every repository:** unlike `.gitignore`, `.nanoignore` is never bypassed, even in a
+  Neuromorph folder.
+- **Honest scope boundary:** `.nanoignore` stops **Neuromorph Nano** from reading or sending
+  matching files to your agent. Your coding agent itself (such as Claude Code) still has its own
+  direct file and shell tools; pair `.nanoignore` with your agent's own ignore/permission settings
+  (or use a local model with Air-Gap Mode on) if you also want to block direct reads by the agent.
+
 ## The interface server
 
 - It binds 127.0.0.1, so it cannot be reached from another machine, unless you set the control
@@ -318,9 +359,7 @@ prompt, the places that answered a similar verified question before; after a fai
 the change that fixed the same failure last time; before an edit, a verified fix in those lines, or
 the callers of a function whose signature the edit changes; after the conversation is compacted,
 what was in play. Each names where it came from and is read fresh first; a note whose lines changed
-is not given. The control `priming` (`off`, `quiet` the default, `on`) sets which: `quiet` gives notes only
-from strong evidence, `on` also from weaker evidence and at a session start and at a stop. There is
-no count per session; each note is given only when its rule fires, and never twice.
+is not given. The control `priming` (`off` the default, `quiet`, `on`) sets which: all priming and all 6 built-in prime rules start `off` (opt-in); `quiet` gives notes only from strong evidence, and `on` also gives notes from weaker evidence, at session start, and at stop. Custom primes (event, interval, and UTC schedule triggers) configured in Primes Studio, `/api/primes`, or MCP `nm_settings` also start `off` until explicitly switched on. There is no fixed count per session; built-in notes fire only when their verified rule matches, and never twice.
 
 - The Nano sends nothing itself: a prime goes to Claude Code on standard output of the hook program,
   as context Claude Code then sends to its model with your conversation, like the files it reads.

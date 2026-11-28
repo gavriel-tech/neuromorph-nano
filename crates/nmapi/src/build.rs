@@ -45,6 +45,9 @@ fn flag(v: &Value, k: &str) -> bool {
 }
 
 fn lines_of(root: &Path, file: &str, line: usize) -> Vec<String> {
+    if nmsubs::repo::is_nanoignored(root, file) {
+        return Vec::new();
+    }
     std::fs::read_to_string(root.join(file))
         .map(|t| t.lines().enumerate().skip(line.saturating_sub(3)).take(5).map(|(i, l)| format!("{}: {}", i + 1, l.trim_end())).collect())
         .unwrap_or_default()
@@ -226,9 +229,10 @@ fn lines(root: &Path, r: &BuildRun, budget: usize, warnings: bool) -> Value {
         let lvl = if d.level == "error" { String::new() } else { format!("{} ", d.level) };
         let code = if d.code.is_empty() { String::new() } else { format!("{} ", d.code) };
         text.push_str(&format!("{lvl}{code}{}:{}:{} {}\n", d.file, d.line, d.col, d.message));
-        if let Some(src) = std::fs::read_to_string(root.join(&d.file))
-            .ok()
-            .and_then(|t| t.lines().nth(d.line.saturating_sub(1)).map(|l| l.trim().to_owned()))
+        if !nmsubs::repo::is_nanoignored(root, &d.file)
+            && let Some(src) = std::fs::read_to_string(root.join(&d.file))
+                .ok()
+                .and_then(|t| t.lines().nth(d.line.saturating_sub(1)).map(|l| l.trim().to_owned()))
         {
             text.push_str(&format!("  {}| {src}\n", d.line));
         }

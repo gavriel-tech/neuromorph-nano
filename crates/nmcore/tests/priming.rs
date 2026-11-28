@@ -98,7 +98,18 @@ impl Place {
         std::fs::create_dir_all(home.join("memory")).unwrap();
         copy_dir(&workspace().join("tests").join("fixtures").join("small-repo"), &repo);
         let want = fixture.map(|f| expected(f).0).unwrap_or_default();
-        Self { dir, home, repo, want, got: Vec::new(), deadline: Some(5000) }
+        let place = Self { dir, home, repo, want, got: Vec::new(), deadline: Some(5000) };
+        // Priming defaults to off (opt-in); enable quiet mode and the 6 built-in rules for these
+        // priming behavior tests (the `priming_off_gives_nothing` test explicitly overrides to off).
+        place.set("priming", "quiet");
+        let proj_mem = place.home.join("memory").join("projects").join(nmsubs_key(&place.repo));
+        std::fs::create_dir_all(&proj_mem).unwrap();
+        std::fs::write(
+            proj_mem.join("primes-config.json"),
+            r#"{"version":1,"builtins":{"prompt-recall":true,"failure-fix":true,"edit-impact":true,"resume":true,"core":true,"open-loop":true},"custom":[]}"#,
+        )
+        .unwrap();
+        place
     }
     fn set(&self, key: &str, value: &str) {
         let p = self.home.join("settings.json");

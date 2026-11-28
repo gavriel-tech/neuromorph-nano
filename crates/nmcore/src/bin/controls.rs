@@ -439,9 +439,9 @@ pub const CONTROLS: &[Control] = &[
         key: "priming",
         group: "Claude Code",
         values: &["off", "quiet", "on"],
-        default: "quiet",
+        default: "off",
         label: "Priming",
-        help: "Primes: short notes the Nano adds to Claude Code's context through its hooks, unasked, when they are likely to help: at a prompt, the places that answered a similar verified question before; after a failed build or test, the change that fixed the same failure last time; before an edit, a verified fix in those lines or the callers of a changed signature; after the conversation is compacted, what was in play. Each cites its source, which is read fresh first; the same note is never given twice in a session. Quiet: only from strong evidence. On: also from weaker evidence, at a session start (what the last session left open) and at a stop with changes not built or tested. No count per session: each note is given only when its rule fires, and never twice. Off: none.",
+        help: "Primes: short notes the Nano adds to Claude Code's context through its hooks, unasked, when they are likely to help. Off by default (opt-in); enable individual built-in rules, custom primes, or presets in Audit -> Primes Studio. Quiet: only strong verified evidence. On: also weaker evidence, startup resume, and stop open-loop nudges. Off: none.",
         wired: true,
         applies: "next hook",
         range: None,
@@ -1391,6 +1391,9 @@ pub fn undo_by(home: &Path, id: &str, by: &str) -> Result<Option<String>, String
         // as they were before the change (each row keeps its `from`).
         ("library-base", "choose") => return crate::library::undo_base(home, &row, id, by),
         ("role-model", "choose") => return crate::library::undo_role(home, &row, id, by),
+        ("nanoignore", "set" | "add" | "remove") => return undo_nanoignore(home, &row, id, by),
+        ("project", "create" | "rename") => return crate::project::undo(home, &row, id, by),
+        (crate::primes_ctl::AUDIT_KIND, _) => return crate::primes_ctl::undo(home, &row, id, by),
         _ => {}
     }
     if row.get("kind").and_then(Value::string).ok() != Some("setting") {
@@ -1747,10 +1750,313 @@ fn check_parity_in(home: &Path) -> Result<(), String> {
     Ok(())
 }
 
+/// Maximum `.nanoignore` file size accepted via API/MCP writes (256 KiB).
+const MAX_NANOIGNORE_BYTES: usize = 256 * 1024;
+
+fn obj(pairs: Vec<(&str, Value)>) -> Value {
+    Value::Object(pairs.into_iter().map(|(k, v)| (k.to_owned(), v)).collect())
+}
+
+fn resolve_nanoignore_root(home: &Path, project: Option<&str>) -> Result<(String, PathBuf), String> {
+    let raw = project.map(str::trim).unwrap_or("");
+    if raw.is_empty() || raw == "nano" {
+        return Ok(("nano".to_owned(), nmsubs::repo::canon(home)));
+    }
+    // Check known project key under memory/projects/<key>/project.json first.
+    let key_ok = raw.chars().all(|c| c.is_alphanumeric() || matches!(c, '-' | '_' | '.')) && !raw.starts_with('.');
+    if key_ok {
+        let pj = home.join("memory").join("projects").join(raw).join("project.json");
+        if let Ok(bytes) = std::fs::read(&pj)
+            && let Ok(val) = nmjson::parse(&bytes)
+            && let Ok(root_s) = val.get("root").and_then(Value::string)
+        {
+            let p = PathBuf::from(root_s);
+            if p.is_dir() {
+                return Ok((raw.to_owned(), nmsubs::repo::canon(&p)));
+            }
+        }
+    }
+    let direct = PathBuf::from(raw);
+    if direct.is_dir() {
+        let canon = nmsubs::repo::canon(&direct);
+        let key = if canon == nmsubs::repo::canon(home) {
+            "nano".to_owned()
+        } else {
+            nmtype::project::memory_dir(home, &canon)
+                .file_name()
+                .and_then(|n| n.to_str())
+                .unwrap_or("project")
+                .to_owned()
+        };
+        return Ok((key, canon));
+    }
+    Err(format!("project: unknown project or folder {raw}"))
+}
+
+fn nanoignore_rules_list(content: &str) -> Vec<String> {
+    content
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty() && !l.starts_with('#'))
+        .map(str::to_owned)
+        .collect()
+}
+
+fn find_nested_nanoignores(root: &Path) -> Vec<String> {
+    fn walk(root: &Path, dir: &Path, depth: usize, out: &mut Vec<String>) {
+        if depth > 6 || out.len() >= 64 {
+            return;
+        }
+        let Ok(rd) = std::fs::read_dir(dir) else { return };
+        let mut entries: Vec<_> = rd.flatten().collect();
+        entries.sort_by_key(std::fs::DirEntry::file_name);
+        for e in entries {
+            let p = e.path();
+            let name = e.file_name().to_string_lossy().into_owned();
+            if e.file_type().is_ok_and(|t| t.is_symlink()) || !p.is_dir() {
+                continue;
+            }
+            if name.starts_with('.') || nmsubs::repo::SKIP.contains(&name.as_str()) {
+                continue;
+            }
+            let nf = p.join(nmsubs::repo::NANOIGNORE_FILE);
+            if nf.is_file() {
+                let rel = nf.strip_prefix(root).unwrap_or(&nf).to_string_lossy().replace('\\', "/");
+                out.push(rel);
+            }
+            walk(root, &p, depth + 1, out);
+        }
+    }
+    let mut out = Vec::new();
+    walk(root, root, 0, &mut out);
+    out
+}
+
+fn write_nanoignore_file(root: &Path, content: Option<&str>) -> Result<(), String> {
+    let target = root.join(nmsubs::repo::NANOIGNORE_FILE);
+    match content {
+        Some(body) => {
+            let tmp = root.join(format!("{}.tmp", nmsubs::repo::NANOIGNORE_FILE));
+            std::fs::write(&tmp, body.as_bytes()).map_err(|e| format!("{}: {e}", tmp.display()))?;
+            if let Err(e) = std::fs::rename(&tmp, &target) {
+                let _ = std::fs::remove_file(&tmp);
+                return Err(format!("{}: {e}", target.display()));
+            }
+            Ok(())
+        }
+        None => {
+            if target.exists() {
+                std::fs::remove_file(&target).map_err(|e| format!("{}: {e}", target.display()))?;
+            }
+            Ok(())
+        }
+    }
+}
+
+fn nanoignore_history_path(home: &Path, audit_id: &str) -> PathBuf {
+    home.join("memory").join("nanoignore-history").join(format!("{audit_id}.json"))
+}
+
+/// `GET /api/nanoignore?project=<key_or_path>[&test=<rel_path>]` and `nm_settings`
+/// `op=nanoignore|nanoignore_check`.
+#[must_use]
+pub fn nanoignore_view(home: &Path, query: &str) -> Value {
+    let proj_arg = crate::project::query_arg(query, "project");
+    let test_arg = crate::project::query_arg(query, "test").filter(|t| !t.trim().is_empty());
+    let (key, root) = match resolve_nanoignore_root(home, proj_arg.as_deref()) {
+        Ok(x) => x,
+        Err(e) => return obj(vec![("error", s(&e))]),
+    };
+    let file = root.join(nmsubs::repo::NANOIGNORE_FILE);
+    let exists = file.is_file();
+    let content = if exists { std::fs::read_to_string(&file).unwrap_or_default() } else { String::new() };
+    let rules = nanoignore_rules_list(&content);
+    let nested = find_nested_nanoignores(&root);
+    let mut fields = vec![
+        ("project", s(&key)),
+        ("root", s(&root.to_string_lossy())),
+        ("file", s(&file.to_string_lossy())),
+        ("exists", Value::Bool(exists)),
+        ("content", s(&content)),
+        ("rules", Value::Array(rules.iter().map(|r| s(r)).collect())),
+        ("nested", Value::Array(nested.iter().map(|n| s(n)).collect())),
+        (
+            "note",
+            s("Excludes matching files and folders from Neuromorph Nano's Global Context Substrate, substrate cache, dense vector index, world model, fresh recall, build-help snippets, hooks, and primes. Pair with your coding agent's own rules to block direct reads by the agent."),
+        ),
+    ];
+    if let Some(t) = test_arg {
+        let ignored = nmsubs::repo::is_nanoignored(&root, &t);
+        fields.push(("test", obj(vec![("path", s(&t)), ("ignored", Value::Bool(ignored))])));
+    }
+    obj(fields)
+}
+
+/// `POST /api/nanoignore` and `nm_settings` `op=nanoignore_set|nanoignore_add|nanoignore_remove`.
+/// Writes `<repo>/.nanoignore` atomically, records the previous state for Audit Undo, and returns
+/// the updated view alongside `audit_id`.
+/// # Errors
+/// Invalid project, oversized content, invalid pattern, or I/O error.
+pub fn nanoignore_write(home: &Path, v: &Value, by: &str) -> Result<Value, String> {
+    let proj = v.get("project").and_then(Value::string).ok();
+    let (key, root) = resolve_nanoignore_root(home, proj)?;
+    let action = v
+        .get("action")
+        .and_then(Value::string)
+        .ok()
+        .filter(|a| !a.is_empty())
+        .unwrap_or(if v.get("content").is_ok() { "set" } else { "" });
+    let file = root.join(nmsubs::repo::NANOIGNORE_FILE);
+    let prev_exists = file.is_file();
+    let prev_content = if prev_exists { std::fs::read_to_string(&file).unwrap_or_default() } else { String::new() };
+    let rules_before = nanoignore_rules_list(&prev_content).len();
+
+    let (next_content, label): (Option<String>, String) = match action {
+        "set" => {
+            let content = v.get("content").and_then(Value::string).map_err(|_| "content: give the .nanoignore text".to_owned())?;
+            if content.len() > MAX_NANOIGNORE_BYTES {
+                return Err(format!("content: exceeds maximum size ({MAX_NANOIGNORE_BYTES} bytes)"));
+            }
+            let norm = content.replace("\r\n", "\n");
+            let next = if norm.trim().is_empty() && !prev_exists { None } else { Some(norm) };
+            (next, format!("Updated .nanoignore ({key})"))
+        }
+        "add" => {
+            let pat = v.get("pattern").and_then(Value::string).map_err(|_| "pattern: give a pattern to add".to_owned())?.trim();
+            if pat.is_empty() || pat.contains('\n') || pat.contains('\r') {
+                return Err("pattern: give one non-empty line without line breaks".to_owned());
+            }
+            let existing = nanoignore_rules_list(&prev_content);
+            let mut next = prev_content.replace("\r\n", "\n");
+            if !existing.iter().any(|r| r == pat) {
+                if !next.is_empty() && !next.ends_with('\n') {
+                    next.push('\n');
+                }
+                next.push_str(pat);
+                next.push('\n');
+            }
+            (Some(next), format!("Added '{pat}' to .nanoignore ({key})"))
+        }
+        "remove" => {
+            let pat = v.get("pattern").and_then(Value::string).map_err(|_| "pattern: give a pattern to remove".to_owned())?.trim();
+            if pat.is_empty() || pat.contains('\n') || pat.contains('\r') {
+                return Err("pattern: give one non-empty line without line breaks".to_owned());
+            }
+            let kept: Vec<&str> = prev_content.lines().filter(|l| l.trim() != pat).collect();
+            let joined = if kept.is_empty() { String::new() } else { format!("{}\n", kept.join("\n")) };
+            let next = if joined.trim().is_empty() { None } else { Some(joined) };
+            (next, format!("Removed '{pat}' from .nanoignore ({key})"))
+        }
+        other => return Err(format!("action {other}: use set, add or remove")),
+    };
+
+    write_nanoignore_file(&root, next_content.as_deref())?;
+    let rules_after = next_content.as_deref().map_or(0, |c| nanoignore_rules_list(c).len());
+    let audit_id = audit(
+        home,
+        "nanoignore",
+        vec![
+            ("action", s(action)),
+            ("project", s(&key)),
+            ("root", s(&root.to_string_lossy())),
+            ("rules_before", Value::Number(rules_before.to_string())),
+            ("rules_after", Value::Number(rules_after.to_string())),
+            ("by", s(by)),
+            ("label", s(&label)),
+        ],
+    )?;
+    let hist = nanoignore_history_path(home, &audit_id);
+    if let Some(dir) = hist.parent() {
+        let _ = std::fs::create_dir_all(dir);
+    }
+    let snap = obj(vec![
+        ("project", s(&key)),
+        ("root", s(&root.to_string_lossy())),
+        ("prev_exists", Value::Bool(prev_exists)),
+        ("prev_content", s(&prev_content)),
+    ]);
+    if let Ok(enc) = snap.encode() {
+        let _ = std::fs::write(&hist, enc.as_bytes());
+    }
+    let view = nanoignore_view(home, &format!("project={key}"));
+    Ok(obj(vec![("audit_id", s(&audit_id)), ("nanoignore", view)]))
+}
+
+/// Undoes one `nanoignore` audit row by restoring the prior `.nanoignore` state from its history snapshot.
+fn undo_nanoignore(home: &Path, row: &Value, id: &str, by: &str) -> Result<Option<String>, String> {
+    let hist = nanoignore_history_path(home, id);
+    let bytes = std::fs::read(&hist).map_err(|_| format!("nanoignore undo: no saved snapshot for {id}"))?;
+    let snap = nmjson::parse(&bytes).map_err(|e| format!("nanoignore undo: {e}"))?;
+    let root_s = snap
+        .get("root")
+        .and_then(Value::string)
+        .or_else(|_| row.get("root").and_then(Value::string))
+        .map_err(|_| format!("nanoignore undo: missing root in {id}"))?;
+    let project = snap
+        .get("project")
+        .and_then(Value::string)
+        .or_else(|_| row.get("project").and_then(Value::string))
+        .unwrap_or("nano");
+    let prev_exists = matches!(snap.get("prev_exists"), Ok(Value::Bool(true)));
+    let prev_content = snap.get("prev_content").and_then(Value::string).unwrap_or("");
+    let root = PathBuf::from(root_s);
+    if !root.is_dir() {
+        return Err(format!("nanoignore undo: folder no longer exists ({root_s})"));
+    }
+    write_nanoignore_file(&root, if prev_exists { Some(prev_content) } else { None })?;
+    let undo_id = audit(
+        home,
+        "nanoignore",
+        vec![
+            ("action", s("undo")),
+            ("undo_of", s(id)),
+            ("project", s(project)),
+            ("root", s(root_s)),
+            ("by", s(by)),
+            ("label", s(&format!("Undid .nanoignore change ({project})"))),
+        ],
+    )?;
+    Ok(Some(undo_id))
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
     fn interface_api_and_mcp_parity() {
         super::check_parity().unwrap();
+    }
+
+    #[test]
+    fn nanoignore_api_and_undo_round_trip() {
+        let base = std::env::temp_dir().join(format!("nmcore-nanoignore-api-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        let home = base.join("home");
+        let repo = base.join("repo");
+        std::fs::create_dir_all(home.join("memory")).unwrap();
+        std::fs::create_dir_all(repo.join("secrets")).unwrap();
+        std::fs::write(repo.join("secrets/key.pem"), "KEY\n").unwrap();
+        let repo_s = repo.to_string_lossy().into_owned();
+
+        // Initially absent -> not ignored.
+        let v0 = super::nanoignore_view(&home, &format!("project={repo_s}&test=secrets/key.pem"));
+        assert_eq!(v0.get("exists").ok(), Some(&nmjson::Value::Bool(false)));
+        assert_eq!(v0.get("test").and_then(|t| t.get("ignored")).ok(), Some(&nmjson::Value::Bool(false)));
+
+        // Add a rule via POST /api/nanoignore.
+        let add_req = nmjson::parse(format!(r#"{{"project":{},"action":"add","pattern":"secrets/"}}"#, nmjson::Value::String(repo_s.clone()).encode().unwrap()).as_bytes()).unwrap();
+        let added = super::nanoignore_write(&home, &add_req, "test").unwrap();
+        let audit_id = added.get("audit_id").and_then(nmjson::Value::string).unwrap().to_owned();
+        let v1 = super::nanoignore_view(&home, &format!("project={repo_s}&test=secrets/key.pem"));
+        assert_eq!(v1.get("exists").ok(), Some(&nmjson::Value::Bool(true)));
+        assert_eq!(v1.get("test").and_then(|t| t.get("ignored")).ok(), Some(&nmjson::Value::Bool(true)));
+
+        // Undo restores original absence of .nanoignore.
+        let undone = super::undo_by(&home, &audit_id, "test").unwrap();
+        assert!(undone.is_some());
+        assert!(!repo.join(".nanoignore").exists());
+        let v2 = super::nanoignore_view(&home, &format!("project={repo_s}&test=secrets/key.pem"));
+        assert_eq!(v2.get("test").and_then(|t| t.get("ignored")).ok(), Some(&nmjson::Value::Bool(false)));
+
+        let _ = std::fs::remove_dir_all(&base);
     }
 }

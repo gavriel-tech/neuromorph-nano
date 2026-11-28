@@ -347,6 +347,12 @@ export type AuditRow = {
 export type Audit = { audit: AuditRow[]; episodes: unknown[] };
 export type Project = {
   key: string;
+  name?: string;
+  custom_name?: string | null;
+  description?: string | null;
+  custom?: boolean;
+  root_exists?: boolean;
+  is_scratch?: boolean;
   root: string | null;
   first_ms: number | null;
   last_ms: number | null;
@@ -363,6 +369,78 @@ export type Project = {
   migration?: unknown;
 };
 export type Projects = { dir: string; projects: Project[]; current?: string | null; serving?: { project?: string; project_key?: string }[] };
+
+/** Human-readable display name for a project (custom name or folder basename, falling back to key). */
+export function projectLabel(p: Pick<Project, "key" | "name"> | null | undefined): string {
+  if (!p) return "nano";
+  const n = p.name?.trim();
+  return n ? n : p.key;
+}
+
+/** Resolves a project key to its display name from the loaded projects list. */
+export function projectLabelByKey(projects: Projects | null | undefined, key: string | null | undefined): string {
+  if (!key || key === "nano") return "The Nano itself";
+  const found = projects?.projects?.find((p) => p.key === key);
+  return found ? projectLabel(found) : key;
+}
+
+export type PrimeSchedule = {
+  days?: string[];
+  after?: string;
+  before?: string;
+};
+
+export type BuiltinPrime = {
+  id: string;
+  label: string;
+  trigger: string;
+  summary: string;
+  enabled: boolean;
+};
+
+export type CustomPrime = {
+  id: string;
+  name: string;
+  text: string;
+  enabled: boolean;
+  trigger: string;
+  every: number;
+  interval_min: number;
+  schedule: PrimeSchedule | null;
+  repeat: string;
+  max: number;
+  glob: string | null;
+  error: string | null;
+  error_count: number;
+  loop_id: string | null;
+  by: string;
+  fired?: number;
+  last_ms?: number;
+};
+
+export type PrimePreset = {
+  name: string;
+  description: string;
+  builtin: boolean;
+  mode: string;
+  builtins: Record<string, boolean>;
+  custom: CustomPrime[];
+};
+
+export type PrimesReply = {
+  project: string;
+  mode: string;
+  builtins: BuiltinPrime[];
+  custom: CustomPrime[];
+  presets: PrimePreset[];
+  triggers: string[];
+  repeats: string[];
+  counts: PrimeCounts | null;
+  loops: { id?: string; name?: string; prompt?: string; enabled?: boolean; status?: string; iterations?: number; max?: number; condition?: string }[];
+  steps: { id?: string; title?: string; status?: string }[];
+  reminders: { id?: string; text?: string; trigger?: string; enabled?: boolean }[];
+  error?: string;
+};
 export type Control = {
   key: string;
   group?: string;

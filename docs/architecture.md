@@ -39,34 +39,26 @@ or by indentation), so no code file is skipped for its language. A code window o
 the nearest definition as its heading. Imports are resolved to files of the tree (relative paths,
 `tsconfig.json` paths, npm workspaces, Python import roots, C include folders); `package.json` and
 `pyproject.toml` give packages next to Cargo's crates. In a folder that is not a Neuromorph folder,
-files its `.gitignore` leaves out are skipped. Reads live in RAM while the material is unchanged
+files its `.gitignore` leaves out are skipped. In **every** folder (including Neuromorph folders),
+root and nested `.nanoignore` files exclude matching files and folders from the substrate, dense
+index, fresh recall re-reads, build-help source snippets, and primes (`docs/privacy.md`, Excluding
+files with `.nanoignore`). Reads live in RAM while the material is unchanged
 and are redone when it changes. With memory on, the read is also cached in the project's memory
 folder (the substrate cache, `substrate-cache-<12 hex>.bin`, keyed by every file's path, size and
 time) so that a restart on an unchanged folder does not read everything again; any change makes the
 cache unused. What it holds: `docs/privacy.md`, Your code.
 
 **Neuropod.** The sensory side.
-- Tentacles: eight. Each tentacle is a small brain that processes what its drones read. All read in
-  parallel, each its own window. On a large tree they take in specific, spread-out pieces connected
-  by real relations rather than reading everything blindly.
-- Drones: the dendrites at the tip of each tentacle, the first contact with the raw material. They
-  sense, classify evidence and judge confidence. Drones of different tentacles never exchange data.
+- Tentacles: eight (`global`, `local`, `structural`, `semantic`, `temporal`, `operational`, `epistemic`, `objective` defaults, all configured with `"job": "any"` so any tentacle can dynamically take any role or lens per question). Each tentacle is a small brain that processes its own disjoint 12,000-token window (96,000 tokens in parallel at default) while sharing central MicroModel weights by reference rather than owning weights. On a large tree they take in specific, spread-out pieces connected by real relations rather than reading everything blindly.
+- Drones (dendrites): the dendrites at the tip of each tentacle, the first contact with the raw material (`crates/nmapi/src/drone_dendrite.rs`, on by default). They run a truncated early-layer cut (`layers 0..k`) of the Reader MicroModel by reference, compute ColBERT-style `MaxSim` late interaction and request-to-piece layer-`k` attention in RAM with position-0 attention-sink exclusion and sensory adaptation (posed-minus-content-free background baselines), classify evidence, and judge confidence. Drones of different tentacles never exchange data.
 
-**Globalized Context Stack (GCX).** The spinal cord or brain stem. It carries sensory data up and
-motor control down, and every level is held in RAM.
-- g0 (one per tentacle): holds its tentacle's encoded read and reports what it found on a scale
-  shared by all tentacles.
-- G1, coordinating communicator: receives every tentacle's output and is the only path between
-  tentacles.
-- G2, whole-context comprehension: decides what goes up to the Core Brain and sends instructions
-  down, such as directing a tentacle's focus.
-- G3, pattern recognition: recognises repeated behaviour and its effect, and applies reloaded
-  muscle memory.
+**Globalized Context Stack (GCX).** The spinal cord or brain stem. It carries afferent sensory data up and efferent motor control orders down (`nmbrain::motor`), and every level is held in RAM.
+- `g0` (`g0_tx`, one per tentacle): holds its tentacle's encoded read on a shared scale, cancels predictable background fields via Huber residualisation (electric-fish negative image), and executes fast local spinal reflexes (`R1-R5`) installed by `G2`.
+- `G1`, coordinating communicator: receives every tentacle's output and is the only path between tentacles, integrating evidence with fading accumulators and an independence quorum (honeybee quorum model).
+- `G2`, whole-context comprehension: decides what goes up to the Core Brain and sends instructions and reflex rules down, such as directing a tentacle's focus.
+- `G3`, pattern recognition: recognises repeated behaviour and its effect, refuses self-caused patterns (immune negative selection) and sensory data (`nmmusc-sensory-refused`), promotes statistically verified habits (Stitch-style compression + Welch `z = 1.96` gate) into `.nmmusc` muscle-memory packs, withdraws fading habits via Page's CUSUM, and reloads active packs back to `G2`.
 
-**Core Brain.** Where the tentacles converge. One brain whose regions are MicroModels, each with
-its own job, beside its planning, arbitration, contradiction, homeostasis and synthesis parts. It
-works as one: one orchestration, one arbitration, one output. A request runs through a chain of
-MicroModels; the final output is kept separate from internal logs.
+**Core Brain.** Singular: one brain whose regions are MicroModels (parameter sets are its neurons), alongside its `Objectives`, `Rivers`, `Arbiter`, `Contradiction`, `Homeostasis` (interactive latency budget), `Development`, and `Synthesis` parts. It works as one: one orchestration, one arbitration, one output. A request runs through a chain of MicroModels; the final output is kept separate from internal logs.
 
 **MicroModels.** The MicroModels are named by their role:
 
@@ -108,9 +100,7 @@ project, or shared). Details: `docs/continuous-learning.md`.
 and saved to disk as a pack. Behaviour only, never sensory data. It is its own store: not memory,
 not weights, not a cartridge.
 
-**Memory.** Persistent records in a hierarchy (core, active, archive), verified episodes, temporary
-notes, one structural summary per code version, and the world model's notes. See Memory layout
-below.
+**Memory.** Persistent records in a hierarchy (`1-core`, `2-active`, `3-archive`) with synaptic tag-and-capture temporary notes (`T0`), RAM working memory (`T1`), append-only verified episodes (`T2`), per-version structural summaries (`T3`), a strict write gate (`refused.jsonl`), the world model's 4-level notes, and the **Dead-Skin Biomimetic Vector Store** (`dense/vectors.bin`, `seg-*.bin`, `skin.json`; see [`docs/dead-skin-vectors.md`](dead-skin-vectors.md)). See Memory layout below.
 
 ## How a question flows
 

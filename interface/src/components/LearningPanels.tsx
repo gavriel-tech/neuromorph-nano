@@ -291,6 +291,22 @@ export function LearningPrimes({ ledger, level, control }: { ledger: Ledger | nu
           <ControlRow c={control} foldHelp onNote={setNote} />
         </div>
       )}
+      <div className="grid gap-2 border-t border-line pt-3">
+        <span className="eyebrow text-faint">How priming nudges your agent</span>
+        <p className="text-[11.5px] leading-relaxed text-muted">
+          Primes are short, verified nudges injected into your coding agent (Claude Code or Antigravity) through lifecycle hooks at the exact moment prior memory or live impact helps steer it. Silence is the default: every cited line is re-read fresh on disk, no prime repeats twice in a session, and any prime exceeding the self-calibrating latency deadline is dropped.
+        </p>
+        <ul className="grid gap-1.5 text-[11px] leading-relaxed text-faint">
+          <li><span className="mono text-text">prompt-recall</span>: surfaces verified past answers at prompt submit.</li>
+          <li><span className="mono text-text">failure-fix</span>: returns the verified fix when the same build or test error recurs.</li>
+          <li><span className="mono text-text">edit-impact</span>: warns before edits touching a verified fix, a refuted outcome, or a function signature with live callers.</li>
+          <li><span className="mono text-text">resume / core</span>: restores active session state after compaction or surfaces top <span className="mono">1-core</span> memories at session open.</li>
+          <li><span className="mono text-text">open-loop</span>: flags unverified edits or failing checks at turn stop (<span className="mono">priming = on</span>).</li>
+        </ul>
+        <p className="text-[11px] leading-relaxed text-faint">
+          Explicit objectives, completion loops, step-graph directions, and trigger reminders ride on the same hook channel and are configured on <span className="text-muted">Memory -&gt; Loops and graph</span> (or by the agent over MCP <span className="mono">nm_goal</span>).
+        </p>
+      </div>
     </div>
   );
 }

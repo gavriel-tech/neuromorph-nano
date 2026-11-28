@@ -573,6 +573,22 @@ pub fn settings(v: &Value) -> Result<Value, ApiError> {
         "undo" => route("/api/undo", "", Some(body(vec![("id", s(need(v, "id", op)?))])?)),
         "status" => route("/api/status", "", None),
         "projects" => route("/api/projects", "", None),
+        "project_create" => {
+            let mut b = vec![("action", s("create")), ("name", s(need(v, "name", op)?))];
+            for k in ["root", "description"] {
+                if let Some(x) = arg(v, k).filter(|x| !x.is_empty()) {
+                    b.push((k, s(x)));
+                }
+            }
+            route("/api/projects", "", Some(body(b)?))
+        }
+        "project_rename" => {
+            let mut b = vec![("action", s("rename")), ("project", s(need(v, "project", op)?)), ("name", s(need(v, "name", op)?))];
+            if let Ok(Value::String(d)) = v.get("description") {
+                b.push(("description", s(d)));
+            }
+            route("/api/projects", "", Some(body(b)?))
+        }
         "designs" => route("/api/settings", "", None),
         "audit" => route("/api/audit", &query(v, &["kind", "project"]), None),
         "activity" => route("/api/activity", &query(v, &["window", "project"]), None),
@@ -580,6 +596,98 @@ pub fn settings(v: &Value) -> Result<Value, ApiError> {
         "session" => route("/api/session", &query(v, &["project"]), None),
         "parts" => route("/api/parts", "", None),
         "airgap" => route("/api/airgap", "", None),
+        "nanoignore" => route("/api/nanoignore", &query(v, &["project", "test"]), None),
+        "nanoignore_check" => {
+            let mut qs = format!("test={}", enc(need(v, "test", op)?));
+            if let Some(p) = arg(v, "project").filter(|x| !x.is_empty()) {
+                qs.push_str(&format!("&project={}", enc(p)));
+            }
+            route("/api/nanoignore", &qs, None)
+        }
+        "nanoignore_set" => {
+            let mut b = vec![("action", s("set")), ("content", s(need(v, "content", op)?))];
+            if let Some(p) = arg(v, "project").filter(|x| !x.is_empty()) {
+                b.push(("project", s(p)));
+            }
+            route("/api/nanoignore", "", Some(body(b)?))
+        }
+        "nanoignore_add" => {
+            let mut b = vec![("action", s("add")), ("pattern", s(need(v, "pattern", op)?))];
+            if let Some(p) = arg(v, "project").filter(|x| !x.is_empty()) {
+                b.push(("project", s(p)));
+            }
+            route("/api/nanoignore", "", Some(body(b)?))
+        }
+        "nanoignore_remove" => {
+            let mut b = vec![("action", s("remove")), ("pattern", s(need(v, "pattern", op)?))];
+            if let Some(p) = arg(v, "project").filter(|x| !x.is_empty()) {
+                b.push(("project", s(p)));
+            }
+            route("/api/nanoignore", "", Some(body(b)?))
+        }
+        "primes" => route("/api/primes", &query(v, &["project"]), None),
+        "prime_builtin" => {
+            let enabled = match v.get("enabled") {
+                Ok(Value::Bool(b)) => *b,
+                _ => return Err(bad("prime_builtin needs enabled (true or false)")),
+            };
+            let mut b = vec![("action", s("toggle_builtin")), ("id", s(need(v, "id", op)?)), ("enabled", Value::Bool(enabled))];
+            if let Some(p) = arg(v, "project").filter(|x| !x.is_empty()) {
+                b.push(("project", s(p)));
+            }
+            route("/api/primes", "", Some(body(b)?))
+        }
+        "prime_add" => {
+            let mut b = vec![("action", s("add")), ("name", s(need(v, "name", op)?)), ("text", s(need(v, "text", op)?))];
+            b.extend(copied(v, &["project", "trigger", "every", "interval_min", "schedule", "repeat", "max", "glob", "error", "error_count", "loop_id", "enabled"]));
+            route("/api/primes", "", Some(body(b)?))
+        }
+        "prime_edit" => {
+            let mut b = vec![("action", s("edit")), ("id", s(need(v, "id", op)?))];
+            b.extend(copied(v, &["project", "name", "text", "trigger", "every", "interval_min", "schedule", "repeat", "max", "glob", "error", "error_count", "loop_id", "enabled"]));
+            route("/api/primes", "", Some(body(b)?))
+        }
+        "prime_toggle" => {
+            let enabled = match v.get("enabled") {
+                Ok(Value::Bool(b)) => *b,
+                _ => return Err(bad("prime_toggle needs enabled (true or false)")),
+            };
+            let mut b = vec![("action", s("toggle")), ("id", s(need(v, "id", op)?)), ("enabled", Value::Bool(enabled))];
+            if let Some(p) = arg(v, "project").filter(|x| !x.is_empty()) {
+                b.push(("project", s(p)));
+            }
+            route("/api/primes", "", Some(body(b)?))
+        }
+        "prime_remove" => {
+            let mut b = vec![("action", s("remove")), ("id", s(need(v, "id", op)?))];
+            if let Some(p) = arg(v, "project").filter(|x| !x.is_empty()) {
+                b.push(("project", s(p)));
+            }
+            route("/api/primes", "", Some(gated(v, b)?))
+        }
+        "prime_preset_save" => {
+            let mut b = vec![("action", s("preset_save")), ("name", s(need(v, "name", op)?))];
+            b.extend(copied(v, &["project", "description"]));
+            route("/api/primes", "", Some(body(b)?))
+        }
+        "prime_preset_apply" => {
+            let mut b = vec![("action", s("preset_apply")), ("name", s(need(v, "name", op)?))];
+            if let Some(p) = arg(v, "project").filter(|x| !x.is_empty()) {
+                b.push(("project", s(p)));
+            }
+            route("/api/primes", "", Some(body(b)?))
+        }
+        "prime_preset_delete" => {
+            let b = vec![("action", s("preset_delete")), ("name", s(need(v, "name", op)?))];
+            route("/api/primes", "", Some(gated(v, b)?))
+        }
+        "prime_all_off" => {
+            let mut b = vec![("action", s("all_off"))];
+            if let Some(p) = arg(v, "project").filter(|x| !x.is_empty()) {
+                b.push(("project", s(p)));
+            }
+            route("/api/primes", "", Some(body(b)?))
+        }
         // 2026-11-26 (Phase B): which MCP clients are connected for a project, with the commands.
         "connect" => route("/api/connect", &format!("project={}", enc(need(v, "project", op)?)), None),
         // 2026-11-26 (Luis Jake Gabriel III: the official cartridge library or third parties): the
@@ -644,7 +752,7 @@ pub fn settings(v: &Value) -> Result<Value, ApiError> {
             route("/api/cartridge-sources", "", Some(body(b)?))
         }
         other => Err(bad(format!(
-            "op {other}: use view, saved, set, undo, status, projects, designs, audit, activity, stage_times, session, parts, airgap, connect, devices, device_revoke, roles, role_set, downloads, download, sources, source_add, source_remove, source_browse, source_fetch, source_fetch_all, source_publish, backups, backup_add, backup_remove, backup_now, backup_snapshots, backup_preview, backup_restore, limits, recommend, set_limit or apply_recommended"
+            "op {other}: use view, saved, set, undo, status, projects, project_create, project_rename, designs, audit, activity, stage_times, session, parts, airgap, nanoignore, nanoignore_check, nanoignore_set, nanoignore_add, nanoignore_remove, primes, prime_builtin, prime_add, prime_edit, prime_toggle, prime_remove, prime_all_off, prime_preset_save, prime_preset_apply, prime_preset_delete, connect, devices, device_revoke, roles, role_set, downloads, download, sources, source_add, source_remove, source_browse, source_fetch, source_fetch_all, source_publish, backups, backup_add, backup_remove, backup_now, backup_snapshots, backup_preview, backup_restore, limits, recommend, set_limit or apply_recommended"
         ))),
     }
 }
@@ -783,6 +891,8 @@ pub const OPS: &[(&str, &str, &str, &str)] = &[
     ("nm_settings", "session", "GET", "/api/session"),
     ("nm_settings", "parts", "GET", "/api/parts"),
     ("nm_settings", "airgap", "GET", "/api/airgap"),
+    ("nm_settings", "nanoignore", "GET", "/api/nanoignore"),
+    ("nm_settings", "nanoignore_check", "GET", "/api/nanoignore"),
     ("nm_settings", "connect", "GET", "/api/connect"),
     ("nm_settings", "devices", "GET", "/api/devices"),
     ("nm_settings", "roles", "GET", "/api/models/roles"),
@@ -810,6 +920,21 @@ pub const OPS: &[(&str, &str, &str, &str)] = &[
     ("nm_settings", "backup_restore", "POST", "/api/backups"),
     ("nm_settings", "set_limit", "POST", "/api/limits"),
     ("nm_settings", "apply_recommended", "POST", "/api/limits/apply-recommended"),
+    ("nm_settings", "nanoignore_set", "POST", "/api/nanoignore"),
+    ("nm_settings", "nanoignore_add", "POST", "/api/nanoignore"),
+    ("nm_settings", "nanoignore_remove", "POST", "/api/nanoignore"),
+    ("nm_settings", "project_create", "POST", "/api/projects"),
+    ("nm_settings", "project_rename", "POST", "/api/projects"),
+    ("nm_settings", "primes", "GET", "/api/primes"),
+    ("nm_settings", "prime_builtin", "POST", "/api/primes"),
+    ("nm_settings", "prime_add", "POST", "/api/primes"),
+    ("nm_settings", "prime_edit", "POST", "/api/primes"),
+    ("nm_settings", "prime_toggle", "POST", "/api/primes"),
+    ("nm_settings", "prime_remove", "POST", "/api/primes"),
+    ("nm_settings", "prime_all_off", "POST", "/api/primes"),
+    ("nm_settings", "prime_preset_save", "POST", "/api/primes"),
+    ("nm_settings", "prime_preset_apply", "POST", "/api/primes"),
+    ("nm_settings", "prime_preset_delete", "POST", "/api/primes"),
 ];
 
 /// Interface routes whose feature a tool outside this module serves with its own function (the
@@ -973,7 +1098,25 @@ pub const IN_COMPREHENSION: &[Field] = &[
 ];
 /// Inputs of `nm_settings`.
 pub const IN_SETTINGS: &[Field] = &[
-    field("op", FieldKind::String, "view (default), saved (settings.json key by key: the keys beside the controls, each entry with its choices and the key set takes for it), set, undo, status, projects, designs, audit, activity, stage_times, session, parts, airgap, connect, devices, device_revoke, roles, role_set, downloads, download, sources (the official and third-party cartridge libraries), source_add, source_remove (two calls: a preview with a confirm_token, then the same call with it), source_browse (lists a source's files from huggingface.co), source_fetch (fetches one listed file and imports it through the cartridge library's checks; needs confirm), source_fetch_all (fetches all missing installable files from a source, optionally filtered by only; needs confirm), source_publish (uploads a local parameter map or stack to a Hugging Face repo or PR using HF_TOKEN; needs confirm), backups (your own repositories for backup and rollback), backup_add, backup_remove, backup_now (sends a snapshot of the chosen parts to your repository), backup_snapshots, backup_preview (what a restore would write; writes nothing), backup_restore (needs confirm; Audit undoes it), limits, recommend, set_limit or apply_recommended"),
+    field("op", FieldKind::String, "view (default), saved (settings.json key by key: the keys beside the controls, each entry with its choices and the key set takes for it), set, undo, status, projects, project_create (creates a custom or folder-backed project with a display name; audited with undo), project_rename (renames a project display name and optional description; audited with undo), designs, audit, activity, stage_times, session, parts, airgap, nanoignore (reads a repository's .nanoignore rules and nested files, optionally testing a path), nanoignore_check (checks whether a relative path is excluded by .nanoignore), nanoignore_set (atomically replaces a repository's .nanoignore content; audited with undo), nanoignore_add (appends one pattern to .nanoignore; audited with undo), nanoignore_remove (removes one pattern from .nanoignore; audited with undo), primes (reads a project's built-in prime toggles, custom primes, presets, triggers, and linked loops), prime_builtin (enables or disables one built-in prime rule), prime_add (adds a custom prime with event, interval, or schedule trigger), prime_edit (updates a custom prime), prime_toggle (enables or disables a custom prime), prime_remove (removes a custom prime; two calls with confirm_token), prime_all_off (turns priming mode off and disables all built-in and custom primes for the project; audited with undo), prime_preset_save (saves the current project's prime setup as a reusable preset), prime_preset_apply (applies a built-in or saved preset to a project), prime_preset_delete (deletes a user-saved preset; two calls with confirm_token), connect, devices, device_revoke, roles, role_set, downloads, download, sources (the official and third-party cartridge libraries), source_add, source_remove (two calls: a preview with a confirm_token, then the same call with it), source_browse (lists a source's files from huggingface.co), source_fetch (fetches one listed file and imports it through the cartridge library's checks; needs confirm), source_fetch_all (fetches all missing installable files from a source, optionally filtered by only; needs confirm), source_publish (uploads a local parameter map or stack to a Hugging Face repo or PR using HF_TOKEN; needs confirm), backups (your own repositories for backup and rollback), backup_add, backup_remove, backup_now (sends a snapshot of the chosen parts to your repository), backup_snapshots, backup_preview (what a restore would write; writes nothing), backup_restore (needs confirm; Audit undoes it), limits, recommend, set_limit or apply_recommended"),
+    field("name", FieldKind::String, "project_create, project_rename: display name; prime_add, prime_edit: short prime name; prime_preset_save, prime_preset_apply, prime_preset_delete: preset name"),
+    field("description", FieldKind::String, "project_create, project_rename, prime_preset_save: optional short description"),
+    field("root", FieldKind::String, "project_create: optional repository folder path on disk (omit for a custom project without a folder)"),
+    field("text", FieldKind::String, "prime_add, prime_edit: nudge text injected when the custom prime triggers"),
+    field("trigger", FieldKind::String, "prime_add, prime_edit: session-start, prompt, compact, stop, edit, failure, tools, error-repeats, interval, or schedule"),
+    field("every", FieldKind::Integer, "prime_add, prime_edit: fire every N matching events (default 1)"),
+    field("interval_min", FieldKind::Integer, "prime_add, prime_edit: minimum minutes between firings (interval trigger or cooldown, 0-1440)"),
+    field("schedule", FieldKind::Object, "prime_add, prime_edit: optional UTC clock/day window {days: [mon..sun], after: HH:MM, before: HH:MM}"),
+    field("repeat", FieldKind::String, "prime_add, prime_edit: always, once, or max"),
+    field("max", FieldKind::Integer, "prime_add, prime_edit: maximum firings per session when repeat=max"),
+    field("glob", FieldKind::String, "prime_add, prime_edit: optional file path glob filter"),
+    field("error", FieldKind::String, "prime_add, prime_edit: optional error substring for error-repeats"),
+    field("error_count", FieldKind::Integer, "prime_add, prime_edit: consecutive errors required for error-repeats (2-5)"),
+    field("loop_id", FieldKind::String, "prime_add, prime_edit: optional guidance loop id linked to this prime"),
+    field("enabled", FieldKind::Bool, "prime_builtin, prime_toggle, prime_add, prime_edit: true or false"),
+    field("content", FieldKind::String, "nanoignore_set: full .nanoignore text to write atomically"),
+    field("pattern", FieldKind::String, "nanoignore_add, nanoignore_remove: one gitignore-style pattern line (for example *.pem, secrets/, !secrets/public.txt)"),
+    field("test", FieldKind::String, "nanoignore, nanoignore_check: root-relative path to check against .nanoignore rules"),
     field("repo", FieldKind::String, "source_add, source_publish: a Hugging Face repository, owner/name"),
     field("url", FieldKind::String, "backup_add: your repository's git URL (GitHub or any git host, or a Hugging Face repository) or a local folder"),
     field("parts", FieldKind::Array, "backup_add: what it holds: memory, maps, cartridges, units, settings (all but cartridges by default)"),
@@ -1037,6 +1180,8 @@ mod tests {
             (cartridges, input(&[("op", s("overlay_clear")), ("key", s("open:qwen3-0.6b"))])),
             (comprehension, input(&[("op", s("refresh"))])),
             (learning, input(&[("op", s("preference_remove")), ("id", s("stated-x"))])),
+            (settings, input(&[("op", s("prime_remove")), ("id", s("p-12345678"))])),
+            (settings, input(&[("op", s("prime_preset_delete")), ("name", s("my-preset"))])),
             (|v: &Value| guidance(v, "nano"), input(&[("op", s("remove")), ("kind", s("reminder")), ("item", s("r1"))])),
         ];
         for (f, v) in gated {

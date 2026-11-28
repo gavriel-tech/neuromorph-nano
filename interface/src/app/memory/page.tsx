@@ -178,6 +178,11 @@ export default function Memory() {
         </ul>
         <p className="mt-2 text-[11.5px] leading-relaxed text-faint">The idle writer writes the notes when the machine has room; its progress shows along each level.</p>
       </RailSection>
+      <RailSection title="Dead-skin vector store">
+        <p className="text-[11.5px] leading-relaxed text-faint">
+          The dense meaning index (<span className="mono">dense/vectors.bin</span>, <span className="mono">seg-*.bin</span>, and <span className="mono">skin.json</span>) manages stale vectors the way living skin manages dead cells: continuous micro-shedding (up to 64 expired rows per sync, never a bulk rewrite), a recently dead barrier layer (opaque hashes only, zero code text or paths) that revives vectors instantly on undo, revert, or branch switch with zero GPU re-embedding, age-calibrated enzymatic timing (<span className="mono">p90 * 2</span> from observed revivals), O(1) whole-segment drop once a 512-row segment expires, and 4x faster shedding for deleted files.
+        </p>
+      </RailSection>
       <RailSection title="The figures">
         <p className="text-[11.5px] leading-relaxed text-faint">
           Strata: four tiers as layers, each project folder a column through every tier, its footprint by size, one bright bead per verified episode, brightness from real memory activity. World model: one point per note, the idle writer&apos;s progress along each level&apos;s front edge, its queue as beads. Both are read again on each writer and memory event.

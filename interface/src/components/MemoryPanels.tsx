@@ -12,14 +12,15 @@
 import { Fragment, useEffect, useRef, type ReactNode } from "react";
 import DeleteFlow from "@/components/DeleteFlow";
 import DotText from "@/components/DotText";
+import ProjectMenu from "@/components/ProjectMenu";
 import { useRail } from "@/components/Workspace";
 import { Empty, Masked, Pill, Placeholder } from "@/components/ui";
-import { ago, bytes, useApi, type Control, type Ledger, type LedgerRow, type Outcomes as OutcomesReply, type Project, type Projects } from "@/lib/api";
+import { ago, bytes, projectLabel, useApi, type Control, type Ledger, type LedgerRow, type Outcomes as OutcomesReply, type Project, type Projects } from "@/lib/api";
 import { combineText, headsText, levelsOf, pct as pctOf, routingByJob, slopeText, TAG_NAMES, unlevelled, type ComprehensionReply } from "@/lib/comprehension";
 import { API_OUTCOMES, API_SESSION, packsOf, pickProject, placeShort, standingTone, stateBg, stateText, stateWord } from "@/lib/evidence";
 import { useHash } from "@/lib/hash";
 import type { LiveWriter } from "@/lib/livefeed";
-import { maskName, maskPath, maskPathsIn, scrub } from "@/lib/privacy";
+import { maskPath, maskPathsIn, scrub } from "@/lib/privacy";
 
 /* ---------- Shared by the Memory and Learning pages ---------- */
 
@@ -40,30 +41,10 @@ export function Block({ id, title, right, children, e2e, hint }: { id?: string; 
   );
 }
 
-/** The project the page reads, as a picker (the Nano's own folder first, then by last served). */
+/** The project the page reads, using the global ProjectMenu dropdown (switch, add, edit, delete). */
 export function ProjectPick({ value, projects }: { value: string | null; projects: Projects | null }) {
-  const sorted = [...(projects?.projects ?? [])].sort((a, b) => (b.last_ms ?? 0) - (a.last_ms ?? 0)).map((p) => p.key);
-  const keys = [...new Set(["nano", ...sorted, ...(value ? [value] : [])])];
-  if (!value) return <span className="mono text-[11px] text-faint">{projects ? "no project yet" : "reading projects"}</span>;
-  return (
-    <label className="relative inline-flex min-w-0 items-center gap-2" title="The project this page reads">
-      <span className="mono text-[10px] uppercase tracking-[0.12em] text-faint">project</span>
-      <select
-        value={value}
-        onChange={(e) => pickProject(e.target.value)}
-        className="press mono h-8 max-w-[220px] appearance-none border-b border-line-strong bg-transparent pr-6 pl-1 text-[11px] text-text hover:border-text focus-visible:border-sense-pale"
-      >
-        {keys.map((p) => (
-          <option key={p} value={p}>
-            {p === "nano" ? "the Nano itself" : `project ${maskName(p)}`}
-          </option>
-        ))}
-      </select>
-      <svg aria-hidden viewBox="0 0 16 16" className="pointer-events-none absolute top-1/2 right-1 h-3 w-3 -translate-y-1/2 text-faint">
-        <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.2" />
-      </svg>
-    </label>
-  );
+  if (!value && !projects) return <span className="mono text-[11px] text-faint">reading projects</span>;
+  return <ProjectMenu placement="down" label="project" />;
 }
 
 /** Deep links kept from the section-bar days (`/memory/#world`, `/learning/#training`): a name
@@ -613,8 +594,8 @@ export function MemoryProjects({ list, current, projects, error, statusRoot, now
               className="press relative grid cursor-pointer gap-0.5 border-b border-line/60 py-2 pl-3 hover:bg-bg-2/40"
             >
               {p.key === current && <span aria-hidden className="absolute top-2 bottom-2 left-0 w-[2px] bg-sense-pale" />}
-              <span className="mono truncate text-[12px] text-text">
-                <Masked id={`project:${p.key}`} shown={`project ${maskName(p.key)}`} full={p.key} />
+              <span className="mono truncate text-[12px] text-text" title={p.key}>
+                {projectLabel(p)}
               </span>
               <span className="mono truncate text-[10px] text-faint">
                 <Masked id={`root:${p.key}`} shown={maskPath(p.root ?? p.dir, statusRoot)} full={p.root ?? p.dir} />

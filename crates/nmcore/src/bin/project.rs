@@ -509,31 +509,310 @@ fn outcome(home: &Path, project: &str, tool: &str, input: &Value, out: &Value, r
     let _ = crate::controls::audit(home, "outcome", f);
 }
 
+fn is_scratch_path(p: &str) -> bool {
+    let norm = p.replace('\\', "/").to_ascii_lowercase();
+    norm.contains("/scratch/")
+        || norm.ends_with("/scratch")
+        || norm.contains("/tests/fixtures/")
+        || norm.contains("/tests/dev-large/")
+}
+
+fn clean_default_name(key: &str, root: Option<&str>) -> String {
+    if let Some(r) = root.filter(|s| !s.trim().is_empty())
+        && let Some(base) = Path::new(r).file_name().and_then(|x| x.to_str()).filter(|s| !s.is_empty())
+    {
+        return base.to_owned();
+    }
+    // Strip trailing `-<8 hex>` hash suffix from auto-generated keys.
+    if let Some((stem, tail)) = key.rsplit_once('-')
+        && tail.len() == 8
+        && tail.bytes().all(|b| b.is_ascii_hexdigit())
+        && !stem.is_empty()
+    {
+        return stem.to_owned();
+    }
+    key.to_owned()
+}
+
 /// Writes `project.json` in a project memory folder: the studied root and when it was first and
-/// last served. Only with memory on, and only for project folders (not the Nano's own memory).
+/// last served. Preserves any custom `name`, `description` or `custom` marker, and skips
+/// auto-registering transient `scratch/` folders unless already registered.
 pub fn note_project(home: &Path, root: &Path, memory_dir: &Path) {
     if nmtype::project::is_home(home, root) || memory_dir != nmtype::project::memory_dir(home, root) {
         return;
     }
     let p = memory_dir.join("project.json");
+    let root_s = root.display().to_string();
+    if !p.exists() && is_scratch_path(&root_s) {
+        return;
+    }
     let now = nmtype::now_ms();
-    let first = std::fs::read(&p)
-        .ok()
-        .and_then(|b| nmjson::parse(&b).ok())
+    let existing = std::fs::read(&p).ok().and_then(|b| nmjson::parse(&b).ok());
+    let first = existing
+        .as_ref()
         .and_then(|v| v.get("first_ms").ok().cloned())
         .unwrap_or_else(|| Value::Number(now.to_string()));
     let mut o = BTreeMap::new();
     o.insert("key".to_owned(), s(&nmtype::project::key(root)));
-    o.insert("root".to_owned(), s(&root.display().to_string()));
+    o.insert("root".to_owned(), s(&root_s));
     o.insert("first_ms".to_owned(), first);
     o.insert("last_ms".to_owned(), Value::Number(now.to_string()));
+    if let Some(prev) = &existing {
+        for keep in ["name", "description", "custom"] {
+            if let Ok(val) = prev.get(keep)
+                && !matches!(val, Value::Null)
+            {
+                o.insert(keep.to_owned(), val.clone());
+            }
+        }
+    }
     o.insert("note".to_owned(), s("Memory of one studied repository, kept by the Neuromorph Nano (written by serve)."));
     if std::fs::create_dir_all(memory_dir).is_ok() {
         let _ = std::fs::write(&p, nmjson::pretty::pretty(&Value::Object(o)));
     }
 }
 
-/// Every project memory folder for the interface: key, root, first and last served, bytes.
+/// Slugifies a user-chosen project name for custom project folder keys.
+fn slug_of(name: &str) -> String {
+    let mut out = String::new();
+    let mut prev_dash = false;
+    for c in name.trim().chars() {
+        if c.is_ascii_alphanumeric() {
+            out.push(c.to_ascii_lowercase());
+            prev_dash = false;
+        } else if !prev_dash && !out.is_empty() {
+            out.push('-');
+            prev_dash = true;
+        }
+        if out.len() >= 32 {
+            break;
+        }
+    }
+    let trimmed = out.trim_end_matches('-').to_owned();
+    if trimmed.is_empty() { "project".to_owned() } else { trimmed }
+}
+
+/// `POST /api/projects` and `nm_settings` `op=project_create|project_rename`.
+/// Creates/registers a custom or folder-backed project or renames an existing project, logged in
+/// Audit with full Undo support.
+/// # Errors
+/// Missing/invalid name, nonexistent root folder, unknown project key, or I/O error.
+fn write_json_atomic(target: &Path, body: &Value) -> Result<(), String> {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static SEQ: AtomicU64 = AtomicU64::new(0);
+    if let Some(dir) = target.parent() {
+        std::fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+    }
+    let seq = SEQ.fetch_add(1, Ordering::Relaxed);
+    let pid = std::process::id();
+    let name = target.file_name().and_then(|x| x.to_str()).unwrap_or("project.json");
+    let tmp = target.with_file_name(format!("{name}.{pid}.{seq}.tmp"));
+    std::fs::write(&tmp, nmjson::pretty::pretty(body)).map_err(|e| format!("{}: {e}", tmp.display()))?;
+    if let Err(e) = std::fs::rename(&tmp, target) {
+        let _ = std::fs::remove_file(&tmp);
+        return Err(format!("{}: {e}", target.display()));
+    }
+    Ok(())
+}
+
+pub fn write(home: &Path, v: &Value, by: &str) -> Result<Value, String> {
+    let action = v.get("action").and_then(Value::string).map_err(|_| "action: use create or rename".to_owned())?;
+    let opt = |k: &str| v.get(k).and_then(Value::string).ok().map(str::trim).filter(|x| !x.is_empty()).map(str::to_owned);
+    match action {
+        "create" => {
+            let name = opt("name").ok_or_else(|| "name: give a display name for the project".to_owned())?;
+            if name.chars().count() > 80 {
+                return Err("name: at most 80 characters".to_owned());
+            }
+            let desc = opt("description").unwrap_or_default();
+            if desc.chars().count() > 400 {
+                return Err("description: at most 400 characters".to_owned());
+            }
+            let root_opt = opt("root");
+            let (key, mem_dir, root_val, is_custom) = if let Some(r) = root_opt {
+                let p = PathBuf::from(&r);
+                if !p.is_dir() {
+                    return Err(format!("root: folder does not exist ({r})"));
+                }
+                let canon = nmsubs::repo::canon(&p);
+                if nmtype::project::is_home(home, &canon) {
+                    return Err("root: the Neuromorph folder itself is already the built-in 'nano' project".to_owned());
+                }
+                let k = nmtype::project::key(&canon);
+                let d = nmtype::project::memory_dir(home, &canon);
+                (k, d, s(&canon.display().to_string()), false)
+            } else {
+                let now = nmtype::now_ms();
+                let hash = nmhash::sha256_bytes(format!("{name}:{now}").as_bytes());
+                let k = format!("{}-{}", slug_of(&name), hash.get(..8).unwrap_or("00000000"));
+                let d = nmtype::project::projects_dir(home).join(&k);
+                (k, d, Value::Null, true)
+            };
+            let pj = mem_dir.join("project.json");
+            let existed = pj.is_file();
+            let now = nmtype::now_ms();
+            let existing = std::fs::read(&pj).ok().and_then(|b| nmjson::parse(&b).ok());
+            let prev_name = existing.as_ref().and_then(|e| e.get("name").and_then(Value::string).ok()).unwrap_or("").to_owned();
+            let prev_desc = existing.as_ref().and_then(|e| e.get("description").and_then(Value::string).ok()).unwrap_or("").to_owned();
+            let first = existing.as_ref().and_then(|e| e.get("first_ms").ok().cloned()).unwrap_or_else(|| Value::Number(now.to_string()));
+            let mut o = BTreeMap::new();
+            o.insert("key".to_owned(), s(&key));
+            o.insert("name".to_owned(), s(&name));
+            if !desc.is_empty() {
+                o.insert("description".to_owned(), s(&desc));
+            }
+            o.insert("custom".to_owned(), Value::Bool(is_custom));
+            o.insert("root".to_owned(), root_val);
+            o.insert("first_ms".to_owned(), first);
+            o.insert("last_ms".to_owned(), Value::Number(now.to_string()));
+            o.insert("note".to_owned(), s("Project registered in Neuromorph Nano."));
+            write_json_atomic(&pj, &Value::Object(o))?;
+            let audit_id = crate::controls::audit(
+                home,
+                "project",
+                vec![
+                    ("action", s("create")),
+                    ("project", s(&key)),
+                    ("name", s(&name)),
+                    ("existed", Value::Bool(existed)),
+                    ("from_name", s(&prev_name)),
+                    ("from_description", s(&prev_desc)),
+                    ("by", s(by)),
+                    ("label", s(&format!("Created project '{name}' ({key})"))),
+                ],
+            )?;
+            let mut out = BTreeMap::new();
+            out.insert("audit_id".to_owned(), s(&audit_id));
+            out.insert("key".to_owned(), s(&key));
+            out.insert("project".to_owned(), s(&key));
+            out.insert("projects".to_owned(), list(home));
+            Ok(Value::Object(out))
+        }
+        "rename" => {
+            let key = opt("project").ok_or_else(|| "project: give the project key".to_owned())?;
+            let key_ok = key.chars().all(|c| c.is_alphanumeric() || matches!(c, '-' | '_' | '.')) && !key.starts_with('.');
+            if !key_ok {
+                return Err(format!("project: invalid key {key}"));
+            }
+            let mem_dir = nmtype::project::projects_dir(home).join(&key);
+            if !mem_dir.is_dir() {
+                return Err(format!("project: no project {key}"));
+            }
+            let name = opt("name").ok_or_else(|| "name: give the new display name".to_owned())?;
+            if name.chars().count() > 80 {
+                return Err("name: at most 80 characters".to_owned());
+            }
+            let desc_in = v.get("description").and_then(Value::string).ok().map(|x| x.trim().to_owned());
+            if let Some(d) = &desc_in
+                && d.chars().count() > 400
+            {
+                return Err("description: at most 400 characters".to_owned());
+            }
+            let pj = mem_dir.join("project.json");
+            let mut o = match std::fs::read(&pj).ok().and_then(|b| nmjson::parse(&b).ok()) {
+                Some(Value::Object(m)) => m,
+                _ => {
+                    let mut m = BTreeMap::new();
+                    m.insert("key".to_owned(), s(&key));
+                    m.insert("first_ms".to_owned(), Value::Number(nmtype::now_ms().to_string()));
+                    m
+                }
+            };
+            let prev_name = o.get("name").and_then(|x| x.string().ok()).unwrap_or("").to_owned();
+            let prev_desc = o.get("description").and_then(|x| x.string().ok()).unwrap_or("").to_owned();
+            o.insert("name".to_owned(), s(&name));
+            if let Some(d) = desc_in {
+                if d.is_empty() {
+                    o.remove("description");
+                } else {
+                    o.insert("description".to_owned(), s(&d));
+                }
+            }
+            o.insert("last_ms".to_owned(), Value::Number(nmtype::now_ms().to_string()));
+            write_json_atomic(&pj, &Value::Object(o))?;
+            let audit_id = crate::controls::audit(
+                home,
+                "project",
+                vec![
+                    ("action", s("rename")),
+                    ("project", s(&key)),
+                    ("from_name", s(&prev_name)),
+                    ("to_name", s(&name)),
+                    ("from_description", s(&prev_desc)),
+                    ("by", s(by)),
+                    ("label", s(&format!("Renamed project {key} to '{name}'"))),
+                ],
+            )?;
+            let mut out = BTreeMap::new();
+            out.insert("audit_id".to_owned(), s(&audit_id));
+            out.insert("key".to_owned(), s(&key));
+            out.insert("project".to_owned(), s(&key));
+            out.insert("projects".to_owned(), list(home));
+            Ok(Value::Object(out))
+        }
+        other => Err(format!("action {other}: use create or rename")),
+    }
+}
+
+/// Undoes one `project` audit row (`create` or `rename`).
+pub fn undo(home: &Path, row: &Value, id: &str, by: &str) -> Result<Option<String>, String> {
+    let action = row.get("action").and_then(Value::string).unwrap_or("");
+    let key = row.get("project").and_then(Value::string).map_err(|_| format!("project undo: missing project in {id}"))?;
+    let mem_dir = nmtype::project::projects_dir(home).join(key);
+    let pj = mem_dir.join("project.json");
+    match action {
+        "create" => {
+            let existed = matches!(row.get("existed"), Ok(Value::Bool(true)));
+            if !existed {
+                // Only remove if no episodes/memory were written since creation; otherwise clear metadata.
+                let has_data = mem_dir.join("episodes.jsonl").exists() || mem_dir.join("journal").exists();
+                if !has_data && mem_dir.is_dir() {
+                    std::fs::remove_dir_all(&mem_dir).map_err(|e| format!("{}: {e}", mem_dir.display()))?;
+                }
+            } else if let Some(Value::Object(mut o)) = std::fs::read(&pj).ok().and_then(|b| nmjson::parse(&b).ok()) {
+                let prev = row.get("from_name").and_then(Value::string).unwrap_or("");
+                if prev.is_empty() {
+                    o.remove("name");
+                } else {
+                    o.insert("name".to_owned(), s(prev));
+                }
+                let _ = write_json_atomic(&pj, &Value::Object(o));
+            }
+        }
+        "rename" => {
+            if let Some(Value::Object(mut o)) = std::fs::read(&pj).ok().and_then(|b| nmjson::parse(&b).ok()) {
+                let prev = row.get("from_name").and_then(Value::string).unwrap_or("");
+                if prev.is_empty() {
+                    o.remove("name");
+                } else {
+                    o.insert("name".to_owned(), s(prev));
+                }
+                let prev_d = row.get("from_description").and_then(Value::string).unwrap_or("");
+                if prev_d.is_empty() {
+                    o.remove("description");
+                } else {
+                    o.insert("description".to_owned(), s(prev_d));
+                }
+                write_json_atomic(&pj, &Value::Object(o))?;
+            }
+        }
+        _ => return Err(format!("project undo: unsupported action {action}")),
+    }
+    let undo_id = crate::controls::audit(
+        home,
+        "project",
+        vec![
+            ("action", s("undo")),
+            ("undo_of", s(id)),
+            ("project", s(key)),
+            ("by", s(by)),
+            ("label", s(&format!("Undid project {action} ({key})"))),
+        ],
+    )?;
+    Ok(Some(undo_id))
+}
+
+/// Every project memory folder for the interface: key, display name, root, status, episodes, bytes.
 #[must_use]
 pub fn list(home: &Path) -> Value {
     let dir = nmtype::project::projects_dir(home);
@@ -545,12 +824,29 @@ pub fn list(home: &Path) -> Value {
                     let key = e.file_name().to_string_lossy().into_owned();
                     let info = std::fs::read(e.path().join("project.json")).ok().and_then(|b| nmjson::parse(&b).ok());
                     let field = |k: &str| info.as_ref().and_then(|v| v.get(k).ok().cloned()).unwrap_or(Value::Null);
+                    let root_str = info.as_ref().and_then(|v| v.get("root").and_then(Value::string).ok()).map(str::to_owned);
+                    let custom_name = info
+                        .as_ref()
+                        .and_then(|v| v.get("name").and_then(Value::string).ok())
+                        .map(str::trim)
+                        .filter(|x| !x.is_empty())
+                        .map(str::to_owned);
+                    let display_name = custom_name.clone().unwrap_or_else(|| clean_default_name(&key, root_str.as_deref()));
+                    let custom = info.as_ref().is_some_and(|v| matches!(v.get("custom"), Ok(Value::Bool(true))));
+                    let root_exists = root_str.as_deref().is_some_and(|r| Path::new(r).is_dir());
+                    let scratch = root_str.as_deref().is_some_and(is_scratch_path);
                     let episodes = std::fs::read_to_string(e.path().join("episodes.jsonl"))
                         .map(|t| t.lines().filter(|l| !l.trim().is_empty()).count())
                         .unwrap_or(0);
                     let mut o = BTreeMap::new();
                     o.insert("key".to_owned(), s(&key));
+                    o.insert("name".to_owned(), s(&display_name));
+                    o.insert("custom_name".to_owned(), custom_name.map_or(Value::Null, |n| s(&n)));
+                    o.insert("description".to_owned(), field("description"));
+                    o.insert("custom".to_owned(), Value::Bool(custom));
                     o.insert("root".to_owned(), field("root"));
+                    o.insert("root_exists".to_owned(), Value::Bool(root_exists));
+                    o.insert("is_scratch".to_owned(), Value::Bool(scratch));
                     o.insert("first_ms".to_owned(), field("first_ms"));
                     o.insert("last_ms".to_owned(), field("last_ms"));
                     o.insert("episodes".to_owned(), Value::Number(episodes.to_string()));
@@ -1438,6 +1734,77 @@ mod tests {
             }
         }
         assert!(super::tail_rows(&dir.join("absent.jsonl"), None, None, 20).is_empty());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn project_create_rename_and_undo() {
+        let dir = std::env::temp_dir().join(format!("nano-proj-ctl-{}-{}", std::process::id(), nmtype::now_ms()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let make = |pairs: Vec<(&str, nmjson::Value)>| {
+            nmjson::Value::Object(pairs.into_iter().map(|(k, v)| (k.to_owned(), v)).collect())
+        };
+        let created = super::write(
+            &dir,
+            &make(vec![
+                ("action", super::s("create")),
+                ("name", super::s("Research Alpha")),
+                ("description", super::s("Custom workspace")),
+            ]),
+            "test",
+        )
+        .unwrap();
+        let key = created.get("project").and_then(nmjson::Value::string).unwrap().to_owned();
+        let aid1 = created.get("audit_id").and_then(nmjson::Value::string).unwrap().to_owned();
+        assert!(key.starts_with("research-alpha-"), "key was {key}");
+
+        let renamed = super::write(
+            &dir,
+            &make(vec![
+                ("action", super::s("rename")),
+                ("project", super::s(&key)),
+                ("name", super::s("Research Beta")),
+                ("description", super::s("Renamed desc")),
+            ]),
+            "test",
+        )
+        .unwrap();
+        let aid2 = renamed.get("audit_id").and_then(nmjson::Value::string).unwrap().to_owned();
+        let list = super::list(&dir);
+        let row = list
+            .get("projects")
+            .and_then(nmjson::Value::array)
+            .unwrap()
+            .iter()
+            .find(|p| p.get("key").and_then(nmjson::Value::string).ok() == Some(key.as_str()))
+            .unwrap();
+        assert_eq!(row.get("name").and_then(nmjson::Value::string).unwrap(), "Research Beta");
+        assert_eq!(row.get("description").and_then(nmjson::Value::string).unwrap(), "Renamed desc");
+        assert!(matches!(row.get("custom"), Ok(nmjson::Value::Bool(true))));
+
+        // Undo rename -> back to Research Alpha.
+        crate::controls::undo_by(&dir, &aid2, "test").unwrap();
+        let list2 = super::list(&dir);
+        let row2 = list2
+            .get("projects")
+            .and_then(nmjson::Value::array)
+            .unwrap()
+            .iter()
+            .find(|p| p.get("key").and_then(nmjson::Value::string).ok() == Some(key.as_str()))
+            .unwrap();
+        assert_eq!(row2.get("name").and_then(nmjson::Value::string).unwrap(), "Research Alpha");
+
+        // Undo create -> removes empty custom project folder.
+        crate::controls::undo_by(&dir, &aid1, "test").unwrap();
+        let list3 = super::list(&dir);
+        assert!(
+            !list3
+                .get("projects")
+                .and_then(nmjson::Value::array)
+                .unwrap()
+                .iter()
+                .any(|p| p.get("key").and_then(nmjson::Value::string).ok() == Some(key.as_str()))
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 }
